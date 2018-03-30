@@ -14,10 +14,10 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=150, unique=True)
     password = models.CharField(max_length=128)
+    phone_number = models.CharField(max_length=12, unique=True)
 
     username = None
-    groups = None
-    user_permissions = None
+
 
     REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'password']
     USERNAME_FIELD = 'email'
