@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from recipes.managers import CustomUserManager
+
 
 class MedicineType(models.Model):
     type_name = models.CharField(max_length=50)
@@ -22,9 +24,11 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'password']
     USERNAME_FIELD = 'email'
 
-    def save(self, *args, **kwargs):
-        self.set_password(self.password)
-        super().save(*args, **kwargs)
+    #def save(self, *args, **kwargs):
+    #    self.set_password(self.password)
+    #    super().save(*args, **kwargs)
+
+    objects = CustomUserManager()
 
     def __str__(self):
         return '{0} {1}'.format(self.first_name, self.last_name)
