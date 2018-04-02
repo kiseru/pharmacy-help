@@ -5,14 +5,26 @@ from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 
 # Create your views here.
-from recipes.forms import LoginForm
+from recipes.forms import LoginForm, UserForm
 from recipes.serializers import serialize_user
+import json
 
 
 @login_required(login_url=reverse_lazy('login'))
 def user_info(request):
-    if request.method == 'GET':
-        return JsonResponse(serialize_user(request.user))
+    errors = []
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+        else:
+            errors = json.loads(form.errors.as_json())
+    return JsonResponse(serialize_user(request.user, errors))
+
+
+@login_required(login_url=reverse_lazy('login'))
+def test_user_info(request):
+    return render(request, 'recipes/test_user_info.html', {'form': UserForm(instance=request.user)})
 
 
 def do_login(request):
