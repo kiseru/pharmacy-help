@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 
 from recipes.views import do_login, do_logout
 
@@ -23,5 +24,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login$', do_login, name='login'),
     url(r'^logout$', do_logout, name='logout'),
-    url(r'^', include('recipes.urls')),
+    url(r'^api/', include('recipes.urls')),
+    url(r'^', TemplateView.as_view(template_name='recipes/index.html')),
 ]
