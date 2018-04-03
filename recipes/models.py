@@ -72,7 +72,7 @@ class Medicine(models.Model):
     medicine_name = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
     medicine_type = models.ForeignKey(MedicineType, on_delete=models.CASCADE)
     medicine_level = models.PositiveSmallIntegerField(default=0)
-    pharmacy = models.ManyToManyField(Pharmacy)
+    pharmacy = models.ManyToManyField(Pharmacy, through='recipes.MedicinesPharmacies')
 
 
 class MedicineDosage(models.Model):
@@ -90,3 +90,9 @@ class MedicineRequest(models.Model):
     request_confirmation_time = models.DateTimeField()
     apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE)
 
+
+class MedicinesPharmacies(models.Model):
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
+    count = models.PositiveIntegerField()
+    price = models.FloatField()
