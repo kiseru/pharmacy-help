@@ -19,6 +19,7 @@ def user_info(request):
             form.save()
         else:
             errors = json.loads(form.errors.as_json())
+            errors = errors if isinstance(errors, list) else [errors, ]
     return JsonResponse(serialize_user(request.user, errors))
 
 

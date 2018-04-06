@@ -6,7 +6,7 @@
 </head>
 <body>
 <form action="{% url "user_info" %}" method="post">
-    {{ form }}
+    {{ form.as_p }}
     {% csrf_token %}
     <input type="submit" value="save">
 </form>
