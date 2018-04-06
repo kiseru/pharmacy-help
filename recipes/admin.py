@@ -4,7 +4,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 
 # Register your models here.
 from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm
-from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary
+from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary, Pharmacy
 
 
 class MyUserAdmin(UserAdmin):
@@ -36,3 +36,4 @@ admin.site.register(Medicine)
 admin.site.register(MedicineName)
 admin.site.register(Doctor)
 admin.site.register(Apothecary)
+admin.site.register(Pharmacy)

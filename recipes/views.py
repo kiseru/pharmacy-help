@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 
 # Create your views here.
-from recipes.auth import login_not_required
+from recipes.auth import login_not_required, has_role
 from recipes.forms import LoginForm
 
 
