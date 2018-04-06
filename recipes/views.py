@@ -5,9 +5,11 @@ from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 
 # Create your views here.
+from recipes.auth import login_not_required
 from recipes.forms import LoginForm
 
 
+@login_not_required()
 def do_login(request):
     if request.method == 'POST':
         email = request.POST['email']
