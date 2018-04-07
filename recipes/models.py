@@ -72,7 +72,7 @@ class Medicine(models.Model):
     medicine_name = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
     medicine_type = models.ForeignKey(MedicineType, on_delete=models.CASCADE)
     medicine_level = models.PositiveSmallIntegerField(default=0)
-    pharmacy = models.ManyToManyField(Pharmacy, through='recipes.MedicinesPharmacies')
+    pharmacies = models.ManyToManyField(Pharmacy, through='recipes.MedicinesPharmacies')
 
 
 class MedicineDosage(models.Model):
