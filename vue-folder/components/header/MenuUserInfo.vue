@@ -1,14 +1,27 @@
 <template>
   <div id="user-info">
-    <p>Чехов</p>
-    <p>Антон</p>
-    <p>Павлович</p>
+    <p>{{ user.firstName }}</p>
+    <p>{{ user.lastName }}</p>
   </div>
 </template>
 
 <script>
+  import axios from 'axios';
+
   export default {
-    name: "MenuUserInfo"
+    name: "MenuUserInfo",
+    data() {
+      return {
+        user: null
+      }
+    },
+    beforeMount() {
+      axios.get("/api/user")
+        .then(
+          response => this.user = response.data,
+          error => this.user = null
+        );
+    }
   }
 </script>
 
