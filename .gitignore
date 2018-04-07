@@ -100,3 +100,12 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+node_modules/
+npm-debug.log
+# Editor directories and files
+*.suo
+*.ntvs*
+*.njsproj
+recipes/static/recipes/build.js
+yarn.lock
