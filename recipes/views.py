@@ -1,11 +1,31 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 
 # Create your views here.
-from recipes.forms import LoginForm
+from recipes.forms import LoginForm, UserForm
+from recipes.serializers import serialize_user
+import json
+
+
+@login_required(login_url=reverse_lazy('login'))
+def user_info(request):
+    errors = []
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+        else:
+            errors = json.loads(form.errors.as_json())
+            errors = errors if isinstance(errors, list) else [errors, ]
+    return JsonResponse(serialize_user(request.user, errors))
+
+
+@login_required(login_url=reverse_lazy('login'))
+def test_user_info(request):
+    return render(request, 'recipes/test_user_info.html', {'form': UserForm(instance=request.user)})
 
 
 def do_login(request):
@@ -22,12 +42,13 @@ def do_login(request):
         else:
             return HttpResponseRedirect(reverse('login'))
     else:
-        return render(request, 'recipes/login.html', {'form': LoginForm})
+        # return render(request, 'recipes/login.html', {'form': LoginForm})
+        return render(request, 'recipes/index.html')
 
 
 @login_required(login_url=reverse_lazy('login'))
 def profile(request):
-    return HttpResponse('My page')
+    return render(request, 'recipes/index.html')
 
 
 def do_logout(request):
