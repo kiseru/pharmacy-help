@@ -1,10 +1,9 @@
+from recipes.auth import *
+from recipes.models import Recipe, MedicineRequest
+
+
 def serialize_user(user, errors: list):
-    if user.doctor_set.count():
-        role = 'doctor'
-    elif user.apothecary_set.count():
-        role = 'apothecary'
-    else:
-        role = None
+    role = get_role(user)
     return {
             'id': user.id,
             'email': user.email,
