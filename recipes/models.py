@@ -92,7 +92,7 @@ class MedicineDosage(models.Model):
     dosage = models.TextField()
     frequency = models.TextField()
     period = models.TextField()
-    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    medicine = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} {} {}'.format(self.medicine.medicine_name.medicine_name, self.dosage, self.frequency)
@@ -102,9 +102,9 @@ class MedicineRequest(models.Model):
     medicine_request_status = models.ForeignKey(MedicineRequestStatus, on_delete=models.CASCADE)
     medicine_dosage = models.ForeignKey(MedicineDosage, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    medicine_count = models.SmallIntegerField()
-    request_confirmation_time = models.DateTimeField()
-    apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE)
+    medicine_count = models.SmallIntegerField(default=0)
+    request_confirmation_time = models.DateTimeField(null=True)
+    apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE, null=True)
 
 
 class MedicinesPharmacies(models.Model):
