@@ -99,10 +99,11 @@ class MedicineDosage(models.Model):
 
 
 class MedicineRequest(models.Model):
-    medicine_request_status = models.ForeignKey(MedicineRequestStatus, on_delete=models.CASCADE)
+    # medicine_request_status = models.ForeignKey(MedicineRequestStatus, on_delete=models.CASCADE)
     medicine_dosage = models.ForeignKey(MedicineDosage, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     medicine_count = models.SmallIntegerField(default=0)
+    given_medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, null=True)
     request_confirmation_time = models.DateTimeField(null=True)
     apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE, null=True)
 
