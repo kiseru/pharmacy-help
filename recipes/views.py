@@ -8,10 +8,12 @@ from django.views.generic.list import BaseListView
 from recipes.auth import login_not_required, has_role
 
 from recipes.forms import LoginForm, UserForm
-from recipes.serializers import serialize_user, JsonSerializer
+from recipes.models import Recipe
+from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
 import json
 
 # Create your views here.
+from recipes.services import get_recipes
 
 
 @login_required(login_url=reverse_lazy('login'))
@@ -90,3 +92,13 @@ class ListJsonView(BaseListView):
             return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
         else:
           raise Exception("Field 'query_param' should be defined")
+
+
+class RecipesListJsonView(ListJsonView):
+    paginate_by = 10
+    model = Recipe
+    ordering = '-date'
+    serializer = RecipeSerializerShort()
+
+    def filter_query_set(self, query):
+        return get_recipes(query)
