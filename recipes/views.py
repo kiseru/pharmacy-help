@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.generic.list import BaseListView
 
 from recipes.auth import login_not_required, has_role
@@ -93,6 +94,8 @@ class ListJsonView(BaseListView):
           raise Exception("Field 'query_param' should be defined")
 
 
+@method_decorator(login_required(login_url=reverse_lazy('login')), name='dispatch')
+@method_decorator(has_role('apothecary'), name='dispatch')
 class RecipesListJsonView(ListJsonView):
     paginate_by = 10
     model = Recipe
