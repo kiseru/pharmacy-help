@@ -2,6 +2,10 @@ from recipes.auth import *
 from recipes.models import Recipe, MedicineRequest
 
 
+class JsonSerializer:
+    def get_json(self, object):
+        return object.__str__()
+
 def serialize_user(user, errors: list):
     role = get_role(user)
     return {
