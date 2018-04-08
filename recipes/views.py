@@ -11,11 +11,10 @@ from recipes.forms import LoginForm, UserForm
 from recipes.models import Recipe
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
 import json
-
-# Create your views here.
 from recipes.services import get_recipes
 
 
+# Create your views here.
 @login_required(login_url=reverse_lazy('login'))
 def user_info(request):
     errors = []
@@ -66,7 +65,7 @@ def do_logout(request):
 
 class ListJsonView(BaseListView):
     query_param = 'query'
-    serializer = JsonSerializer()
+    serializer = JsonSerializer
 
     def get_json(self, object):
         return self.serializer.get_json(object)
@@ -98,7 +97,7 @@ class RecipesListJsonView(ListJsonView):
     paginate_by = 10
     model = Recipe
     ordering = '-date'
-    serializer = RecipeSerializerShort()
+    serializer = RecipeSerializerShort
 
     def filter_query_set(self, query):
         return get_recipes(query)
