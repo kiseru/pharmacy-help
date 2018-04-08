@@ -45,7 +45,7 @@ class Recipe(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     patient_email = models.CharField(max_length=50)
     patient_initials = models.CharField(max_length=100)
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now=True)
     token = models.TextField()
     day_duration = models.PositiveIntegerField(default=15)
     patient_age = models.PositiveSmallIntegerField()
@@ -73,6 +73,7 @@ class MedicineRequestStatus(models.Model):
 class MedicineName(models.Model):
     medicine_name = models.CharField(max_length=50)
     medicine_description = models.TextField()
+    medicine_level = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return self.medicine_name
@@ -81,7 +82,6 @@ class MedicineName(models.Model):
 class Medicine(models.Model):
     medicine_name = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
     medicine_type = models.ForeignKey(MedicineType, on_delete=models.CASCADE)
-    medicine_level = models.PositiveSmallIntegerField(default=0)
     pharmacies = models.ManyToManyField(Pharmacy, through='recipes.MedicinesPharmacies')
 
     def __str__(self):
