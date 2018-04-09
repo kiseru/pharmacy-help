@@ -3,13 +3,19 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.generic.list import BaseListView
+
+from recipes.auth import login_not_required, has_role
+
+from recipes.forms import LoginForm, UserForm
+from recipes.models import Recipe
+from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
+import json
+from recipes.services import get_recipes
+
 
 # Create your views here.
-from recipes.forms import LoginForm, UserForm
-from recipes.serializers import serialize_user
-import json
-
-
 @login_required(login_url=reverse_lazy('login'))
 def user_info(request):
     errors = []
@@ -28,6 +34,7 @@ def test_user_info(request):
     return render(request, 'recipes/test_user_info.html', {'form': UserForm(instance=request.user)})
 
 
+@login_not_required()
 def do_login(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -54,3 +61,46 @@ def profile(request):
 def do_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('login'))
+
+
+class ListJsonView(BaseListView):
+    query_param = 'query'
+    serializer = JsonSerializer
+
+    def get_json(self, object):
+        return self.serializer.get_json(object)
+
+    def filter_query_set(self, query):
+        return self.queryset
+
+    def get(self, request, *args, **kwargs):
+        if self.query_param:
+            if self.query_param in request.GET:
+                query_param_value = request.GET[self.query_param]
+            else:
+                query_param_value = None
+            self.queryset = self.filter_query_set(query_param_value)
+            paginator, page, queryset, is_paginated = self.paginate_queryset(self.queryset, self.paginate_by)
+            data = [self.get_json(i) for i in queryset]
+            result = {
+                'has_prev': page.has_previous(),
+                'has_next': page.has_next(),
+                'object_list': data,
+                'page_number': paginator.num_pages,
+            }
+            return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
+        else:
+            raise Exception("Field 'query_param' should be defined")
+
+
+@method_decorator(login_required(login_url=reverse_lazy('login')), name='dispatch')
+@method_decorator(has_role('apothecary'), name='dispatch')
+class RecipesListJsonView(ListJsonView):
+    paginate_by = 10
+    model = Recipe
+    ordering = '-date'
+    serializer = RecipeSerializerShort
+
+    def filter_query_set(self, query):
+        return get_recipes(query)
+
