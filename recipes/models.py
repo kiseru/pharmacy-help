@@ -37,16 +37,23 @@ class User(AbstractUser):
 class Doctor(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.user.email
+
 
 class Recipe(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     patient_email = models.CharField(max_length=50)
-    date = models.DateTimeField()
+    patient_initials = models.CharField(max_length=100)
+    date = models.DateTimeField(auto_now=True)
     token = models.TextField()
-    day_duration = models.SmallIntegerField(default=-1)
+    day_duration = models.PositiveIntegerField(default=15)
     patient_age = models.PositiveSmallIntegerField()
     medicine_card_number = models.CharField(max_length=10, null=True)
     medicine_policy_number = models.CharField(max_length=16, null=True)
+
+    def __str__(self):
+        return '{} - {} - {}'.format(self.date, self.patient_email, self.doctor.user.email)
 
 
 class Pharmacy(models.Model):
@@ -66,29 +73,39 @@ class MedicineRequestStatus(models.Model):
 class MedicineName(models.Model):
     medicine_name = models.CharField(max_length=50)
     medicine_description = models.TextField()
+    medicine_level = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        return self.medicine_name
 
 
 class Medicine(models.Model):
     medicine_name = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
     medicine_type = models.ForeignKey(MedicineType, on_delete=models.CASCADE)
-    medicine_level = models.PositiveSmallIntegerField(default=0)
-    pharmacy = models.ManyToManyField(Pharmacy, through='recipes.MedicinesPharmacies')
+    pharmacies = models.ManyToManyField(Pharmacy, through='recipes.MedicinesPharmacies')
+
+    def __str__(self):
+        return '{} {}'.format(self.medicine_name.medicine_name, self.medicine_type.type_name)
 
 
 class MedicineDosage(models.Model):
     dosage = models.TextField()
     frequency = models.TextField()
     period = models.TextField()
-    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    medicine = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{} {} {}'.format(self.medicine.medicine_name.medicine_name, self.dosage, self.frequency)
 
 
 class MedicineRequest(models.Model):
-    medicine_request_status = models.ForeignKey(MedicineRequestStatus, on_delete=models.CASCADE)
+    # medicine_request_status = models.ForeignKey(MedicineRequestStatus, on_delete=models.CASCADE)
     medicine_dosage = models.ForeignKey(MedicineDosage, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    medicine_count = models.SmallIntegerField()
-    request_confirmation_time = models.DateTimeField()
-    apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE)
+    medicine_count = models.SmallIntegerField(default=0)
+    given_medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, null=True)
+    request_confirmation_time = models.DateTimeField(null=True)
+    apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE, null=True)
 
 
 class MedicinesPharmacies(models.Model):
