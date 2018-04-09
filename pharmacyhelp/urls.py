@@ -25,5 +25,9 @@ urlpatterns = [
     url(r'^login$', do_login, name='login'),
     url(r'^logout$', do_logout, name='logout'),
     url(r'^api/', include('recipes.urls')),
-    url(r'^', TemplateView.as_view(template_name='recipes/index.html')),
+    url(r'^$', do_login),
+    url(r'^medicine$', TemplateView.as_view(template_name='recipes/index.html')),
+    url(r'^medicine/add$', TemplateView.as_view(template_name='recipes/index.html')),
+    url(r'^recipe$', TemplateView.as_view(template_name='recipes/index.html')),
+    url(r'^recipes$', TemplateView.as_view(template_name='recipes/index.html')),
 ]
