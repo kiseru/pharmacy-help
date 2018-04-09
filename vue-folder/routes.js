@@ -16,5 +16,5 @@ export default [
   new Route("/apothecary", Apothecary),
   new Route("/doctor", Doctor),
   new Route("/error", NotFound),
-  new Route("/", HomePage)
+  new Route("", HomePage)
 ];
