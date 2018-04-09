@@ -9,11 +9,8 @@ Vue.config.productionTip = false;
 Vue.use(VueCookies);
 Vue.use(VueRouter);
 
-<<<<<<< HEAD
+
 const router = new VueRouter({
-=======
-let router = new VueRouter({
->>>>>>> develop
   mode: 'history',
   routes: routes
 });
