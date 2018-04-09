@@ -108,4 +108,5 @@ npm-debug.log
 *.ntvs*
 *.njsproj
 recipes/static/recipes/build.js
+recipes/static/recipes/build.js.map
 yarn.lock
