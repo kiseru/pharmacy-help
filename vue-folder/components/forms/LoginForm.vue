@@ -1,7 +1,8 @@
 <template>
   <div class="form">
     <p>Войти</p>
-    <form action="/" method="post">
+    <form action="/login" method="post">
+      <input type="hidden" name="csrfmiddlewaretoken" v-bind:value="csrfToken">
       <div>
         <label for="email">E-mail</label>
         <br>
@@ -10,7 +11,7 @@
       <div>
         <label for="password">Пароль</label>
         <br>
-        <input type="text" id="password" name="password">
+        <input type="password" id="password" name="password">
       </div>
       <button type="submit">Войти</button>
     </form>
@@ -19,7 +20,15 @@
 
 <script>
   export default {
-    name: "HomePageForm"
+    name: "LoginForm",
+    data() {
+      return {
+        csrfToken: ""
+      }
+    },
+    beforeMount() {
+      this.csrfToken = this.$cookies.get("csrftoken")
+    }
   }
 </script>
 

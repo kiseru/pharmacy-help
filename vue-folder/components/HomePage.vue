@@ -1,16 +1,16 @@
 <template>
   <div>
-    <home-page-form/>
+    <login-form/>
   </div>
 </template>
 
 <script>
-  import HomePageForm from './forms/HomePageForm';
+  import LoginForm from './forms/LoginForm';
 
   export default {
     name: "HomePage",
     components: {
-      HomePageForm
+      LoginForm
     },
     data() {
       return {
