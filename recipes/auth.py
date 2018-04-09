@@ -24,7 +24,6 @@ def login_not_required(url=None):
     def wrapper(func):
         def new_func(request, *args, **kwargs):
             if request.user.is_authenticated:
-                # print(request.user)
                 new_url = url
                 if not new_url:
                     new_url = get_default_url(get_role(request.user))
