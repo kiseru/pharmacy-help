@@ -4,7 +4,7 @@ var webpack = require('webpack')
 module.exports = {
   entry: './vue-folder/main.js',
   output: {
-    path: path.resolve(__dirname, './recipes/static/recipes'),
+    path: path.resolve(__dirname, './static/js'),
     publicPath: '/static/js',
     filename: 'build.js'
   },
@@ -90,7 +90,7 @@ module.exports = {
   },
   devServer: {
     historyApiFallback: {
-      index: './recipes/templates/recipes/index.html'
+      index: './templates/index.html'
     },
     noInfo: true,
     overlay: true
