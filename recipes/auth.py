@@ -13,11 +13,11 @@ def get_role(user):
 
 def get_default_url(role):
     if role == 'doctor':
-        return '/recipe'
+        return '/doctor'
     elif role == 'apothecary':
-        return '/medicine'
+        return '/apothecary'
     else:
-        return '/profile'
+        return '/admin'
 
 
 def login_not_required(url=None):

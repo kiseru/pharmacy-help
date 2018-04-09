@@ -34,7 +34,6 @@ def test_user_info(request):
     return render(request, 'recipes/test_user_info.html', {'form': UserForm(instance=request.user)})
 
 
-
 @login_not_required()
 def do_login(request):
     if request.method == 'POST':
@@ -91,7 +90,7 @@ class ListJsonView(BaseListView):
             }
             return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
         else:
-          raise Exception("Field 'query_param' should be defined")
+            raise Exception("Field 'query_param' should be defined")
 
 
 @method_decorator(login_required(login_url=reverse_lazy('login')), name='dispatch')
