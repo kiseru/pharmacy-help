@@ -60,10 +60,16 @@ class Pharmacy(models.Model):
     pharmacy_name = models.CharField(max_length=20)
     pharmacy_address = models.TextField()
 
+    def __str__(self):
+        return self.pharmacy_name
+
 
 class Apothecary(models.Model):
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{} - {}'.format(self.user.email, self.pharmacy.pharmacy_name)
 
 
 class MedicineRequestStatus(models.Model):
