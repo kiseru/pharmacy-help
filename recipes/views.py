@@ -6,7 +6,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.list import BaseListView
 
-from recipes.auth import login_not_required, has_role
+from recipes.auth import login_not_required, has_role, get_default_url, get_role
 
 from recipes.forms import LoginForm, UserForm
 from recipes.models import Recipe
@@ -45,7 +45,7 @@ def do_login(request):
             if 'next' in request.GET:
                 return HttpResponseRedirect(request.GET['next'])
             else:
-                return HttpResponseRedirect(reverse('profile'))
+                return HttpResponseRedirect(get_default_url(get_role(user)))
         else:
             return HttpResponseRedirect(reverse('login'))
     else:

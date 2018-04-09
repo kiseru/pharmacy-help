@@ -11,6 +11,8 @@ urlpatterns = [
     url(r'^medicine/add$', TemplateView.as_view(template_name='recipes/index.html')),
     url(r'^recipe$', TemplateView.as_view(template_name='recipes/index.html')),
     url(r'^recipes$', TemplateView.as_view(template_name='recipes/index.html')),
+    url(r'^apothecary$', TemplateView.as_view(template_name='recipes/index.html')),
+    url(r'^doctor$', TemplateView.as_view(template_name='recipes/index.html')),
     url(r'^$', do_login, name='login'),
     url(r'^api/recipes', RecipesListJsonView.as_view(), name='recipes'),
 ]
