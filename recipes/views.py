@@ -35,10 +35,10 @@ def do_login(request):
         user = authenticate(username=email, password=password)
         if user is not None and user.is_active:
             login(request, user)
-            if 'next' in request.GET:
-                return HttpResponseRedirect(request.GET['next'])
-            else:
-                return HttpResponseRedirect(reverse('profile'))
+            # if 'next' in request.GET:
+                # return HttpResponseRedirect(request.GET['next'])
+            # else:
+            return HttpResponse(status=200)
         else:
             return HttpResponseRedirect(reverse('login'))
     else:
