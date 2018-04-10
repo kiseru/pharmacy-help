@@ -17,7 +17,8 @@
         required: true
       },
       type: {
-        required: true
+        required: false,
+        default: "text"
       }
     }
   }
@@ -25,6 +26,8 @@
 
 <style lang="less" scoped>
   div {
+    margin: 10px;
+
     input {
       border-radius: 10px;
       border: 2px solid #087e8b;
