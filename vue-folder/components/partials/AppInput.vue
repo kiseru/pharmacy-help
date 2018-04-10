@@ -8,7 +8,7 @@
 
 <script>
   export default {
-    name: "AppTextInput",
+    name: "AppInput",
     props: {
       id: {
         required: true
