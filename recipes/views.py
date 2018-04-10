@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.list import BaseListView
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
-from recipes.forms import UserForm
+from recipes.forms import UserForm, LoginForm
 from recipes.models import Recipe
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
 from recipes.services import get_recipes
@@ -48,12 +48,13 @@ def do_login(request):
         else:
             return HttpResponseRedirect(reverse('login'))
     else:
+        # return render(request, 'recipes/login.html', {'form': LoginForm})
         return render(request, 'index.html')
 
 
 @login_required(login_url=reverse_lazy('login'))
 def profile(request):
-    return render(request, 'recipes/index.html')
+    return render(request, 'index.html')
 
 
 def do_logout(request):
