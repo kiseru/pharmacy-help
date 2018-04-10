@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.generic.list import BaseListView
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
