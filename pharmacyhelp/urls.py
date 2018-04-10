@@ -17,11 +17,8 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
 
-from recipes.views import do_login, do_logout
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^login$', do_login, name='login'),
-    url(r'^logout$', do_logout, name='logout'),
-    url(r'^', include('recipes.urls')),
+    url('admin/', admin.site.urls),
+    url('', include('recipes.urls')),
 ]

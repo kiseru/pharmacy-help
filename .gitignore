@@ -100,3 +100,15 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+node_modules/
+npm-debug.log
+# Editor directories and files
+*.suo
+*.ntvs*
+*.njsproj
+yarn.lock
+
+# Static vue.js files
+build.js
+build.js.map
