@@ -19,7 +19,7 @@
       axios.get("/api/user")
         .then(
           response => this.user = response.data,
-          error => this.user = null
+          error => this.user = { first_name: "Not found", last_name: "Not found" }
         );
     }
   }
@@ -30,7 +30,7 @@
     background-color: #f5f5f5;
     width: inherit;
     height: 150px;
-    padding-top: 40px;
+    padding-top: 75px;
   }
 
   #user-info p {
