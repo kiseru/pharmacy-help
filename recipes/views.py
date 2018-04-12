@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.generic import TemplateView
 from django.views.generic.list import BaseListView
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
@@ -103,4 +104,21 @@ class RecipesListJsonView(ListJsonView):
 
     def filter_query_set(self, query):
         return get_recipes(query)
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+class TemplateViewForAuthenticated(TemplateView):
+    pass
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+@method_decorator(has_role('apothecary'), name='dispatch')
+class TemplateViewForApothecary(TemplateView):
+    pass
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+@method_decorator(has_role('doctor'), name='dispatch')
+class TemplateViewForDoctor(TemplateView):
+    pass
 

@@ -10,11 +10,11 @@ urlpatterns = [
     url('^api/user/', user_info, name='user_info'),
     url('^api/test_user_info/', test_user_info, name='test_user_info'),
     url('^api/recipes/', RecipesListJsonView.as_view(), name='recipes'),
-    url('^medicines/$', TemplateView.as_view(template_name='index.html')),
-    url('^medicines/new$', TemplateView.as_view(template_name='index.html')),
-    url('^recipes/(?P<token>.+)', TemplateView.as_view(template_name='index.html')),
-    url('^recipes/$', TemplateView.as_view(template_name='index.html')),
-    url('^apothecary/', TemplateView.as_view(template_name='index.html')),
-    url('^doctor/', TemplateView.as_view(template_name='index.html')),
+    url('^medicines/$', TemplateViewForApothecary.as_view(template_name='index.html')),
+    url('^medicines/new$', TemplateViewForApothecary.as_view(template_name='index.html')),
+    url('^recipes/(?P<token>.+)', TemplateViewForAuthenticated.as_view(template_name='index.html')),
+    url('^recipes/$', TemplateViewForAuthenticated.as_view(template_name='index.html')),
+    url('^apothecary/', TemplateViewForApothecary.as_view(template_name='index.html')),
+    url('^doctor/', TemplateViewForDoctor.as_view(template_name='index.html')),
 ]
 
