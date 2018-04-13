@@ -64,6 +64,7 @@ def do_logout(request):
     return HttpResponseRedirect(reverse('home'))
 
 
+# нафиг пока не надо
 class ListJsonView(BaseListView):
     query_param = 'query'
     serializer = JsonSerializer
@@ -94,6 +95,7 @@ class ListJsonView(BaseListView):
             raise Exception("Field 'query_param' should be defined")
 
 
+# и это не надо
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
 @method_decorator(has_role('apothecary'), name='dispatch')
 class RecipesListJsonView(ListJsonView):
