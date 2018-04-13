@@ -1,8 +1,9 @@
 <template>
   <div>
     <apothecary-header/>
-    <div id="search-input">
-      <app-input id="search" label="Найти"/>
+    <div id="search-block">
+      <label for="search-input">Найти</label><br/>
+      <input type="text" id="search-input" v-model="searchText">
     </div>
     <div id="recipes">
       <div v-for="recipe in recipes">
@@ -28,35 +29,32 @@
     },
     data() {
       return {
-        recipes: [
-          {
-            id: "906635418151ba60480cd745256310229175",
-            patientName: "asdfas",
-            doctorName: "asdfasdf",
-            date: "28.07.2018"
-          },
-          {
-            id: "906635418151ba60480cd745256310229175",
-            patientName: "asdfas",
-            doctorName: "asdfasdf",
-            date: "28.07.2018"
-          }
-        ]
+        searchText: "",
+        recipes: []
       }
     },
-    /*beforeMount() {
-      axios.get("/api/recipes")
+    beforeMount() {
+      axios.get("/api/recipes?id=" + this.searchText)
         .then(response => this.recipes = response.data)
         .catch(error => this.recipes = [])
-    }*/
+    }
   }
 </script>
 
 <style lang="less" scoped>
-  #search-input {
+  #search-block {
     margin: 10px auto;
     text-align: center;
     width: 300px;
+
+    #search-input {
+      width: 300px;
+      height: 30px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 2px solid #087e8b;
+      outline: none;
+    }
   }
 
   #recipes {
