@@ -1,5 +1,5 @@
 <template>
-  <app-form header="Добавить препорат" button-name="Добавить" action="/" v-bind:inputs="inputs"/>
+  <app-form header="Добавить препарат" button-name="Добавить" action="/" v-bind:inputs="inputs"/>
 </template>
 
 <script>
@@ -24,6 +24,18 @@
           {
             id: "description",
             label: "Описание"
+          },
+          {
+            id: "count",
+            label: "Количетсво"
+          },
+          {
+            id: "level",
+            label: "Уровень (1-3)"
+          },
+          {
+            id: "price",
+            label: "Цена"
           }
         ]
       }
