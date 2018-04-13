@@ -4,19 +4,20 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.generic import TemplateView
 from django.views.generic.list import BaseListView
 
-from recipes.auth import login_not_required, has_role
-
-from recipes.forms import LoginForm, UserForm
+from recipes.auth import login_not_required, has_role, get_default_url, get_role
+from recipes.forms import UserForm, LoginForm
 from recipes.models import Recipe
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
-import json
 from recipes.services import get_recipes
 
+import json
 
-# Create your views here.
-@login_required(login_url=reverse_lazy('login'))
+
+@login_required(login_url=reverse_lazy('home'))
 def user_info(request):
     errors = []
     if request.method == 'POST':
@@ -29,10 +30,9 @@ def user_info(request):
     return JsonResponse(serialize_user(request.user, errors))
 
 
-@login_required(login_url=reverse_lazy('login'))
+@login_required(login_url=reverse_lazy('home'))
 def test_user_info(request):
     return render(request, 'recipes/test_user_info.html', {'form': UserForm(instance=request.user)})
-
 
 
 @login_not_required()
@@ -46,24 +46,25 @@ def do_login(request):
             if 'next' in request.GET:
                 return HttpResponseRedirect(request.GET['next'])
             else:
-                return HttpResponseRedirect(reverse('profile'))
+                return HttpResponseRedirect(get_default_url(get_role(user)))
         else:
-            return HttpResponseRedirect(reverse('login'))
+            return HttpResponseRedirect(reverse('home'))
     else:
         # return render(request, 'recipes/login.html', {'form': LoginForm})
-        return render(request, 'recipes/index.html')
+        return render(request, 'index.html')
 
 
-@login_required(login_url=reverse_lazy('login'))
+@login_required(login_url=reverse_lazy('home'))
 def profile(request):
-    return render(request, 'recipes/index.html')
+    return render(request, 'index.html')
 
 
 def do_logout(request):
     logout(request)
-    return HttpResponseRedirect(reverse('login'))
+    return HttpResponseRedirect(reverse('home'))
 
 
+# нафиг пока не надо
 class ListJsonView(BaseListView):
     query_param = 'query'
     serializer = JsonSerializer
@@ -91,10 +92,11 @@ class ListJsonView(BaseListView):
             }
             return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
         else:
-          raise Exception("Field 'query_param' should be defined")
+            raise Exception("Field 'query_param' should be defined")
 
 
-@method_decorator(login_required(login_url=reverse_lazy('login')), name='dispatch')
+# и это не надо
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
 @method_decorator(has_role('apothecary'), name='dispatch')
 class RecipesListJsonView(ListJsonView):
     paginate_by = 10
@@ -104,3 +106,29 @@ class RecipesListJsonView(ListJsonView):
 
     def filter_query_set(self, query):
         return get_recipes(query)
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+class TemplateViewForAuthenticated(TemplateView):
+    pass
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+@method_decorator(has_role('apothecary'), name='dispatch')
+class TemplateViewForApothecary(TemplateView):
+    pass
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+@method_decorator(has_role('doctor'), name='dispatch')
+class TemplateViewForDoctor(TemplateView):
+    pass
+
+
+@login_required(login_url=reverse_lazy('home'))
+@has_role('apothecary')
+def get_recipes_view(request):
+    token = request.GET['id'] if 'id' in request.GET else ''
+    queryset = get_recipes(token).order_by('-date')[:10]
+    result = [RecipeSerializerShort.get_json(i) for i in queryset]
+    return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')

@@ -1,4 +1,5 @@
 from django.http import HttpResponseRedirect
+from django.middleware.csrf import get_token
 
 
 def get_role(user):
@@ -13,18 +14,18 @@ def get_role(user):
 
 def get_default_url(role):
     if role == 'doctor':
-        return '/recipe'
+        return '/doctor'
     elif role == 'apothecary':
-        return '/medicine'
+        return '/apothecary'
     else:
-        return '/profile'
+        return '/admin'
 
 
 def login_not_required(url=None):
     def wrapper(func):
         def new_func(request, *args, **kwargs):
+            get_token(request)
             if request.user.is_authenticated:
-                # print(request.user)
                 new_url = url
                 if not new_url:
                     new_url = get_default_url(get_role(request.user))

@@ -18,11 +18,11 @@ class RecipeSerializerShort(JsonSerializer):
     @staticmethod
     def get_json(object: Recipe):
         recipe = dict()
-        recipe['id'] = object.id
-        recipe['doctor_initials'] = object.doctor.user.last_name + ' ' + object.doctor.user.first_name
-        recipe['patient_initials'] = object.patient_initials
-        recipe['patient_email'] = object.patient_email
-        recipe['date'] = object.date.strftime('%Y-%m-%d %H:%M')
+        recipe['id'] = object.token
+        recipe['doctorName'] = object.doctor.user.last_name + ' ' + object.doctor.user.first_name
+        recipe['patientName'] = object.patient_initials
+        # recipe['patient_email'] = object.patient_email
+        recipe['date'] = object.date.strftime('%d.%m.%Y')
         return recipe
 
 
