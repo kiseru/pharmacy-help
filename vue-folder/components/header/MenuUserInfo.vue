@@ -1,14 +1,27 @@
 <template>
   <div id="user-info">
-    <p>Чехов</p>
-    <p>Антон</p>
-    <p>Павлович</p>
+    <p>{{ user.first_name }}</p>
+    <p>{{ user.last_name }}</p>
   </div>
 </template>
 
 <script>
+  import axios from 'axios';
+
   export default {
-    name: "MenuUserInfo"
+    name: "MenuUserInfo",
+    data() {
+      return {
+        user: null
+      }
+    },
+    beforeMount() {
+      axios.get("/api/user")
+        .then(
+          response => this.user = response.data,
+          error => this.user = { first_name: "Not found", last_name: "Not found" }
+        );
+    }
   }
 </script>
 
@@ -17,7 +30,7 @@
     background-color: #f5f5f5;
     width: inherit;
     height: 150px;
-    padding-top: 40px;
+    padding-top: 75px;
   }
 
   #user-info p {

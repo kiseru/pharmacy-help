@@ -14,8 +14,10 @@
 </template>
 
 <script>
-  import GoodCard from './GoodCard';
-  import NewGoodCard from './NewGoodCard';
+  import axios from "axios";
+
+  import GoodCard from "./GoodCard";
+  import NewGoodCard from "./NewGoodCard";
 
   export default {
     name: "GoodsCards",
@@ -26,72 +28,7 @@
     data() {
       return {
         searchText: "",
-        medicines: [
-          {
-            id: 1,
-            name: "Парацетамол",
-            description: "Обезбаливающее",
-            type: "Таблетки",
-            count: 50,
-            price: 125
-          },
-          {
-            id: 1,
-            name: "Парацетамол",
-            description: "Обезбаливающее",
-            type: "Таблетки",
-            count: 50,
-            price: 125
-          },
-          {
-            id: 1,
-            name: "Парацетамол",
-            description: "Обезбаливающее",
-            type: "Таблетки",
-            count: 50,
-            price: 125
-          },
-          {
-            id: 1,
-            name: "Парацетамол",
-            description: "Обезбаливающее",
-            type: "Таблетки",
-            count: 50,
-            price: 125
-          },
-          {
-            id: 1,
-            name: "Парацетамол",
-            description: "Обезбаливающее",
-            type: "Таблетки",
-            count: 50,
-            price: 125
-          },
-          {
-            id: 1,
-            name: "Парацетамол",
-            description: "Обезбаливающее",
-            type: "Таблетки",
-            count: 50,
-            price: 125
-          },
-          {
-            id: 1,
-            name: "Парацетамол",
-            description: "Обезбаливающее",
-            type: "Таблетки",
-            count: 50,
-            price: 125
-          },
-          {
-            id: 1,
-            name: "Парацетамол",
-            description: "Обезбаливающее",
-            type: "Таблетки",
-            count: 50,
-            price: 125
-          }
-        ]
+        medicines: []
       }
     },
     computed: {
@@ -102,6 +39,11 @@
           return this.medicines.filter(medicine => medicine.name.includes(this.searchText))
         }
       }
+    },
+    beforeMount() {
+      axios.get("/api/medicines")
+        .then(response => this.medicines = response.data)
+        .catch(error => this.medicines = []);
     }
   }
 </script>

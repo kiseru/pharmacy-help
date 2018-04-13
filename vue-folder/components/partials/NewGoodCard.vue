@@ -14,6 +14,7 @@
 
 <style scoped>
   #new-good-card {
+    background-color: #ffffff;
     width: 200px;
     height: 300px;
     border: 2px solid #087E8B;

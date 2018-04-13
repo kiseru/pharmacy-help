@@ -4,19 +4,20 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.generic import TemplateView
 from django.views.generic.list import BaseListView
 
-from recipes.auth import login_not_required, has_role
-
-from recipes.forms import LoginForm, UserForm
+from recipes.auth import login_not_required, has_role, get_default_url, get_role
+from recipes.forms import UserForm, LoginForm
 from recipes.models import Recipe
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
-import json
 from recipes.services import get_recipes
 
+import json
 
-# Create your views here.
-@login_required(login_url=reverse_lazy('login'))
+
+@login_required(login_url=reverse_lazy('home'))
 def user_info(request):
     errors = []
     if request.method == 'POST':
@@ -29,7 +30,7 @@ def user_info(request):
     return JsonResponse(serialize_user(request.user, errors))
 
 
-@login_required(login_url=reverse_lazy('login'))
+@login_required(login_url=reverse_lazy('home'))
 def test_user_info(request):
     return render(request, 'recipes/test_user_info.html', {'form': UserForm(instance=request.user)})
 
@@ -45,22 +46,22 @@ def do_login(request):
             if 'next' in request.GET:
                 return HttpResponseRedirect(request.GET['next'])
             else:
-                return HttpResponseRedirect(reverse('profile'))
+                return HttpResponseRedirect(get_default_url(get_role(user)))
         else:
-            return HttpResponseRedirect(reverse('login'))
+            return HttpResponseRedirect(reverse('home'))
     else:
         # return render(request, 'recipes/login.html', {'form': LoginForm})
-        return render(request, 'recipes/index.html')
+        return render(request, 'index.html')
 
 
-@login_required(login_url=reverse_lazy('login'))
+@login_required(login_url=reverse_lazy('home'))
 def profile(request):
-    return render(request, 'recipes/index.html')
+    return render(request, 'index.html')
 
 
 def do_logout(request):
     logout(request)
-    return HttpResponseRedirect(reverse('login'))
+    return HttpResponseRedirect(reverse('home'))
 
 
 class ListJsonView(BaseListView):
@@ -93,7 +94,7 @@ class ListJsonView(BaseListView):
             raise Exception("Field 'query_param' should be defined")
 
 
-@method_decorator(login_required(login_url=reverse_lazy('login')), name='dispatch')
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
 @method_decorator(has_role('apothecary'), name='dispatch')
 class RecipesListJsonView(ListJsonView):
     paginate_by = 10
@@ -103,3 +104,21 @@ class RecipesListJsonView(ListJsonView):
 
     def filter_query_set(self, query):
         return get_recipes(query)
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+class TemplateViewForAuthenticated(TemplateView):
+    pass
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+@method_decorator(has_role('apothecary'), name='dispatch')
+class TemplateViewForApothecary(TemplateView):
+    pass
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+@method_decorator(has_role('doctor'), name='dispatch')
+class TemplateViewForDoctor(TemplateView):
+    pass
+
