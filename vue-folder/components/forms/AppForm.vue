@@ -1,31 +1,29 @@
 <template>
   <div class="form">
-    <p>Добавить препорат</p>
-    <form action="" method="post">
-      <div>
-        <input type="text">
-      </div>
-
-      <div>
-        <input type="text">
-      </div>
-
-      <div>
-        <input type="text">
-      </div>
-
-      <div>
-        <input type="text">
-      </div>
-
-      <button type="submit">Добавить</button>
+    <p>{{ header }}</p>
+    <form v-bind:action="action" method="post">
+      <input type="hidden" name="csrfmiddlewaretoken" v-bind:value="csrfToken">
+      <app-input v-for="input in inputs" v-bind:id="input.id" v-bind:label="input.label" v-bind:type="input.type"/>
+      <app-button v-bind:name="buttonName"/>
     </form>
   </div>
 </template>
 
 <script>
+  import AppButton from "../partials/AppButton";
+  import AppInput from "../partials/AppInput";
+
   export default {
-    name: "Form",
+    name: "AppForm",
+    components: {
+      AppButton,
+      AppInput
+    },
+    data() {
+      return {
+        csrfToken: ""
+      }
+    },
     props: {
       header: {
         required: true
@@ -35,7 +33,14 @@
       },
       action: {
         required: true
+      },
+      inputs: {
+        type: Array,
+        required: true
       }
+    },
+    beforeMount() {
+      this.csrfToken = this.$cookies.get("csrftoken")
     }
   }
 </script>
