@@ -15,5 +15,6 @@ urlpatterns = [
     url('^recipes/', TemplateView.as_view(template_name='index.html')),
     url('^apothecary/', TemplateView.as_view(template_name='index.html')),
     url('^doctor/', TemplateView.as_view(template_name='index.html')),
+    url('^api/medicines/new/', add_medicine, name='add_medicine'),
 ]
 
