@@ -161,3 +161,22 @@ def add_medicine(request):
 #                                                     'medicine_id__medicines_pharmacies__price',)
 #     return JsonResponse({'medicines': list(medicines)})
 
+
+def get_medicine(request):
+    pharmacy = request.user.apothecary_set.all()[0].pharmacy
+    medicinepharmacies = pharmacy.medicinespharmacies_set.all()
+    return HttpResponse(
+        json.dumps([get_medicine_json(i) for i in medicinepharmacies], ensure_ascii=False),
+        content_type='application/json'
+    )
+
+
+def get_medicine_json(medicinepharmacy):
+    return {
+        'price': medicinepharmacy.price,
+        'count': medicinepharmacy.count,
+        'id': medicinepharmacy.id,
+        'description': medicinepharmacy.medicine.medicine_name.medicine_description,
+        'name': medicinepharmacy.medicine.medicine_name.medicine_name,
+        'type': medicinepharmacy.medicine.medicine_type.type_name,
+    }

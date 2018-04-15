@@ -38,8 +38,8 @@ class MedicineForm(ModelForm):
 
     def save(self, m1, m2, *args, **kwargs):
         instance = self.instance
-        instance.medicine_name_id = m2
-        instance.medicine_type_id = m1
+        instance.medicine_name = m2
+        instance.medicine_type = m1
         instance.save()
         return super()
 
