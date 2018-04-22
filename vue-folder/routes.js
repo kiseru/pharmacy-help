@@ -3,6 +3,7 @@ import Apothecary from "./components/Apothecary";
 import Doctor from "./components/Doctor";
 import HomePage from "./components/HomePage";
 import NotFound from "./components/NotFound";
+import Recipes from "./components/Recipes";
 
 class Route {
     constructor(path, component) {
@@ -12,6 +13,7 @@ class Route {
 }
 
 export default [
+  new Route("/apothecary/recipes", Recipes),
   new Route("/apothecary/new", AddGood),
   new Route("/apothecary", Apothecary),
   new Route("/doctor", Doctor),
