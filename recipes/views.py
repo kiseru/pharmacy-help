@@ -1,18 +1,19 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.http import *
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django.views.generic.list import BaseListView
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
-from recipes.forms import UserForm, LoginForm
+from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
-from recipes.services import get_recipes, create_recipe
+from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
+
 
 import json
 import traceback
@@ -161,9 +162,70 @@ class TemplateViewForDoctor(TemplateView):
 
 
 @login_required(login_url=reverse_lazy('home'))
-# @has_role('apothecary')
 def get_recipes_view(request):
+    role = get_role(request.user)
+    if role == 'apothecary':
+        return get_recipes_for_apothecary(request)
+    elif role == 'doctor':
+        return get_recipes_for_doctor(request)
+    
+
+def get_recipes_for_apothecary(request):
     token = request.GET['id'] if 'id' in request.GET else ''
     queryset = get_recipes(token).order_by('-date')[:10]
     result = [RecipeSerializerShort.get_json(i) for i in queryset]
     return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
+
+
+def get_recipes_for_doctor(request):
+    token = request.GET['id'] if 'id' in request.GET else ''
+    queryset = get_recipes_of_doctor(request.user.doctor_set.all()[0], token).order_by('-date')[:10]
+    result = [RecipeSerializerShort.get_json(i) for i in queryset]
+    return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
+
+
+def add_medicine(request):
+    ctx = {
+         'medicine_name_form': MedicineNamesForm(),
+         'medicine_type_form': MedicineTypeForm(),
+         'medicine_form': MedicineForm()}
+    if request.method == 'POST':
+        ctx['medicine_name_form'] = MedicineNamesForm(request.POST)
+        ctx['medicine_type_form'] = MedicineTypeForm(request.POST)
+        ctx['medicine_form'] = MedicineForm(request.POST)
+        if (ctx['medicine_name_form'].is_valid()) and (ctx['medicine_type_form'].is_valid()) and (ctx['medicine_form'].is_valid()):
+            instance_medicine_name = ctx['medicine_name_form'].save()
+            instance_medicine_type = ctx['medicine_type_form'].save()
+            instance = ctx['medicine_form'].save(m1=instance_medicine_type, m2=instance_medicine_name)
+            instance.save()
+            return redirect('medicine')
+    return render(request, 'recipes/add_medicine.html', ctx)
+
+# def get_medicine(request):
+#     medicines = Medicines_pharmacies.objects.values('medicine_id',
+#                                                     'medicine_id__medicine_name_id__medicine_name',
+#                                                     'medicine_id__medicine_name_id__description',
+#                                                     'medicine_id__medicine_type_id__type_name',
+#                                                     'medicine_id__medicines_pharmacies__count',
+#                                                     'medicine_id__medicines_pharmacies__price',)
+#     return JsonResponse({'medicines': list(medicines)})
+
+
+def get_medicine(request):
+    pharmacy = request.user.apothecary_set.all()[0].pharmacy
+    medicinepharmacies = pharmacy.medicinespharmacies_set.all()
+    return HttpResponse(
+        json.dumps([get_medicine_json(i) for i in medicinepharmacies], ensure_ascii=False),
+        content_type='application/json'
+    )
+
+
+def get_medicine_json(medicinepharmacy):
+    return {
+        'price': medicinepharmacy.price,
+        'count': medicinepharmacy.count,
+        'id': medicinepharmacy.id,
+        'description': medicinepharmacy.medicine.medicine_name.medicine_description,
+        'name': medicinepharmacy.medicine.medicine_name.medicine_name,
+        'type': medicinepharmacy.medicine.medicine_type.type_name,
+    }
