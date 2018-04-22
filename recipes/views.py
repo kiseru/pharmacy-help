@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
@@ -11,9 +12,11 @@ from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
-from recipes.services import get_recipes, get_recipes_of_doctor
+from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
+
 
 import json
+import traceback
 
 
 @login_required(login_url=reverse_lazy('home'))
@@ -61,6 +64,40 @@ def profile(request):
 def do_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('home'))
+
+
+@login_required(login_url=reverse_lazy('home'))
+@has_role('doctor')
+def add_recipe(request):
+    if request.is_ajax():
+        if request.method == 'POST':
+            try:
+                create_recipe(json.loads(request.body.decode('utf-8')), request.user)
+            except ValidationError:
+                traceback.print_exc()
+                response = {
+                    'status': 'fail',
+                    'error': 'invalid_data'
+                }
+                return JsonResponse(response)
+            except ObjectDoesNotExist:
+                traceback.print_exc()
+                response = {
+                  'status': 'fail',
+                  'error': 'invalid_data'
+                }
+                return JsonResponse(response)
+            except Exception as e:
+                traceback.print_exc()
+                response = {
+                  'status': 'fail',
+                  'error': str(e)
+                }
+                return JsonResponse(response)
+    response = {
+      'status': 'success'
+    }
+    return JsonResponse(response)
 
 
 # нафиг пока не надо
