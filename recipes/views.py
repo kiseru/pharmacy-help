@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import *
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -10,7 +10,7 @@ from django.views.generic.list import BaseListView
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
-from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
+from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort, RecipeSerializerFull
 from recipes.services import get_recipes, get_recipes_of_doctor
 
 import json
@@ -192,3 +192,26 @@ def get_medicine_json(medicinepharmacy):
         'name': medicinepharmacy.medicine.medicine_name.medicine_name,
         'type': medicinepharmacy.medicine.medicine_type.type_name,
     }
+
+
+@login_required()
+def get_recipe_info(request, id):
+    recipes = Recipe.objects.filter(id=id)
+    if recipes.count() > 0:
+        recipe = recipes.all()[0]
+        if get_role(request.user) == 'doctor':
+            if recipe.doctor.user.id != request.user.id:
+                return HttpResponseForbidden()
+        return HttpResponse(json.dumps(
+            {
+                'status': 'success',
+                'error': None,
+                'data': RecipeSerializerFull.get_json(recipe)
+            }, ensure_ascii=False), content_type='application/json', charset='utf-8')
+    else:
+        response = {
+            'status': 'fail',
+            'error': 'not_found',
+            'data': None
+        }
+        return JsonResponse(response)
