@@ -11,10 +11,10 @@ from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort, RecipeSerializerFull
-from recipes.services import get_recipes, get_recipes_of_doctor
+from recipes.services import get_recipes, get_recipes_of_doctor, serve_recipe
 
 import json
-
+import traceback
 
 @login_required(login_url=reverse_lazy('home'))
 def user_info(request):
@@ -194,20 +194,40 @@ def get_medicine_json(medicinepharmacy):
     }
 
 
-@login_required()
-def get_recipe_info(request, id):
-    recipes = Recipe.objects.filter(id=id)
+@login_required(login_url=reverse_lazy('home'))
+def serve_recipe_view(request, id):
+    recipes = Recipe.objects.filter(token=id)
     if recipes.count() > 0:
         recipe = recipes.all()[0]
-        if get_role(request.user) == 'doctor':
-            if recipe.doctor.user.id != request.user.id:
+        if request.method == 'GET':
+            if get_role(request.user) == 'doctor':
+                if recipe.doctor.user.id != request.user.id:
+                    return HttpResponseForbidden()
+            return HttpResponse(json.dumps(
+                {
+                    'status': 'success',
+                    'error': None,
+                    'data': RecipeSerializerFull.get_json(recipe)
+                }, ensure_ascii=False), content_type='application/json', charset='utf-8')
+        else:
+            if get_role(request.user) == 'apothecary':
+                try:
+                    medicines = json.loads(request.body.decode('utf-8'))
+                    print(medicines)
+                    serve_recipe(medicines, recipe, request.user.apothecary_set.all()[0])
+                    response = {
+                      'status': 'success',
+                    }
+                    return JsonResponse(response)
+                except Exception as e:
+                    traceback.print_exc()
+                    response = {
+                      'status': 'fail',
+                      'error': str(e),
+                    }
+                    return JsonResponse(response)
+            else:
                 return HttpResponseForbidden()
-        return HttpResponse(json.dumps(
-            {
-                'status': 'success',
-                'error': None,
-                'data': RecipeSerializerFull.get_json(recipe)
-            }, ensure_ascii=False), content_type='application/json', charset='utf-8')
     else:
         response = {
             'status': 'fail',

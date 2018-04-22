@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from recipes.models import Recipe, MedicineDosage, MedicineRequest, MedicineName
+from recipes.models import Recipe, MedicineDosage, MedicineRequest, MedicineName, MedicinesPharmacies
 
 
 def get_recipes(query: str=None, recipes=Recipe.objects):
@@ -78,3 +78,33 @@ def contains_highlevel_medicines(medicinelist: list):
 def get_hash(*args):
     string = ''.join(str(i) for i in args)
     return MD5PasswordHasher().encode(string, '1')[6:]
+
+
+@transaction.atomic()
+def serve_recipe(medicines, recipe, apothecary):
+    for m in medicines:
+        medicine_requests = MedicineRequest.objects.filter(
+              recipe=recipe,
+              medicine_dosage__medicine__pk=m['medicine_name_id'])
+        if medicine_requests.count():
+            medicine_request = medicine_requests[0]
+            if not medicine_request.request_confirmation_time:
+                medicine_request.apothecary = apothecary
+                medicine_request.medicine_count = m['medicine_count']
+                medicine_request.request_confirmation_time = timezone.now()
+                medicine_request.given_medicine_id = m['medicine_id']
+                pharmacy = apothecary.pharmacy
+                good = pharmacy.medicinespharmacies_set.filter(medicine_id=m['medicine_id'])
+                if good.count():
+                    if good.all()[0].count:
+                        good.all()[0].count -= 1
+                        MedicinesPharmacies.save(good.all()[0])
+                    else:
+                        raise Exception('invalid_data')
+                else:
+                    raise Exception('invalid_data')
+                MedicineRequest.save(medicine_request)
+            else:
+                raise Exception('invalid_data')
+        else:
+            raise Exception('invalid_data')
