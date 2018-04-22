@@ -16,13 +16,8 @@
 <script>
   import axios from "axios";
 
-  import MenuUserInfo from './MenuUserInfo';
-
   export default {
     name: "Menu",
-    components: {
-      MenuUserInfo
-    },
     data() {
       return {
         user: null
