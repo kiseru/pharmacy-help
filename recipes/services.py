@@ -29,7 +29,9 @@ def create_recipe(data: dict, user):
                     and 'medicine_card_number' in data
                     and data['medicine_policy_number']
                     and data['medicine_card_number']):
-                raise Exception('More data is required')
+                raise Exception('more_required')
+            if len(data['medicines']) > 1:
+                raise Exception('too_much_medicines')
 
         doctor = user.doctor_set.all()[0]
         recipe = Recipe(
@@ -38,7 +40,7 @@ def create_recipe(data: dict, user):
             patient_initials=data['patient_initials'],
             medicine_card_number=data['medicine_card_number'],
             medicine_policy_number=data['medicine_policy_number'],
-            day_duration=15 if flag else data['day_duration'],
+            day_duration=15 if (flag or ('day_duration' not in data)) else data['day_duration'],
             token=get_hash(data['patient_email'], doctor.id, timezone.now()),
             doctor=doctor
         )

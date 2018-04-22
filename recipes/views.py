@@ -87,11 +87,11 @@ def add_recipe(request):
                   'error': 'invalid_data'
                 }
                 return JsonResponse(response)
-            except:
+            except Exception as e:
                 traceback.print_exc()
                 response = {
                   'status': 'failed',
-                  'error': 'more_required'
+                  'error': str(e)
                 }
                 return JsonResponse(response)
     response = {
