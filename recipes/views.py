@@ -4,7 +4,6 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views import View
 from django.views.generic import TemplateView
 from django.views.generic.list import BaseListView
 
@@ -12,7 +11,7 @@ from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
-from recipes.services import get_recipes
+from recipes.services import get_recipes, get_recipes_of_doctor
 
 import json
 
@@ -108,7 +107,6 @@ class RecipesListJsonView(ListJsonView):
         return get_recipes(query)
 
 
-
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
 class TemplateViewForAuthenticated(TemplateView):
     pass
@@ -127,10 +125,24 @@ class TemplateViewForDoctor(TemplateView):
 
 
 @login_required(login_url=reverse_lazy('home'))
-@has_role('apothecary')
 def get_recipes_view(request):
+    role = get_role(request.user)
+    if role == 'apothecary':
+        return get_recipes_for_apothecary(request)
+    elif role == 'doctor':
+        return get_recipes_for_doctor(request)
+    
+
+def get_recipes_for_apothecary(request):
     token = request.GET['id'] if 'id' in request.GET else ''
     queryset = get_recipes(token).order_by('-date')[:10]
+    result = [RecipeSerializerShort.get_json(i) for i in queryset]
+    return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
+
+
+def get_recipes_for_doctor(request):
+    token = request.GET['id'] if 'id' in request.GET else ''
+    queryset = get_recipes_of_doctor(request.user.doctor_set.all()[0], token).order_by('-date')[:10]
     result = [RecipeSerializerShort.get_json(i) for i in queryset]
     return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
 
