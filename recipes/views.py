@@ -5,7 +5,6 @@ from django.http import *
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views import View
 from django.views.generic import TemplateView
 from django.views.generic.list import BaseListView
 
@@ -76,21 +75,21 @@ def add_recipe(request):
             except ValidationError:
                 traceback.print_exc()
                 response = {
-                    'status': 'failed',
+                    'status': 'fail',
                     'error': 'invalid_data'
                 }
                 return JsonResponse(response)
             except ObjectDoesNotExist:
                 traceback.print_exc()
                 response = {
-                  'status': 'failed',
+                  'status': 'fail',
                   'error': 'invalid_data'
                 }
                 return JsonResponse(response)
             except Exception as e:
                 traceback.print_exc()
                 response = {
-                  'status': 'failed',
+                  'status': 'fail',
                   'error': str(e)
                 }
                 return JsonResponse(response)
