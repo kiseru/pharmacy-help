@@ -30,7 +30,8 @@ class LoginForm(ModelForm):
         fields = ['email', 'password']
     password = CharField(widget=PasswordInput())
 
-#Формы для добавления лекарств
+
+# Формы для добавления лекарств
 class MedicineForm(ModelForm):
     class Meta:
         model = Medicine
@@ -48,6 +49,7 @@ class MedicineTypeForm(ModelForm):
     class Meta:
         model = MedicineType
         fields = ('type_name',)
+
 
 class MedicineNamesForm(ModelForm):
     class Meta:
