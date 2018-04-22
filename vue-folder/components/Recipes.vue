@@ -1,13 +1,17 @@
 <template>
   <div>
     <apothecary-header/>
-    <div id="search-block">
-      <label for="search-input">Найти</label><br/>
-      <input type="text" id="search-input" v-model="searchText">
-    </div>
-    <div id="recipes">
-      <div v-for="recipe in recipes">
-        <recipe-card v-bind:recipe="recipe"/>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-4 align-self-center form-group">
+          <label for="search-input">Найти</label><br/>
+          <input type="text" id="search-input" class="form-control" v-model="searchText">
+        </div>
+      </div>
+      <div id="recipes">
+        <div v-for="recipe in recipes">
+          <recipe-card v-bind:recipe="recipe"/>
+        </div>
       </div>
     </div>
   </div>
@@ -30,30 +34,43 @@
     data() {
       return {
         searchText: "",
-        recipes: []
+        recipes: [
+          {
+            id: 1,
+            patientName: "asdfasdf",
+            doctorName: "asdfasdf",
+            date: "24.02.1994"
+          },
+          {
+            id: 1,
+            patientName: "asdfasdf",
+            doctorName: "asdfasdf",
+            date: "24.02.1994"
+          },
+          {
+            id: 1,
+            patientName: "asdfasdf",
+            doctorName: "asdfasdf",
+            date: "24.02.1994"
+          }
+        ]
       }
     },
     beforeMount() {
-      axios.get("/api/recipes?id=" + this.searchText)
-        .then(response => this.recipes = response.data)
-        .catch(error => this.recipes = [])
+      // axios.get("/api/recipes?id=" + this.searchText)
+      //   .then(response => this.recipes = response.data)
+      //   .catch(error => this.recipes = [])
     }
   }
 </script>
 
 <style lang="less" scoped>
-  #search-block {
-    margin: 10px auto;
-    text-align: center;
-    width: 300px;
 
-    #search-input {
-      width: 300px;
-      height: 30px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: 2px solid #087e8b;
-      outline: none;
+  .container {
+    margin-top: 20px;
+
+    .form-group {
+      text-align: center;
     }
   }
 
