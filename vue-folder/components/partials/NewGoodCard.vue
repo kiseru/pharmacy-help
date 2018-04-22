@@ -1,6 +1,6 @@
 <template>
   <a href="/medicines/new">
-    <div id="new-good-card">
+    <div id="new-good-card" class="card">
       <div class="ion-ios-plus-outline"></div>
     </div>
   </a>
@@ -17,12 +17,12 @@
     background-color: #ffffff;
     width: 200px;
     height: 300px;
-    border: 2px solid #087E8B;
+    border: 2px solid #0062cc;
     margin: 10px auto;
     border-radius: 5px;
     text-align: center;
     transition: ease 0.8s;
-    color: #087e8b;
+    color: #0062cc;
   }
 
   #new-good-card .ion-ios-plus-outline {
@@ -32,7 +32,8 @@
   }
 
   #new-good-card:hover {
-    background-color: #087e8b;
+    background-color: rgba(0, 98, 204, 0.8);
+    border-color: rgba(0, 98, 204, 0.5);
     color: #f5f5f5;
   }
 </style>
