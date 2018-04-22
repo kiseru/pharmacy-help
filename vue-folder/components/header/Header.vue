@@ -1,9 +1,9 @@
 <template>
-  <div id="header">
-    <burger-button v-bind:menu="menu"/>
-    <logo/>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <burger-button v-bind:menu="menu" class="navbar-text navbar-brand"/>
+    <a href="/" class="navbar-brand">Pharmacy Help</a>
     <app-menu v-bind:menu="menu" v-bind:menuItems="menuItems"/>
-  </div>
+  </nav>
 </template>
 
 <script>
@@ -35,14 +35,8 @@
 </script>
 
 <style scoped>
-  #header {
-    display: inline-flex;
-    position: relative;
-    top: 0;
-    width: 100%;
-    height: 40px;
-    background-color: #087E8B;
-    text-align: center;
-    z-index: 1;
+  nav {
+    height: 56px;
+    padding: 8px 16px 8px 0;
   }
 </style>

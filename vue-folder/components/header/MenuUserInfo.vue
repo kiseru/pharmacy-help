@@ -1,8 +1,5 @@
 <template>
-  <div id="user-info">
-    <p>{{ user.first_name }}</p>
-    <p>{{ user.last_name }}</p>
-  </div>
+
 </template>
 
 <script>
@@ -15,13 +12,7 @@
         user: null
       }
     },
-    beforeMount() {
-      axios.get("/api/user")
-        .then(
-          response => this.user = response.data,
-          error => this.user = { first_name: "Not found", last_name: "Not found" }
-        );
-    }
+
   }
 </script>
 

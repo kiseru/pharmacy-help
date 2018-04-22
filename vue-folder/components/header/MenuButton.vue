@@ -19,12 +19,12 @@
 <style scoped>
   #menu-button {
     position: relative;
-    height: 40px;
-    width: 40px;
+    height: 56px;
+    width: 56px;
     padding: 3px;
     transition: ease 0.3s;
     z-index: 2;
-    background-color: #087E8B;
+    background-color: #343a40;
     border: 0;
     outline: none;
   }
@@ -39,7 +39,7 @@
   }
 
   #menu-button:hover span {
-    color: #087e8b;
+    color: #343a40;
   }
 
 </style>
