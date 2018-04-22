@@ -1,6 +1,6 @@
 from django.forms import ModelForm, PasswordInput, CharField
 
-from recipes.models import User
+from recipes.models import User, Medicine, MedicineType, MedicineName
 
 
 class UserForm(ModelForm):
@@ -29,3 +29,27 @@ class LoginForm(ModelForm):
         model = User
         fields = ['email', 'password']
     password = CharField(widget=PasswordInput())
+
+#Формы для добавления лекарств
+class MedicineForm(ModelForm):
+    class Meta:
+        model = Medicine
+        fields = ()
+
+    def save(self, m1, m2, *args, **kwargs):
+        instance = self.instance
+        instance.medicine_name = m2
+        instance.medicine_type = m1
+        instance.save()
+        return super()
+
+
+class MedicineTypeForm(ModelForm):
+    class Meta:
+        model = MedicineType
+        fields = ('type_name',)
+
+class MedicineNamesForm(ModelForm):
+    class Meta:
+        model = MedicineName
+        fields = ('medicine_name', 'medicine_description','medicine_level',)
