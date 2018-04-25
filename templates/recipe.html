@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create recipe</title>
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+</head>
+<body>
+  <div>
+    {% csrf_token %}
+    <label for="patient_initials">ФИО пациента</label>
+    <input type="text" name="patient_initials" id="patient_initials">
+    <label for="patient_email">email пациента</label>
+    <input type="email" name="patient_email" id="patient_email">
+    <label for="policy_number">Номер полиса</label>
+    <input type="text" name="medicine_policy_number" id="policy_number">
+    <label for="card_number">Номер карты</label>
+    <input type="text" name="medicine_card_number" id="card_number">
+    <label for="age">Возраст</label>
+    <input type="number" name="patient_age" id="age" min="0">
+    <p>Выписка препаратов</p>
+    <div id="medicines_container">
+      <div id="medicine_1">
+        <p>Препарат 1</p>
+        <label for="medicine_id_1">id препарата</label>
+        <input type="text" id="medicine_id_1">
+        <label for="dosage_1">доза препарата</label>
+        <input type="text" id="dosage_1">
+        <label for="frequency_1">частота</label>
+        <input type="text" id="frequency_1">
+        <label for="period_1">протяженность</label>
+        <input type="text" id="period_1">
+      </div>
+
+    </div>
+    <button id="add_medicine">+</button>
+    <label for="day_duration">Срок рецепта:</label>
+    <input type="number" id="day_duration" value="15" min="1">
+    <button id="submit">Сохранить</button>
+  </div>
+  <script type="application/javascript">
+    var medicine_count = 1;
+    $('#add_medicine').click(function () {
+      medicine_count++;
+      $("#medicines_container").append(
+        '<div id="medicine_'+ medicine_count +'">\n' +
+        '        <p>Препарат '+ medicine_count+'</p>\n' +
+        '        <label for="medicine_id_'+ medicine_count+'">id препарата</label>\n' +
+        '        <input type="text" id="medicine_id_'+ medicine_count+'">\n' +
+        '        <label for="dosage_'+ medicine_count+'">доза препарата</label>\n' +
+        '        <input type="text" id="dosage_'+ medicine_count+'">\n' +
+        '        <label for="frequency_'+ medicine_count+'">частота</label>\n' +
+        '        <input type="text" id="frequency_'+ medicine_count+'">\n' +
+        '        <label for="period_'+ medicine_count+'">протяженность</label>\n' +
+        '        <input type="text" id="period_'+ medicine_count+'">\n' +
+        '      </div>'
+      )
+    });
+    $('#submit').click(function () {
+      post = {
+        'patient_initials': $('#patient_initials').val(),
+        'patient_email': $('#patient_email').val(),
+        'medicine_policy_number': $('#policy_number').val(),
+        'medicine_card_number': $('#card_number').val(),
+        'patient_age': $('#age').val(),
+        'medicines': [],
+        'day_duration': $('#day_duration').val()
+      };
+      for (let i=1; i <= medicine_count; i++) {
+        let medicine = {
+          'medicine_id': $('#medicine_id_' + i).val(),
+          'dosage': $('#dosage_' + i).val(),
+          'frequency': $('#frequency_' + i).val(),
+          'period': $('#period_' + i).val()
+        };
+        post['medicines'].push(medicine)
+      }
+      console.log(post);
+      post['csrf_token'] = $('input[name=csrfmiddlewaretoken]').val();
+      $.ajax({
+        url:'/api/recipes/new',
+        type:"POST",
+        data: JSON.stringify(post),
+        success: success,
+        error: function (request, textStatus, errorThrown) {
+          alert(textStatus);
+        }
+      });
+
+
+
+    });
+    function success(data) {
+      if (data['status'] == 'success')
+          document.location.href = '/api/recipes';
+      else alert(data['error'])
+    }
+
+    $.ajaxSetup({
+       beforeSend: function(xhr, settings) {
+           function getCookie(name) {
+               var cookieValue = null;
+               if (document.cookie && document.cookie != '') {
+                   var cookies = document.cookie.split(';');
+                   for (var i = 0; i < cookies.length; i++) {
+                       var cookie = jQuery.trim(cookies[i]);
+                       // Does this cookie string begin with the name we want?
+                   if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                       cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                       break;
+                   }
+               }
+           }
+           return cookieValue;
+           }
+           if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+               // Only send the token to relative URLs i.e. locally.
+               xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+           }
+       }
+});
+  </script>
+</body>
+</html>
+<!--    {
+        'patient_initials': '...',
+        'patient_email': '...',
+        'medicine_policy_number': '...',
+        'medicine_card_number':'...',
+        'patient_age': ...,
+        'day_duration': ...,
+        'medicines': [
+            {
+              'medicine_id': ...,
+              'dosage': '...',
+              'frequency': '...',
+              'period': '...'
+            }
+        ]
+
+    }
+-->

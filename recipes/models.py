@@ -60,10 +60,16 @@ class Pharmacy(models.Model):
     pharmacy_name = models.CharField(max_length=20)
     pharmacy_address = models.TextField()
 
+    def __str__(self):
+        return self.pharmacy_name
+
 
 class Apothecary(models.Model):
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{} - {}'.format(self.user.email, self.pharmacy.pharmacy_name)
 
 
 class MedicineRequestStatus(models.Model):
@@ -103,9 +109,9 @@ class MedicineRequest(models.Model):
     medicine_dosage = models.ForeignKey(MedicineDosage, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     medicine_count = models.SmallIntegerField(default=0)
-    given_medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, null=True)
-    request_confirmation_time = models.DateTimeField(null=True)
-    apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE, null=True)
+    given_medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, null=True, blank=True)
+    request_confirmation_time = models.DateTimeField(null=True, blank=True)
+    apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE, null=True, blank=True)
 
 
 class MedicinesPharmacies(models.Model):
