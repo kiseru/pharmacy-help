@@ -1,8 +1,6 @@
 <template>
   <div>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <span class="navbar-brand">Pharmacy Help</span>
-    </nav>
+    <patient-header/>
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-4 align-self-center form-group">
@@ -20,11 +18,13 @@
 </template>
 
 <script>
+  import PatientHeader from "./header/PatientHeader";
   import RecipeCard from "./partials/RecipeCard";
 
   export default {
     name: "PatientRecipes",
     components: {
+      PatientHeader,
       RecipeCard
     },
     data() {
