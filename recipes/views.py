@@ -56,6 +56,33 @@ def do_login(request):
         return render(request, 'index.html')
 
 
+@login_not_required()
+def do_login_ajax(request):
+    if request.method == 'POST' and request.is_ajax():
+        data = json.loads(request.body.decode('utf-8'))
+        error = None
+        if 'email' in data and 'password' in data:
+            user = authenticate(username=data['email'], password=data['password'])
+            if user is not None and user.is_active:
+                login(request, user)
+                return HttpResponse(json.dumps({
+                  'status': 'success',
+                  'data': None,
+                  'error': error
+                }, ensure_ascii=False), content_type='application/json')
+            else:
+                error = 'not_found'
+        else:
+            error = 'invalid_data'
+        return HttpResponse(json.dumps({
+                  'status': 'fail',
+                  'data': None,
+                  'error': error
+                }, ensure_ascii=False), content_type='application/json')
+    else:
+        return render(request, 'recipes/test_login.html')
+    
+
 @login_required(login_url=reverse_lazy('home'))
 def profile(request):
     return render(request, 'index.html')

@@ -7,6 +7,7 @@ urlpatterns = [
     url('^$', do_login, name='home'),
     url('^login$', do_login, name='login'),
     url('^logout/', do_logout, name='logout'),
+    url('^api/login', do_login_ajax, name='login_ajax'),
     url('^api/user/', user_info, name='user_info'),
     url('^api/test_user_info/', test_user_info, name='test_user_info'),
     url('^api/recipes/$', get_recipes_view, name='recipes'),
