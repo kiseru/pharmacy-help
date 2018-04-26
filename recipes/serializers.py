@@ -29,7 +29,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 class MedicineRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicineRequest
-        fields = ['is_accepted', 'medicine_name', 'medicine_frequency', 'medicine_dosage', 'medicine_period']
+        fields = ['id', 'medicine_name_id', 'is_accepted', 'medicine_name', 'medicine_frequency', 'medicine_dosage', 'medicine_period']
 
 
 class RecipeFullSerializer(serializers.ModelSerializer):
@@ -37,10 +37,11 @@ class RecipeFullSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'doctor_initials', 'doctor_email', 'patient_initials', 'patient_email',
                   'date', 'day_duration', 'patient_age', 'medicine_card_number', 'medicine_policy_number', 'requests')
-    doctor_initials = CharField(source='get_doctor_initials')
-    doctor_email = CharField(source='get_doctor_email')
-    date = CharField(source='get_date_str')
-    requests = MedicineRequestSerializer(many=True)
+    id = CharField(source='token')
+    doctor_initials = CharField(source='get_doctor_initials', required=False)
+    doctor_email = CharField(source='get_doctor_email', required=False)
+    date = CharField(source='get_date_str', required=False)
+    requests = MedicineRequestSerializer(many=True, required=False)
 
 
 class UserSerializer(serializers.ModelSerializer):
