@@ -30,6 +30,7 @@ class MedicineRequestSerializer(JsonSerializer):
     @staticmethod
     def get_json(object: MedicineRequest):
         result = dict()
+        result['id'] = object.medicine_dosage.medicine.id
         result['is_accepted'] = object.medicine_count > 0
         result['medicine_name'] = object.medicine_dosage.medicine.medicine_name
         result['medicine_frequency'] = object.medicine_dosage.frequency

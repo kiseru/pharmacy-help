@@ -96,11 +96,12 @@ def serve_recipe(medicines, recipe, apothecary):
                 medicine_request.request_confirmation_time = timezone.now()
                 medicine_request.given_medicine_id = m['medicine_id']
                 pharmacy = apothecary.pharmacy
-                good = pharmacy.medicinespharmacies_set.filter(medicine_id=m['medicine_id'])
-                if good.count() >= m['medicine_count']:
-                    if good.all()[0].count:
-                        good.all()[0].count -= m['medicine_count']
-                        MedicinesPharmacies.save(good.all()[0])
+                goods = pharmacy.medicinespharmacies_set.filter(medicine_id=m['medicine_id'])
+                if goods.count():
+                    good = goods.all()[0]
+                    if good.count >= m['medicine_count']:
+                        good.count -= m['medicine_count']
+                        MedicinesPharmacies.save(good)
                     else:
                         raise Exception('invalid_data')
                 else:
