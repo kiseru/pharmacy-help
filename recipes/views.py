@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.http import *
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -9,14 +10,17 @@ from django.views.generic import TemplateView
 from django.views.generic.list import BaseListView
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
-from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
+from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
+from recipes.serializers import RecipeSerializerFull
+from recipes.services import serve_recipe
+
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
-
 import json
 import traceback
+
 
 
 @login_required(login_url=reverse_lazy('home'))
@@ -229,3 +233,46 @@ def get_medicine_json(medicinepharmacy):
         'name': medicinepharmacy.medicine.medicine_name.medicine_name,
         'type': medicinepharmacy.medicine.medicine_type.type_name,
     }
+
+
+@login_required(login_url=reverse_lazy('home'))
+def serve_recipe_view(request, id):
+    recipes = Recipe.objects.filter(token=id)
+    if recipes.count() > 0:
+        recipe = recipes.all()[0]
+        if request.method == 'GET':
+            if get_role(request.user) == 'doctor':
+                if recipe.doctor.user.id != request.user.id:
+                    return HttpResponseForbidden()
+            return HttpResponse(json.dumps(
+                {
+                    'status': 'success',
+                    'error': None,
+                    'data': RecipeSerializerFull.get_json(recipe)
+                }, ensure_ascii=False), content_type='application/json', charset='utf-8')
+        else:
+            if get_role(request.user) == 'apothecary':
+                try:
+                    medicines = json.loads(request.body.decode('utf-8'))
+                    print(medicines)
+                    serve_recipe(medicines, recipe, request.user.apothecary_set.all()[0])
+                    response = {
+                      'status': 'success',
+                    }
+                    return JsonResponse(response)
+                except Exception as e:
+                    traceback.print_exc()
+                    response = {
+                      'status': 'fail',
+                      'error': str(e),
+                    }
+                    return JsonResponse(response)
+            else:
+                return HttpResponseForbidden()
+    else:
+        response = {
+            'status': 'fail',
+            'error': 'not_found',
+            'data': None
+        }
+        return JsonResponse(response)
