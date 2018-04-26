@@ -1,9 +1,11 @@
 <template>
-  <div class="recipe">
-    <div class="id">ID: {{ recipe.id }}</div>
-    <div class="recipe-man-name">Пациент: {{ recipe.patientName }}</div>
-    <div class="recipe-man-name">Доктор: {{ recipe.doctorName }}</div>
-    <div class="recipe-date">{{ recipe.date }}</div>
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">ID: {{ recipe.id }}</div>
+      <div class="card-subtitle mb-2 text-muted">{{ recipe.date }}</div>
+      <div class="card-text">Пациент: {{ recipe.patientName }}</div>
+      <div class="card-text">Доктор: {{ recipe.doctorName }}</div>
+    </div>
   </div>
 </template>
 
@@ -41,5 +43,9 @@
       font-size: 18px;
       text-align: left;
     }
+  }
+
+  .card {
+    margin: 10px;
   }
 </style>

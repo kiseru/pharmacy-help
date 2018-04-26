@@ -1,13 +1,17 @@
 <template>
   <div>
-    <div id="search-block">
-      <label for="search-input">Найти</label><br/>
-      <input type="text" id="search-input" v-model="searchText">
-    </div>
-    <div id="goods-cards">
-      <new-good-card/>
-      <div v-for="medicine in foundMedicines">
-        <good-card v-bind:medicine="medicine"></good-card>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-4 align-self-center form-group">
+          <label for="search-input">Найти</label><br/>
+          <input type="text" id="search-input" class="form-control" v-model="searchText">
+        </div>
+      </div>
+      <div id="goods-cards">
+        <new-good-card/>
+        <div v-for="medicine in foundMedicines">
+          <good-card v-bind:medicine="medicine"></good-card>
+        </div>
       </div>
     </div>
   </div>
@@ -28,7 +32,43 @@
     data() {
       return {
         searchText: "",
-        medicines: []
+        medicines: [
+          {
+            name: "asdfasdf",
+            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
+            type: "asdfasdf",
+            count: 123,
+            price: 1234
+          },
+          {
+            name: "asdfasdf",
+            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
+            type: "asdfasdf",
+            count: 123,
+            price: 1234
+          },
+          {
+            name: "asdfasdf",
+            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
+            type: "asdfasdf",
+            count: 123,
+            price: 1234
+          },
+          {
+            name: "asdfasdf",
+            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
+            type: "asdfasdf",
+            count: 123,
+            price: 1234
+          },
+          {
+            name: "asdfasdf",
+            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
+            type: "asdfasdf",
+            count: 123,
+            price: 1234
+          }
+        ]
       }
     },
     computed: {
@@ -41,14 +81,14 @@
       }
     },
     beforeMount() {
-      axios.get("/api/medicines")
-        .then(response => this.medicines = response.data)
-        .catch(error => this.medicines = []);
+      // axios.get("/api/medicines")
+      //   .then(response => this.medicines = response.data)
+      //   .catch(error => this.medicines = []);
     }
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
   #goods-cards {
     display: grid;
     margin: 10px auto;
@@ -99,5 +139,13 @@
   #search-block label {
     font-size: 25px;
     font-weight: normal;
+  }
+
+  .container {
+    margin-top: 20px;
+
+    .form-group {
+      text-align: center;
+    }
   }
 </style>

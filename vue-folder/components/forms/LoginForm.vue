@@ -1,5 +1,7 @@
 <template>
-  <app-form header="Войти" button-name="Войти" action="/login" v-bind:inputs="inputs"/>
+  <div>
+    <app-form header="Войти" button-name="Войти" action="/login" v-bind:inputs="inputs"/>
+  </div>
 </template>
 
 <script>
@@ -33,7 +35,7 @@
 </script>
 
 <style lang="less" scoped>
-  .form {
+  div {
     margin-top: 200px !important;
   }
 </style>

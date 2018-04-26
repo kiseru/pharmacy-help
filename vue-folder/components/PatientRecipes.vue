@@ -1,6 +1,6 @@
 <template>
   <div>
-    <apothecary-header/>
+    <patient-header/>
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-4 align-self-center form-group">
@@ -18,54 +18,38 @@
 </template>
 
 <script>
-  import axios from "axios";
-
-  import ApothecaryHeader from "./header/ApothecaryHeader";
-  import AppInput from "./partials/AppInput";
+  import PatientHeader from "./header/PatientHeader";
   import RecipeCard from "./partials/RecipeCard";
 
   export default {
-    name: "Recipes",
+    name: "PatientRecipes",
     components: {
-      RecipeCard,
-      AppInput,
-      ApothecaryHeader
+      PatientHeader,
+      RecipeCard
     },
     data() {
       return {
         searchText: "",
         recipes: [
           {
-            id: 1,
-            patientName: "asdfasdf",
-            doctorName: "asdfasdf",
-            date: "24.02.1994"
+            id: "asdfadfa",
+            patientName: "asdfasdfas",
+            doctorName: "adadf",
+            date: "24.02.2991"
           },
           {
-            id: 1,
-            patientName: "asdfasdf",
-            doctorName: "asdfasdf",
-            date: "24.02.1994"
-          },
-          {
-            id: 1,
-            patientName: "asdfasdf",
-            doctorName: "asdfasdf",
-            date: "24.02.1994"
+            id: "asdfadfa",
+            patientName: "asdfasdfas",
+            doctorName: "adadf",
+            date: "24.02.2991"
           }
         ]
       }
-    },
-    beforeMount() {
-      // axios.get("/api/recipes?id=" + this.searchText)
-      //   .then(response => this.recipes = response.data)
-      //   .catch(error => this.recipes = [])
     }
   }
 </script>
 
 <style lang="less" scoped>
-
   .container {
     margin-top: 20px;
 
