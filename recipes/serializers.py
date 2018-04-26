@@ -1,5 +1,8 @@
+from rest_framework.fields import CharField
+
 from recipes.auth import *
-from recipes.models import Recipe, MedicineRequest
+from recipes.models import Recipe, MedicineRequest, User
+from rest_framework import routers, serializers, viewsets
 
 
 class JsonSerializer:
@@ -9,9 +12,9 @@ class JsonSerializer:
 
 
 def serialize_user(user, errors: list):
-    result = UserSerializer.get_json(user)
-    result['error'] = None if not errors else ''.join([''.join([j[1][0]['message'] for j in i.items()]) for i in errors])
-    return result
+    result = UserSerializer(instance=user)
+    result.data['error'] = None if not errors else ''.join([''.join([j[1][0]['message'] for j in i.items()]) for i in errors])
+    return result.data
 
 
 class RecipeSerializerShort(JsonSerializer):
@@ -58,15 +61,23 @@ class RecipeSerializerFull(JsonSerializer):
         return recipe
 
 
-class UserSerializer(JsonSerializer):
-    @staticmethod
-    def get_json(object):
-        role = get_role(object)
-        return {
-          'id': object.id,
-          'email': object.email,
-          'last_name': object.last_name,
-          'first_name': object.first_name,
-          'phone_number': object.phone_number,
-          'role': role,
-        }
+# class UserSerializer(JsonSerializer):
+#     @staticmethod
+#     def get_json(object):
+#         role = get_role(object)
+#         return {
+#           'id': object.id,
+#           'email': object.email,
+#           'last_name': object.last_name,
+#           'first_name': object.first_name,
+#           'phone_number': object.phone_number,
+#           'role': role,
+#         }
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'last_name', 'first_name', 'phone_number', 'role')
+    
+
