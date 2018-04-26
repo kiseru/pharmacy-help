@@ -95,9 +95,9 @@ def serve_recipe(medicines, recipe, apothecary):
                 medicine_request.given_medicine_id = m['medicine_id']
                 pharmacy = apothecary.pharmacy
                 good = pharmacy.medicinespharmacies_set.filter(medicine_id=m['medicine_id'])
-                if good.count():
+                if good.count() >= m['medicine_count']:
                     if good.all()[0].count:
-                        good.all()[0].count -= 1
+                        good.all()[0].count -= m['medicine_count']
                         MedicinesPharmacies.save(good.all()[0])
                     else:
                         raise Exception('invalid_data')
