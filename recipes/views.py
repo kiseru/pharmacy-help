@@ -6,18 +6,17 @@ from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
-from django.views.generic.list import BaseListView
-from rest_framework.decorators import permission_classes
 from rest_framework.renderers import JSONRenderer
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, permissions
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
-from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort, UserSerializer
+from recipes.serializers import serialize_user, JsonSerializer, RecipeShortSerializer, UserSerializer
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 
@@ -107,47 +106,47 @@ def add_recipe(request):
 
 
 # нафиг пока не надо
-class ListJsonView(BaseListView):
-    query_param = 'query'
-    serializer = JsonSerializer
-
-    def get_json(self, object):
-        return self.serializer.get_json(object)
-
-    def filter_query_set(self, query):
-        return self.queryset
-
-    def get(self, request, *args, **kwargs):
-        if self.query_param:
-            if self.query_param in request.GET:
-                query_param_value = request.GET[self.query_param]
-            else:
-                query_param_value = None
-            self.queryset = self.filter_query_set(query_param_value)
-            paginator, page, queryset, is_paginated = self.paginate_queryset(self.queryset, self.paginate_by)
-            data = [self.get_json(i) for i in queryset]
-            result = {
-                'has_prev': page.has_previous(),
-                'has_next': page.has_next(),
-                'object_list': data,
-                'page_number': paginator.num_pages,
-            }
-            return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
-        else:
-            raise Exception("Field 'query_param' should be defined")
+# class ListJsonView(BaseListView):
+#     query_param = 'query'
+#     serializer = JsonSerializer
+#
+#     def get_json(self, object):
+#         return self.serializer.get_json(object)
+#
+#     def filter_query_set(self, query):
+#         return self.queryset
+#
+#     def get(self, request, *args, **kwargs):
+#         if self.query_param:
+#             if self.query_param in request.GET:
+#                 query_param_value = request.GET[self.query_param]
+#             else:
+#                 query_param_value = None
+#             self.queryset = self.filter_query_set(query_param_value)
+#             paginator, page, queryset, is_paginated = self.paginate_queryset(self.queryset, self.paginate_by)
+#             data = [self.get_json(i) for i in queryset]
+#             result = {
+#                 'has_prev': page.has_previous(),
+#                 'has_next': page.has_next(),
+#                 'object_list': data,
+#                 'page_number': paginator.num_pages,
+#             }
+#             return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
+#         else:
+#             raise Exception("Field 'query_param' should be defined")
 
 
 # и это не надо
-@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
-@method_decorator(has_role('apothecary'), name='dispatch')
-class RecipesListJsonView(ListJsonView):
-    paginate_by = 10
-    model = Recipe
-    ordering = '-date'
-    serializer = RecipeSerializerShort
-
-    def filter_query_set(self, query):
-        return get_recipes(query)
+# @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+# @method_decorator(has_role('apothecary'), name='dispatch')
+# class RecipesListJsonView(ListJsonView):
+#     paginate_by = 10
+#     model = Recipe
+#     ordering = '-date'
+#     serializer = RecipeSerializerShort
+#
+#     def filter_query_set(self, query):
+#         return get_recipes(query)
 
 
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
@@ -167,27 +166,27 @@ class TemplateViewForDoctor(TemplateView):
     pass
 
 
-@login_required(login_url=reverse_lazy('home'))
-def get_recipes_view(request):
-    role = get_role(request.user)
-    if role == 'apothecary':
-        return get_recipes_for_apothecary(request)
-    elif role == 'doctor':
-        return get_recipes_for_doctor(request)
-    
-
-def get_recipes_for_apothecary(request):
-    token = request.GET['id'] if 'id' in request.GET else ''
-    queryset = get_recipes(token).order_by('-date')[:10]
-    result = [RecipeSerializerShort.get_json(i) for i in queryset]
-    return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
+# @login_required(login_url=reverse_lazy('home'))
+# def get_recipes_view(request):
+#     role = get_role(request.user)
+#     if role == 'apothecary':
+#         return get_recipes_for_apothecary(request)
+#     elif role == 'doctor':
+#         return get_recipes_for_doctor(request)
 
 
-def get_recipes_for_doctor(request):
-    token = request.GET['id'] if 'id' in request.GET else ''
-    queryset = get_recipes_of_doctor(request.user.doctor_set.all()[0], token).order_by('-date')[:10]
-    result = [RecipeSerializerShort.get_json(i) for i in queryset]
-    return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
+# def get_recipes_for_apothecary(request):
+#     token = request.GET['id'] if 'id' in request.GET else ''
+#     queryset = get_recipes(token).order_by('-date')[:10]
+#     result = [RecipeShortSerializer(i).data for i in queryset]
+#     return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
+
+
+# def get_recipes_for_doctor(request):
+#     token = request.GET['id'] if 'id' in request.GET else ''
+#     queryset = get_recipes_of_doctor(request.user.doctor_set.all()[0], token).order_by('-date')[:10]
+#     result = [RecipeShortSerializer(i).data for i in queryset]
+#     return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
 
 
 def add_medicine(request):
@@ -252,3 +251,18 @@ class UserInfoView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.data.update({"error": serializer.errors}), status=status.HTTP_400_BAD_REQUEST)
+
+
+class RecipesViewSet(ReadOnlyModelViewSet):
+    renderer_classes = (JSONRenderer,)
+    
+    queryset = None
+    serializer_class = RecipeShortSerializer
+
+    def list(self, request, *args, **kwargs):
+        token = request.GET['id'] if 'id' in request.GET else ''
+        if request.user.role is 'doctor':
+            self.queryset = get_recipes_of_doctor(request.user.doctor_set.all()[0], token).order_by('-date')[:10]
+        else:
+            self.queryset = get_recipes(token).order_by('-date')[:10]
+        return super().list(request, *args, **kwargs)

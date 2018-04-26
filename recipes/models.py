@@ -35,13 +35,16 @@ class User(AbstractUser):
     @property
     def role(self):
         return get_role(self)
-
+    
 
 class Doctor(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.email
+    
+    def get_initials(self):
+        return str(self.user)
 
 
 class Recipe(models.Model):
@@ -55,8 +58,15 @@ class Recipe(models.Model):
     medicine_card_number = models.CharField(max_length=10, null=True)
     medicine_policy_number = models.CharField(max_length=16, null=True)
 
+    @property
+    def get_date_str(self):
+        return self.date.strftime('%d.%m.%Y')
+    
     def __str__(self):
         return '{} - {} - {}'.format(self.date, self.patient_email, self.doctor.user.email)
+    
+    def get_doctor_initials(self):
+        return self.doctor.get_initials()
 
 
 class Pharmacy(models.Model):

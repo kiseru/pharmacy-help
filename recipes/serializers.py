@@ -18,17 +18,27 @@ def serialize_user(user, errors: list):
     return result.data
 
 
-class RecipeSerializerShort(JsonSerializer):
-    @staticmethod
-    def get_json(object: Recipe):
-        recipe = dict()
-        recipe['id'] = object.token
-        recipe['doctorName'] = object.doctor.user.last_name + ' ' + object.doctor.user.first_name
-        recipe['patientName'] = object.patient_initials
-        # recipe['patient_email'] = object.patient_email
-        recipe['date'] = object.date.strftime('%d.%m.%Y')
-        return recipe
+# class RecipeSerializerShort(JsonSerializer):
+#     @staticmethod
+#     def get_json(object: Recipe):
+#         recipe = dict()
+#         recipe['id'] = object.token
+#         recipe['doctorName'] = object.doctor.user.last_name + ' ' + object.doctor.user.first_name
+#         recipe['patientName'] = object.patient_initials
+#         # recipe['patient_email'] = object.patient_email
+#         recipe['date'] = object.date.strftime('%d.%m.%Y')
+#         return recipe
 
+
+class RecipeShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'doctorName', 'patientName', 'patient_email', 'date')
+    id = CharField(source='token')
+    doctorName = CharField(source='get_doctor_initials')
+    patientName = CharField(source='patient_initials')
+    date = CharField(source='get_date_str')
+    
 
 class MedicineRequestSerializer(JsonSerializer):
     @staticmethod
