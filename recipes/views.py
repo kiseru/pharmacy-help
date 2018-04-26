@@ -16,7 +16,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
-from recipes.serializers import serialize_user, JsonSerializer, RecipeShortSerializer, UserSerializer
+from recipes.serializers import serialize_user, JsonSerializer, RecipeShortSerializer, UserSerializer, RecipeFullSerializer
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 
@@ -254,7 +254,7 @@ class UserInfoView(APIView):
 
 
 class RecipesViewSet(ReadOnlyModelViewSet):
-    renderer_classes = (JSONRenderer,)
+    # renderer_classes = (JSONRenderer,)
     
     queryset = None
     serializer_class = RecipeShortSerializer
