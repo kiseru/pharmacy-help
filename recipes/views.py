@@ -7,11 +7,17 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django.views.generic.list import BaseListView
+from rest_framework.decorators import permission_classes
+from rest_framework.renderers import JSONRenderer
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status, permissions
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
-from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
+from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort, UserSerializer
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 
@@ -229,3 +235,20 @@ def get_medicine_json(medicinepharmacy):
         'name': medicinepharmacy.medicine.medicine_name.medicine_name,
         'type': medicinepharmacy.medicine.medicine_type.type_name,
     }
+
+
+class UserInfoView(APIView):
+    renderer_classes = (JSONRenderer,)
+    
+    def get(self, request, format=None):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        data = request.POST
+        serializer = UserSerializer(instance=request.user, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.data.update({"error": serializer.errors}), status=status.HTTP_400_BAD_REQUEST)

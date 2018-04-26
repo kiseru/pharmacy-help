@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from rest_framework.fields import CharField
 
 from recipes.auth import *
@@ -79,5 +80,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'email', 'last_name', 'first_name', 'phone_number', 'role')
+        
+    def save(self, **kwargs):
+        super().save(**kwargs)
     
 
