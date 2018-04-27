@@ -140,9 +140,13 @@ def do_logout(request):
 
 
 @method_decorator(has_role('doctor'), name='create')
+@method_decorator(has_role('apothecary'), name='update')
 @method_decorator(response_to_api_format, name='create')
+@method_decorator(response_to_api_format, name='update')
+@method_decorator(response_to_api_format, name='retrieve')
 class RecipeCreationViewSet(mixins.CreateModelMixin,
                             mixins.RetrieveModelMixin,
+                            mixins.UpdateModelMixin,
                             GenericViewSet):
     renderer_classes = (JSONRenderer,)
     
@@ -162,6 +166,14 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
         create_recipe(recipe, data)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        json_str = list(request.POST.dict().keys())[0]
+        medicines = json.loads(json_str)
+        print(medicines)
+        serve_recipe(medicines, instance, request.user.apothecary_set.all()[0])
+        return Response(status=status.HTTP_200_OK)
 
 
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
@@ -261,45 +273,4 @@ class RecipesViewSet(ReadOnlyModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
-@login_required(login_url=reverse_lazy('home'))
-def serve_recipe_view(request, id):
-    recipes = Recipe.objects.filter(token=id)
-    if recipes.count() > 0:
-        recipe = recipes.all()[0]
-        if request.method == 'GET':
-            if get_role(request.user) == 'doctor':
-                if recipe.doctor.user.id != request.user.id:
-                    return HttpResponseForbidden()
-            return HttpResponse(json.dumps(
-                {
-                    'status': 'success',
-                    'error': None,
-                    'data': RecipeFullSerializer(recipe).data
-                }, ensure_ascii=False), content_type='application/json', charset='utf-8')
-        else:
-            if get_role(request.user) == 'apothecary':
-                try:
-                    medicines = json.loads(request.body.decode('utf-8'))
-                    print(medicines)
-                    serve_recipe(medicines, recipe, request.user.apothecary_set.all()[0])
-                    response = {
-                      'status': 'success',
-                    }
-                    return JsonResponse(response)
-                except Exception as e:
-                    traceback.print_exc()
-                    response = {
-                      'status': 'fail',
-                      'error': str(e),
-                    }
-                    return JsonResponse(response)
-            else:
-                return HttpResponseForbidden()
-    else:
-        response = {
-            'status': 'fail',
-            'error': 'not_found',
-            'data': None
-        }
-        return JsonResponse(response)
 
