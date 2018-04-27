@@ -1,3 +1,4 @@
+import rest_framework
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import *
@@ -7,33 +8,64 @@ from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
-from django.views.generic.list import BaseListView
+from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes
+from rest_framework.renderers import JSONRenderer
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status, permissions, mixins
+from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe
-from recipes.serializers import RecipeSerializerFull
+from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer
 from recipes.services import serve_recipe
-
-from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 import json
 import traceback
 
 
-
-@login_required(login_url=reverse_lazy('home'))
-def user_info(request):
-    errors = []
-    if request.method == 'POST':
-        form = UserForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-        else:
-            errors = json.loads(form.errors.as_json())
-            errors = errors if isinstance(errors, list) else [errors, ]
-    return JsonResponse(serialize_user(request.user, errors))
+def response_to_api_format(func):
+    def new_func(request, *args, **kwargs):
+        try:
+            response = func(request, *args, **kwargs)
+            if response.__class__ != Response:
+                return response
+            if status.is_success(response.status_code):
+                new_response = {
+                  'status': 'success',
+                  'data': response.data,
+                  'error': None
+                }
+                response.data = new_response
+            elif status.is_client_error(response.status_code):
+                new_response = {
+                  'status': 'fail',
+                  'data': response.data,
+                  'error': 'invalid_data'
+                }
+                response.data = new_response
+            return response
+        except (rest_framework.exceptions.ValidationError, ValidationError, ObjectDoesNotExist):
+            traceback.print_exc()
+            new_response = {
+                'status': 'fail',
+                'data': None,
+                'error': 'invalid_data'
+            }
+            return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            traceback.print_exc()
+            new_response = {
+              'status': 'fail',
+              'error': str(e),
+              'data': None,
+            }
+            return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
+    return new_func
 
 
 @login_required(login_url=reverse_lazy('home'))
@@ -60,119 +92,67 @@ def do_login(request):
         return render(request, 'index.html')
 
 
-@login_not_required()
+@api_view(['GET', 'POST'])
+@permission_classes((permissions.AllowAny,))
+@renderer_classes((JSONRenderer,))
+@response_to_api_format
 def do_login_ajax(request):
     if request.method == 'POST' and request.is_ajax():
-        data = json.loads(request.body.decode('utf-8'))
-        error = None
+        json_str = list(request.POST.dict().keys())[0]
+        data = json.loads(json_str)
         if 'email' in data and 'password' in data:
             user = authenticate(username=data['email'], password=data['password'])
             if user is not None and user.is_active:
                 login(request, user)
-                return HttpResponse(json.dumps({
-                  'status': 'success',
-                  'data': None,
-                  'error': error
-                }, ensure_ascii=False), content_type='application/json')
+                return Response(status=status.HTTP_200_OK)
             else:
-                error = 'not_found'
+                raise Exception('not_found')
         else:
-            error = 'invalid_data'
-        return HttpResponse(json.dumps({
-                  'status': 'fail',
-                  'data': None,
-                  'error': error
-                }, ensure_ascii=False), content_type='application/json')
+            raise Exception('invalid_data')
     else:
         return render(request, 'recipes/test_login.html')
     
-
-@login_required(login_url=reverse_lazy('home'))
-def profile(request):
-    return render(request, 'index.html')
-
 
 def do_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('home'))
 
 
-@login_required(login_url=reverse_lazy('home'))
-@has_role('doctor')
-def add_recipe(request):
-    if request.is_ajax():
-        if request.method == 'POST':
-            try:
-                create_recipe(json.loads(request.body.decode('utf-8')), request.user)
-            except ValidationError:
-                traceback.print_exc()
-                response = {
-                    'status': 'fail',
-                    'error': 'invalid_data'
-                }
-                return JsonResponse(response)
-            except ObjectDoesNotExist:
-                traceback.print_exc()
-                response = {
-                  'status': 'fail',
-                  'error': 'invalid_data'
-                }
-                return JsonResponse(response)
-            except Exception as e:
-                traceback.print_exc()
-                response = {
-                  'status': 'fail',
-                  'error': str(e)
-                }
-                return JsonResponse(response)
-    response = {
-      'status': 'success'
-    }
-    return JsonResponse(response)
-
-
-# нафиг пока не надо
-class ListJsonView(BaseListView):
-    query_param = 'query'
-    serializer = JsonSerializer
-
-    def get_json(self, object):
-        return self.serializer.get_json(object)
-
-    def filter_query_set(self, query):
-        return self.queryset
-
-    def get(self, request, *args, **kwargs):
-        if self.query_param:
-            if self.query_param in request.GET:
-                query_param_value = request.GET[self.query_param]
-            else:
-                query_param_value = None
-            self.queryset = self.filter_query_set(query_param_value)
-            paginator, page, queryset, is_paginated = self.paginate_queryset(self.queryset, self.paginate_by)
-            data = [self.get_json(i) for i in queryset]
-            result = {
-                'has_prev': page.has_previous(),
-                'has_next': page.has_next(),
-                'object_list': data,
-                'page_number': paginator.num_pages,
-            }
-            return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
-        else:
-            raise Exception("Field 'query_param' should be defined")
-
-
-# и это не надо
-@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
-@method_decorator(has_role('apothecary'), name='dispatch')
-class RecipesListJsonView(ListJsonView):
-    paginate_by = 10
-    model = Recipe
-    ordering = '-date'
-    serializer = RecipeSerializerShort
-
-    def filter_query_set(self, query):
-        return get_recipes(query)
+@method_decorator(has_role('doctor'), name='create')
+@method_decorator(has_role('apothecary'), name='update')
+@method_decorator(response_to_api_format, name='create')
+@method_decorator(response_to_api_format, name='update')
+@method_decorator(response_to_api_format, name='retrieve')
+class RecipeCreationViewSet(mixins.CreateModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.UpdateModelMixin,
+                            GenericViewSet):
+    renderer_classes = (JSONRenderer,)
+    
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeFullSerializer
+    
+    lookup_field = 'token'
+    
+    def create(self, request, *args, **kwargs):
+        json_str = list(request.POST.dict().keys())[0]
+        data = json.loads(json_str)
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        print(serializer.is_valid())
+        # self.perform_create(serializer)
+        recipe = Recipe(**serializer.data, doctor=request.user.doctor_set.all()[0])
+        create_recipe(recipe, data)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        json_str = list(request.POST.dict().keys())[0]
+        medicines = json.loads(json_str)
+        print(medicines)
+        serve_recipe(medicines, instance, request.user.apothecary_set.all()[0])
+        return Response(status=status.HTTP_200_OK)
 
 
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
@@ -190,29 +170,6 @@ class TemplateViewForApothecary(TemplateView):
 @method_decorator(has_role('doctor'), name='dispatch')
 class TemplateViewForDoctor(TemplateView):
     pass
-
-
-@login_required(login_url=reverse_lazy('home'))
-def get_recipes_view(request):
-    role = get_role(request.user)
-    if role == 'apothecary':
-        return get_recipes_for_apothecary(request)
-    elif role == 'doctor':
-        return get_recipes_for_doctor(request)
-    
-
-def get_recipes_for_apothecary(request):
-    token = request.GET['id'] if 'id' in request.GET else ''
-    queryset = get_recipes(token).order_by('-date')[:10]
-    result = [RecipeSerializerShort.get_json(i) for i in queryset]
-    return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
-
-
-def get_recipes_for_doctor(request):
-    token = request.GET['id'] if 'id' in request.GET else ''
-    queryset = get_recipes_of_doctor(request.user.doctor_set.all()[0], token).order_by('-date')[:10]
-    result = [RecipeSerializerShort.get_json(i) for i in queryset]
-    return HttpResponse(json.dumps(result, ensure_ascii=False), content_type='application/json')
 
 
 def add_medicine(request):
@@ -262,44 +219,34 @@ def get_medicine_json(medicinepharmacy):
     }
 
 
-@login_required(login_url=reverse_lazy('home'))
-def serve_recipe_view(request, id):
-    recipes = Recipe.objects.filter(token=id)
-    if recipes.count() > 0:
-        recipe = recipes.all()[0]
-        if request.method == 'GET':
-            if get_role(request.user) == 'doctor':
-                if recipe.doctor.user.id != request.user.id:
-                    return HttpResponseForbidden()
-            return HttpResponse(json.dumps(
-                {
-                    'status': 'success',
-                    'error': None,
-                    'data': RecipeSerializerFull.get_json(recipe)
-                }, ensure_ascii=False), content_type='application/json', charset='utf-8')
+@method_decorator(response_to_api_format, name='post')
+class UserInfoView(APIView):
+    renderer_classes = (JSONRenderer,)
+    
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def post(self, request):
+        data = request.POST
+        serializer = UserSerializer(instance=request.user, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            if get_role(request.user) == 'apothecary':
-                try:
-                    medicines = json.loads(request.body.decode('utf-8'))
-                    print(medicines)
-                    serve_recipe(medicines, recipe, request.user.apothecary_set.all()[0])
-                    response = {
-                      'status': 'success',
-                    }
-                    return JsonResponse(response)
-                except Exception as e:
-                    traceback.print_exc()
-                    response = {
-                      'status': 'fail',
-                      'error': str(e),
-                    }
-                    return JsonResponse(response)
-            else:
-                return HttpResponseForbidden()
-    else:
-        response = {
-            'status': 'fail',
-            'error': 'not_found',
-            'data': None
-        }
-        return JsonResponse(response)
+            return Response(serializer.data.update({"error": serializer.errors}), status=status.HTTP_400_BAD_REQUEST)
+
+
+class RecipesViewSet(ReadOnlyModelViewSet):
+    renderer_classes = (JSONRenderer,)
+    
+    queryset = None
+    serializer_class = RecipeShortSerializer
+    
+    def list(self, request, *args, **kwargs):
+        token = request.GET['id'] if 'id' in request.GET else ''
+        if request.user.role is 'doctor':
+            self.queryset = get_recipes_of_doctor(request.user.doctor_set.all()[0], token).order_by('-date')[:10]
+        else:
+            self.queryset = get_recipes(token).order_by('-date')[:10]
+        return super().list(request, *args, **kwargs)

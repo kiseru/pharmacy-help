@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from recipes.managers import CustomUserManager
-
+from recipes.auth import  *
 
 class MedicineType(models.Model):
     type_name = models.CharField(max_length=50)
@@ -20,25 +20,31 @@ class User(AbstractUser):
 
     username = None
 
-
     REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'password']
     USERNAME_FIELD = 'email'
 
-    #def save(self, *args, **kwargs):
-    #    self.set_password(self.password)
-    #    super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.set_password(self.password)
+    #     super().save(*args, **kwargs)
 
     objects = CustomUserManager()
 
     def __str__(self):
         return '{0} {1}'.format(self.first_name, self.last_name)
-
+    
+    @property
+    def role(self):
+        return get_role(self)
+    
 
 class Doctor(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.email
+    
+    def get_initials(self):
+        return str(self.user)
 
 
 class Recipe(models.Model):
@@ -49,12 +55,25 @@ class Recipe(models.Model):
     token = models.TextField()
     day_duration = models.PositiveIntegerField(default=15)
     patient_age = models.PositiveSmallIntegerField()
-    medicine_card_number = models.CharField(max_length=10, null=True)
-    medicine_policy_number = models.CharField(max_length=16, null=True)
-
+    medicine_card_number = models.CharField(max_length=10, null=True, blank=True)
+    medicine_policy_number = models.CharField(max_length=16, null=True, blank=True)
+    
+    def get_date_str(self):
+        return self.date.strftime('%d.%m.%Y')
+    
     def __str__(self):
         return '{} - {} - {}'.format(self.date, self.patient_email, self.doctor.user.email)
-
+    
+    def get_doctor_initials(self):
+        return self.doctor.get_initials()
+    
+    def get_doctor_email(self):
+        return self.doctor.user.email
+    
+    @property
+    def requests(self):
+        return self.medicinerequest_set.all()
+    
 
 class Pharmacy(models.Model):
     pharmacy_name = models.CharField(max_length=20)
@@ -112,7 +131,31 @@ class MedicineRequest(models.Model):
     given_medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, null=True, blank=True)
     request_confirmation_time = models.DateTimeField(null=True, blank=True)
     apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE, null=True, blank=True)
+    
+    @property
+    def is_accepted(self):
+        return self.medicine_count > 0
 
+    @property
+    def medicine_frequency(self):
+        return self.medicine_dosage.frequency
+    
+    @property
+    def dosage(self):
+        return self.medicine_dosage.dosage
+    
+    @property
+    def medicine_period(self):
+        return self.medicine_dosage.period
+    
+    @property
+    def medicine_name(self):
+        return self.medicine_dosage.medicine.medicine_name
+
+    @property
+    def medicine_name_id(self):
+        return self.medicine_dosage.medicine.medicine_name.id
+    
 
 class MedicinesPharmacies(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
