@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
+from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes
 from rest_framework.renderers import JSONRenderer
 
 from rest_framework.response import Response
@@ -30,6 +31,8 @@ def response_to_api_format(func):
     def new_func(request, *args, **kwargs):
         try:
             response = func(request, *args, **kwargs)
+            if response.__class__ != Response:
+                return response
             if status.is_success(response.status_code):
                 new_response = {
                   'status': 'success',
@@ -66,19 +69,6 @@ def response_to_api_format(func):
 
 
 @login_required(login_url=reverse_lazy('home'))
-def user_info(request):
-    errors = []
-    if request.method == 'POST':
-        form = UserForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-        else:
-            errors = json.loads(form.errors.as_json())
-            errors = errors if isinstance(errors, list) else [errors, ]
-    return JsonResponse(serialize_user(request.user, errors))
-
-
-@login_required(login_url=reverse_lazy('home'))
 def test_user_info(request):
     return render(request, 'recipes/test_user_info.html', {'form': UserForm(instance=request.user)})
 
@@ -102,37 +92,26 @@ def do_login(request):
         return render(request, 'index.html')
 
 
-@login_not_required()
+@api_view(['GET', 'POST'])
+@permission_classes((permissions.AllowAny,))
+@renderer_classes((JSONRenderer,))
+@response_to_api_format
 def do_login_ajax(request):
     if request.method == 'POST' and request.is_ajax():
-        data = json.loads(request.body.decode('utf-8'))
-        error = None
+        json_str = list(request.POST.dict().keys())[0]
+        data = json.loads(json_str)
         if 'email' in data and 'password' in data:
             user = authenticate(username=data['email'], password=data['password'])
             if user is not None and user.is_active:
                 login(request, user)
-                return HttpResponse(json.dumps({
-                  'status': 'success',
-                  'data': None,
-                  'error': error
-                }, ensure_ascii=False), content_type='application/json')
+                return Response(status=status.HTTP_200_OK)
             else:
-                error = 'not_found'
+                raise Exception('not_found')
         else:
-            error = 'invalid_data'
-        return HttpResponse(json.dumps({
-                  'status': 'fail',
-                  'data': None,
-                  'error': error
-                }, ensure_ascii=False), content_type='application/json')
+            raise Exception('invalid_data')
     else:
         return render(request, 'recipes/test_login.html')
     
-
-@login_required(login_url=reverse_lazy('home'))
-def profile(request):
-    return render(request, 'index.html')
-
 
 def do_logout(request):
     logout(request)
@@ -271,6 +250,3 @@ class RecipesViewSet(ReadOnlyModelViewSet):
         else:
             self.queryset = get_recipes(token).order_by('-date')[:10]
         return super().list(request, *args, **kwargs)
-
-
-
