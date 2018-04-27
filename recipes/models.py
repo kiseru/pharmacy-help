@@ -55,8 +55,8 @@ class Recipe(models.Model):
     token = models.TextField()
     day_duration = models.PositiveIntegerField(default=15)
     patient_age = models.PositiveSmallIntegerField()
-    medicine_card_number = models.CharField(max_length=10, null=True)
-    medicine_policy_number = models.CharField(max_length=16, null=True)
+    medicine_card_number = models.CharField(max_length=10, null=True, blank=True)
+    medicine_policy_number = models.CharField(max_length=16, null=True, blank=True)
     
     def get_date_str(self):
         return self.date.strftime('%d.%m.%Y')

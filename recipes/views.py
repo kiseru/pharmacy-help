@@ -1,3 +1,4 @@
+import rest_framework
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
@@ -22,6 +23,45 @@ from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 import json
 import traceback
+
+
+def response_to_api_format(func):
+    def new_func(request, *args, **kwargs):
+        try:
+            response = func(request, *args, **kwargs)
+            if status.is_success(response.status_code):
+                new_response = {
+                  'status': 'success',
+                  'data': response.data,
+                  'error': None
+                }
+                response.data = new_response
+            elif status.is_client_error(response.status_code):
+                new_response = {
+                  'status': 'fail',
+                  'data': response.data,
+                  'error': 'invalid_data'
+                }
+                response.data = new_response
+            return response
+        except (rest_framework.exceptions.ValidationError, ValidationError, ObjectDoesNotExist):
+            traceback.print_exc()
+            new_response = {
+                'status': 'fail',
+                'data': None,
+                'error': 'invalid_data'
+            }
+            return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            traceback.print_exc()
+            new_response = {
+              'status': 'fail',
+              'error': str(e),
+              'data': None,
+            }
+            return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
+    return new_func
 
 
 @login_required(login_url=reverse_lazy('home'))
@@ -71,43 +111,11 @@ def do_logout(request):
     return HttpResponseRedirect(reverse('home'))
 
 
-# @login_required(login_url=reverse_lazy('home'))
-# @has_role('doctor')
-# def add_recipe(request):
-#     if request.is_ajax():
-#         if request.method == 'POST':
-#             try:
-#                 create_recipe(json.loads(request.body.decode('utf-8')), request.user)
-#             except ValidationError:
-#                 traceback.print_exc()
-#                 response = {
-#                     'status': 'fail',
-#                     'error': 'invalid_data'
-#                 }
-#                 return JsonResponse(response)
-#             except ObjectDoesNotExist:
-#                 traceback.print_exc()
-#                 response = {
-#                   'status': 'fail',
-#                   'error': 'invalid_data'
-#                 }
-#                 return JsonResponse(response)
-#             except Exception as e:
-#                 traceback.print_exc()
-#                 response = {
-#                   'status': 'fail',
-#                   'error': str(e)
-#                 }
-#                 return JsonResponse(response)
-#     response = {
-#       'status': 'success'
-#     }
-#     return JsonResponse(response)
-
-
+@method_decorator(has_role('doctor'), name='create')
+@method_decorator(response_to_api_format, name='create')
 class RecipeCreationViewSet(mixins.CreateModelMixin,
-                   mixins.RetrieveModelMixin,
-                   GenericViewSet):
+                            mixins.RetrieveModelMixin,
+                            GenericViewSet):
     renderer_classes = (JSONRenderer,)
     
     queryset = Recipe.objects.all()
@@ -120,6 +128,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
         data = json.loads(json_str)
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
+        print(serializer.is_valid())
         # self.perform_create(serializer)
         recipe = Recipe(**serializer.data, doctor=request.user.doctor_set.all()[0])
         create_recipe(recipe, data)
@@ -191,6 +200,7 @@ def get_medicine_json(medicinepharmacy):
     }
 
 
+@method_decorator(response_to_api_format, name='post')
 class UserInfoView(APIView):
     renderer_classes = (JSONRenderer,)
     
@@ -213,7 +223,7 @@ class RecipesViewSet(ReadOnlyModelViewSet):
     
     queryset = None
     serializer_class = RecipeShortSerializer
-
+    
     def list(self, request, *args, **kwargs):
         token = request.GET['id'] if 'id' in request.GET else ''
         if request.user.role is 'doctor':
