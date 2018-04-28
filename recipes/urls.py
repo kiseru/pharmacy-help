@@ -28,6 +28,7 @@ urlpatterns = [
     url('^doctor/', TemplateViewForDoctor.as_view(template_name='index.html')),
     url('^api/medicines/new/', add_medicine, name='add_medicine'),
     url('^api/medicines', get_medicine, name='medicine'),
+    url('^api/search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
     # url(r'^api/', include(router.urls)),
 ]
 

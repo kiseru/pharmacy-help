@@ -1,6 +1,6 @@
 from rest_framework.fields import CharField
 
-from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType
+from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType, MedicineName
 from rest_framework import serializers
 
 
@@ -59,9 +59,9 @@ class MedicineTypeSerializer(serializers.ModelSerializer):
         fields = ('id', 'type_name')
 
 
-class MedicineSerializer(serializers.ModelSerializer):
+class MedicineNameSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Medicine
+        model = MedicineName
         fields = ('id', 'medicine_name', 'medicine_types')
-    medicine_types = MedicineRequestSerializer(many=True)
+    medicine_types = MedicineTypeSerializer(many=True)
 
