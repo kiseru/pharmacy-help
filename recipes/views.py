@@ -203,6 +203,8 @@ def add_medicine(request):
 def get_medicine(request):
     pharmacy = request.user.apothecary_set.all()[0].pharmacy
     medicinepharmacies = pharmacy.medicinespharmacies_set.all()
+    if 'name_id' in request.GET:
+        medicinepharmacies = medicinepharmacies.filter(medicine__medicine_name__id=request.GET['name_id'])
     return HttpResponse(
         json.dumps([get_medicine_json(i) for i in medicinepharmacies], ensure_ascii=False),
         content_type='application/json'
