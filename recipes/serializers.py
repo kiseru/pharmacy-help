@@ -1,6 +1,6 @@
 from rest_framework.fields import CharField
 
-from recipes.models import Recipe, MedicineRequest, User
+from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType
 from rest_framework import serializers
 
 
@@ -51,5 +51,17 @@ class UserSerializer(serializers.ModelSerializer):
         
     def save(self, **kwargs):
         super().save(**kwargs)
-    
+        
+
+class MedicineTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicineType
+        fields = ('id', 'type_name')
+
+
+class MedicineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medicine
+        fields = ('id', 'medicine_name', 'medicine_types')
+    medicine_types = MedicineRequestSerializer(many=True)
 

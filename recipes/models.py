@@ -4,6 +4,7 @@ from django.db import models
 from recipes.managers import CustomUserManager
 from recipes.auth import  *
 
+
 class MedicineType(models.Model):
     type_name = models.CharField(max_length=50)
 
@@ -99,7 +100,11 @@ class MedicineName(models.Model):
     medicine_name = models.CharField(max_length=50)
     medicine_description = models.TextField()
     medicine_level = models.PositiveSmallIntegerField(default=0)
-
+    
+    @property
+    def medicine_types(self):
+        return MedicineType.objects.filter(medicine__medicine_name_id=self.id)
+    
     def __str__(self):
         return self.medicine_name
 
