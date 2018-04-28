@@ -18,8 +18,9 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
-from recipes.models import Recipe
-from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer
+from recipes.models import Recipe, MedicineName, MedicineType
+from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
+  MedicineNameSerializer, MedicineTypeSerializer
 from recipes.services import serve_recipe
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
@@ -202,6 +203,8 @@ def add_medicine(request):
 def get_medicine(request):
     pharmacy = request.user.apothecary_set.all()[0].pharmacy
     medicinepharmacies = pharmacy.medicinespharmacies_set.all()
+    if 'name_id' in request.GET:
+        medicinepharmacies = medicinepharmacies.filter(medicine__medicine_name__id=request.GET['name_id'])
     return HttpResponse(
         json.dumps([get_medicine_json(i) for i in medicinepharmacies], ensure_ascii=False),
         content_type='application/json'
@@ -250,3 +253,27 @@ class RecipesViewSet(ReadOnlyModelViewSet):
         else:
             self.queryset = get_recipes(token).order_by('-date')[:10]
         return super().list(request, *args, **kwargs)
+
+
+class SearchMedicineViewSet(ReadOnlyModelViewSet):
+    renderer_classes = (JSONRenderer,)
+    
+    queryset = MedicineName.objects.all()
+    serializer_class = MedicineNameSerializer
+    
+    def list(self, request, *args, **kwargs):
+        if 'medicine_name' in request.GET:
+            self.queryset = self.queryset.filter(medicine_name__icontains=request.GET['medicine_name'])
+        return super().list(request, *args, *kwargs)
+
+
+class SearchMedicineTypesViewSet(ReadOnlyModelViewSet):
+    renderer_classes = (JSONRenderer,)
+    
+    queryset = MedicineType.objects.all()
+    serializer_class = MedicineTypeSerializer
+    
+    def list(self, request, *args, **kwargs):
+        if 'type_name' in request.GET:
+            self.queryset = self.queryset.filter(type_name__icontains=request.GET['type_name'])
+        return super().list(request, *args, *kwargs)
