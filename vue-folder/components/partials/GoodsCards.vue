@@ -1,12 +1,7 @@
 <template>
   <div>
     <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-4 align-self-center form-group">
-          <label for="search-input">Найти</label><br/>
-          <input type="text" id="search-input" class="form-control" v-model="searchText">
-        </div>
-      </div>
+      <search-bar v-bind:search-obj="searchObj"/>
       <div id="goods-cards">
         <new-good-card/>
         <div v-for="medicine in foundMedicines">
@@ -22,16 +17,20 @@
 
   import GoodCard from "./GoodCard";
   import NewGoodCard from "./NewGoodCard";
+  import SearchBar from "./SearchBar";
 
   export default {
     name: "GoodsCards",
     components: {
       GoodCard,
-      NewGoodCard
+      NewGoodCard,
+      SearchBar
     },
     data() {
       return {
-        searchText: "",
+        searchObj: {
+          text: ""
+        },
         medicines: [
           {
             name: "asdfasdf",

@@ -2,12 +2,7 @@
   <div>
     <patient-header/>
     <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-4 align-self-center form-group">
-          <label for="search-input">Найти</label><br/>
-          <input type="text" id="search-input" class="form-control" v-model="searchText">
-        </div>
-      </div>
+      <search-bar  v-bind:search-obj="searchObj"/>
       <div id="recipes">
         <div v-for="recipe in recipes">
           <recipe-card v-bind:recipe="recipe"/>
@@ -20,16 +15,20 @@
 <script>
   import PatientHeader from "./header/PatientHeader";
   import RecipeCard from "./partials/RecipeCard";
+  import SearchBar from "./partials/SearchBar";
 
   export default {
     name: "PatientRecipes",
     components: {
       PatientHeader,
-      RecipeCard
+      RecipeCard,
+      SearchBar
     },
     data() {
       return {
-        searchText: "",
+        searchObj: {
+          text: ""
+        },
         recipes: [
           {
             id: "asdfadfa",

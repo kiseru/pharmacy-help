@@ -26,41 +26,24 @@ def get_recipes_of_doctor(doctor, query=''):
     
 
 @transaction.atomic
-def create_recipe(data: dict, user):
+def create_recipe(recipe, data: dict):
         flag = contains_highlevel_medicines(data['medicines'])
         if flag:
-            if not ('medicine_policy_number' in data
-                    and 'medicine_card_number' in data
-                    and data['medicine_policy_number']
-                    and data['medicine_card_number']):
+            if not (recipe.medicine_policy_number
+                    and recipe.medicine_card_number):
                 raise Exception('more_required')
             if len(data['medicines']) > 1:
                 raise Exception('too_much_medicines')
 
-        doctor = user.doctor_set.all()[0]
-        recipe = Recipe(
-            patient_age=data['patient_age'],
-            patient_email=data['patient_email'],
-            patient_initials=data['patient_initials'],
-            medicine_card_number=data['medicine_card_number'],
-            medicine_policy_number=data['medicine_policy_number'],
-            day_duration=15 if (flag or ('day_duration' not in data)) else data['day_duration'],
-            token=get_hash(data['patient_email'], doctor.id, timezone.now()),
-            doctor=doctor
-        )
+        recipe.token=get_hash(recipe.patient_email, recipe.doctor.id, timezone.now())
         recipe.full_clean()
         recipe.save()
         for i in data['medicines']:
             medicine = MedicineName.objects.get(pk=i['medicine_id'])
-            medicine_dosage = MedicineDosage(
-                medicine=medicine,
-                frequency=i['frequency'],
-                period=i['period'],
-                dosage=i['dosage'],
-            )
+            medicine_dosage = MedicineDosage(**i, medicine=medicine)
             medicine_dosage.full_clean()
             medicine_dosage.save()
-            # objects_for_saving.append(medicine_dosage)
+            
             request = MedicineRequest(
                 medicine_dosage=medicine_dosage,
                 recipe=recipe,
