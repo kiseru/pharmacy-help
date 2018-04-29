@@ -1,5 +1,6 @@
 import AddGood from "./components/AddGood";
 import Apothecary from "./components/Apothecary";
+import ConfirmingRecipe from "./components/ConfirmingRecipes";
 import CreateRecipePage from "./components/CreateRecipePage";
 import Doctor from "./components/Doctor";
 import HomePage from "./components/HomePage";
@@ -17,6 +18,7 @@ class Route {
 
 export default [
   new Route("/apothecary/recipes", Recipes),
+  new Route("/apothecary/recipe", ConfirmingRecipe),
   new Route("/apothecary/new", AddGood),
   new Route("/apothecary", Apothecary),
   new Route("/doctor", Doctor),

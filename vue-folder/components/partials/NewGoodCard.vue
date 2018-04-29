@@ -12,7 +12,7 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
   #new-good-card {
     background-color: #ffffff;
     width: 200px;
