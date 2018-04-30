@@ -34,7 +34,7 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
   nav {
     height: 56px;
     padding: 8px 16px 8px 0;

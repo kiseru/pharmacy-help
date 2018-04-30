@@ -1,15 +1,15 @@
 <template>
-  <div>
-    <h1>404 Not Found</h1>
-  </div>
+  <span class="ion-checkmark"></span>
 </template>
 
 <script>
   export default {
-    name: "NotFound",
+    name: 'Checkmark'
   }
 </script>
 
 <style lang="less" scoped>
-
+  .ion-checkmark {
+    color: #28a745;
+  }
 </style>

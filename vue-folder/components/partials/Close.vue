@@ -1,15 +1,15 @@
 <template>
-  <div>
-    <h1>404 Not Found</h1>
-  </div>
+  <span class="ion-close"></span>
 </template>
 
 <script>
   export default {
-    name: "NotFound",
+    name: 'Close'
   }
 </script>
 
 <style lang="less" scoped>
-
+  .ion-close {
+    color: #dc3545;
+  }
 </style>

@@ -27,8 +27,8 @@
               <td>{{ medicine.frequency }}</td>
               <td>{{ medicine.period }}</td>
               <td>
-                <span v-if="medicine.confirmed" class="ion-checkmark"></span>
-                <span class="ion-close" v-else></span>
+                <checkmark v-if="medicine.confirmed"/>
+                <close v-else/>
               </td>
             </tr>
           </tbody>
@@ -40,10 +40,14 @@
 
 <script>
   import PatientHeader from "./header/PatientHeader";
+  import Checkmark from "./partials/Checkmark";
+  import Close from "./partials/Close";
 
   export default {
     name: "PatientRecipe",
     components: {
+      Close,
+      Checkmark,
       PatientHeader
     },
     data() {
@@ -88,14 +92,6 @@
     .card-title {
       font-size: 32px;
       text-align: center;
-    }
-
-    .ion-checkmark {
-      color: #28a745;
-    }
-
-    .ion-close {
-      color: #dc3545;
     }
   }
 </style>

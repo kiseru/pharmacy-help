@@ -8,7 +8,7 @@
 <script>
   import AddGoodForm from "./forms/AddGoodForm";
   import ApothecaryHeader from "./header/ApothecaryHeader";
-  
+
   export default {
     name: "AddGood",
     components: {
@@ -18,6 +18,6 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 
 </style>
