@@ -47,3 +47,17 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
+
+### URL
+
+/ - страница входа
+
+/doctor - страница создания рецепта
+
+/apothecary - страница лекарств в аптеке
+
+/apothecary/new - страница добавление товара в аптеку
+
+/apothecary/recipes - страница поиска рецептов пациента
+
+/patient - страница рецепта пациента
