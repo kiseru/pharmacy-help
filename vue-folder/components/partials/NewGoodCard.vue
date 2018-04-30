@@ -1,5 +1,5 @@
 <template>
-  <a href="/medicines/new">
+  <a href="/apothecary/new">
     <div id="new-good-card" class="card">
       <div class="ion-ios-plus-outline"></div>
     </div>
