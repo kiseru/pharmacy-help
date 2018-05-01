@@ -45,10 +45,6 @@ def has_role(role, redirect_url=None):
         def new_func(request, *args, **kwargs):
             actual_role = get_role(request.user)
             if actual_role != role:
-                # new_url = redirect_url
-                # if not new_url:
-                #     new_url = get_default_url(actual_role)
-                # return HttpResponseRedirect(new_url)
                 return Response(status=status.HTTP_403_FORBIDDEN)
             else:
                 return func(request, *args, **kwargs)

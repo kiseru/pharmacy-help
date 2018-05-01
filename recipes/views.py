@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes
 from rest_framework.renderers import JSONRenderer
 
@@ -35,38 +36,28 @@ def response_to_api_format(func):
             if response.__class__ != Response:
                 return response
             if status.is_success(response.status_code):
-                new_response = {
-                  'status': 'success',
-                  'data': response.data,
-                  'error': None
-                }
-                response.data = new_response
+                response.data = get_response(is_success=True, data=response.data)
             elif status.is_client_error(response.status_code):
-                new_response = {
-                  'status': 'fail',
-                  'data': response.data,
-                  'error': 'invalid_data'
-                }
-                response.data = new_response
+                response.data = get_response(is_success=False, data=response.data, error='invalid_data')
             return response
         except (rest_framework.exceptions.ValidationError, ValidationError, ObjectDoesNotExist):
             traceback.print_exc()
-            new_response = {
-                'status': 'fail',
-                'data': None,
-                'error': 'invalid_data'
-            }
+            new_response = get_response(is_success=False, error='invalid_data')
             return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
-        
         except Exception as e:
             traceback.print_exc()
-            new_response = {
-              'status': 'fail',
-              'error': str(e),
-              'data': None,
-            }
+            new_response = get_response(is_success=False, error=str(e))
             return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
+    
     return new_func
+
+
+def get_response(is_success, error=None, data=None):
+    return {
+        'status': 'success' if is_success else 'fail',
+        'error': error,
+        'data': data,
+    }
 
 
 @login_required(login_url=reverse_lazy('home'))
@@ -95,12 +86,15 @@ def do_login(request):
 
 @api_view(['GET', 'POST'])
 @permission_classes((permissions.AllowAny,))
+@authentication_classes((SessionAuthentication,))
 @renderer_classes((JSONRenderer,))
 @response_to_api_format
 def do_login_ajax(request):
-    if request.method == 'POST' and request.is_ajax():
-        json_str = list(request.POST.dict().keys())[0]
-        data = json.loads(json_str)
+    print(request)
+    if request.method == 'POST':
+        print(request.is_ajax())
+        # json_str = list(request.POST.dict().keys())[0]
+        data = request.data
         if 'email' in data and 'password' in data:
             user = authenticate(username=data['email'], password=data['password'])
             if user is not None and user.is_active:
@@ -112,7 +106,7 @@ def do_login_ajax(request):
             raise Exception('invalid_data')
     else:
         return render(request, 'recipes/test_login.html')
-    
+  
 
 def do_logout(request):
     logout(request)
