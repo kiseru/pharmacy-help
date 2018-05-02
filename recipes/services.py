@@ -105,6 +105,6 @@ def get_coordinates(address: str):
     try:
         coordinates_str = data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos']
         x, y = map(lambda s: float(s), coordinates_str.split())
-        return x, y
+        return y, x
     except:
         pass
