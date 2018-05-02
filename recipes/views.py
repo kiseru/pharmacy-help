@@ -19,9 +19,9 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
-from recipes.models import Recipe, MedicineName, MedicineType
+from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
-  MedicineNameSerializer, MedicineTypeSerializer
+  MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer
 from recipes.services import serve_recipe
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
@@ -271,3 +271,17 @@ class SearchMedicineTypesViewSet(ReadOnlyModelViewSet):
         if 'type_name' in request.GET:
             self.queryset = self.queryset.filter(type_name__icontains=request.GET['type_name'])
         return super().list(request, *args, *kwargs)
+
+
+class MedicineWithPharmaciesViewSet(ReadOnlyModelViewSet):
+    renderer_classes = (JSONRenderer,)
+    
+    queryset = None
+    serializer_class = MedicineWithPharmaciesSerializer
+    
+    def list(self, request, *args, **kwargs):
+        if 'id' in request.GET:
+            self.queryset = Medicine.objects.filter(medicine_name__pk=request.GET['id'])
+        else:
+            self.queryset = Medicine.objects.all()
+        return super().list(request, *args, **kwargs)

@@ -32,6 +32,7 @@ urlpatterns = [
     url('^api/medicines', get_medicine, name='medicine'),
     url('^api/search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
     url('^api/search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
+    url('^api/medicine_pharmacy/', MedicineWithPharmaciesViewSet.as_view({'get': 'list'})),
     # url(r'^api/', include(router.urls)),
 ]
 
