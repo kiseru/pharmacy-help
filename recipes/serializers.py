@@ -65,14 +65,6 @@ class MedicineNameSerializer(serializers.ModelSerializer):
         model = MedicineName
         fields = ('id', 'medicine_name', 'medicine_types')
     medicine_types = MedicineTypeSerializer(many=True)
-
-
-class MedicineSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Medicine
-        fields = ('medicine_name', 'medicine_type')
-    medicine_name = CharField(source='name')
-    medicine_type = CharField(source='type')
     
     
 class PharmacySerializer(serializers.ModelSerializer):
@@ -81,9 +73,18 @@ class PharmacySerializer(serializers.ModelSerializer):
         fields = '__all__'
         
         
-class MedicinePharmacySerializer(serializers.ModelSerializer):
+class MedicineWithPharmaciesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MedicinesPharmacies
-        exclude = ('count',)
-    medicine = MedicineSerializer
-    pharmacy = PharmacySerializer
+        model = Medicine
+        fields = ('medicine_name', 'medicine_type', 'pharmacies')
+    medicine_name = CharField(source='name')
+    medicine_type = CharField(source='type')
+    pharmacies = PharmacySerializer(many=True)
+    
+    
+# class MedicinePharmacySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = MedicinesPharmacies
+#         exclude = ('count',)
+#     medicine = MedicineSerializer()
+#     pharmacy = PharmacySerializer()

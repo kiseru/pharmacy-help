@@ -1,7 +1,8 @@
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-from django.forms import EmailField, CharField
+from django.forms import EmailField, CharField, ModelForm
 
 from recipes.models import User
+from recipes.services import get_coordinates
 
 
 class MyUserChangeForm(UserChangeForm):
