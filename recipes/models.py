@@ -118,6 +118,14 @@ class Medicine(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.medicine_name.medicine_name, self.medicine_type.type_name)
+    
+    @property
+    def name(self):
+        return self.medicine_name.medicine_name
+    
+    @property
+    def type(self):
+        return self.medicine_type.type_name
 
 
 class MedicineDosage(models.Model):
