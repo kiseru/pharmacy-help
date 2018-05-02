@@ -1,5 +1,8 @@
+import json
 import re
+import traceback
 
+import requests
 from django.contrib.auth.hashers import MD5PasswordHasher
 from django.db import transaction
 from django.db.models import Q
@@ -96,3 +99,12 @@ def serve_recipe(medicines, recipe, apothecary):
             raise Exception('invalid_data')
 
 
+def get_coordinates(address: str):
+    response = requests.get('https://geocode-maps.yandex.ru/1.x/?format=json&geocode={}'.format(address))
+    data = json.loads(response.content.decode(response.encoding))
+    try:
+        coordinates_str = data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos']
+        x, y = map(lambda s: float(s), coordinates_str.split())
+        return x, y
+    except:
+        pass
