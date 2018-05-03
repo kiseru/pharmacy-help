@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from recipes.models import Recipe, MedicineDosage, MedicineRequest, MedicineName, MedicinesPharmacies, Pharmacy, \
   Medicine
+from recipes.serializers import PharmacySerializer, MedicineSerializer
 
 
 def get_recipes(query: str=None, recipes=Recipe.objects):
@@ -112,8 +113,18 @@ def get_coordinates(address: str):
         pass
 
 
+def get_pharmacies_and_medicines(data):
+    city = data['city_name']
+    print(city)
+    medicines = data['medicines']
+    print(medicines)
+    coordinates = data['coordinates'] if 'coordinates' in data else None
+    result = find_pharmacies(city, medicines, coordinates)
+    return [{'pharmacy':PharmacySerializer(k).data, 'medicines': [MedicineSerializer(i).data for i in v]} for k, v in result.items()]
+
+
 def find_pharmacies(city_name, medicine_ids, coordinates=None):
-    result = []
+    result = dict()
     if not coordinates:
         coordinates = get_coordinates(city_name)
     pharmacies = Pharmacy.objects.filter(city__name=city_name)
@@ -123,7 +134,7 @@ def find_pharmacies(city_name, medicine_ids, coordinates=None):
         pharmacies_goods[p] = [[], 0]
         for m in medicines:
             if MedicinesPharmacies.objects.filter(pharmacy=p, medicine=m).count():
-                pharmacies_goods[p][0].append(m.id)
+                pharmacies_goods[p][0].append(m)
                 pharmacies_goods[p][1] = get_distance(*coordinates, p.latitude, p.longitude)
     found_medicines = 0
     required_medicines = len(medicines)
@@ -132,15 +143,18 @@ def find_pharmacies(city_name, medicine_ids, coordinates=None):
         pharmacies_goods_list = sorted(pharmacies_goods_list, key=lambda x: (-len(x[1][0]), x[1][1]))
         if len(pharmacies_goods_list[0][1][0]) == 0:
             break
-        result.append(pharmacies_goods_list[0][0])
         
-        for m in pharmacies_goods_list[0][1][0]:
+        pharmacy = pharmacies_goods_list[0]
+        pharmacies_goods_list = pharmacies_goods_list[1:]
+
+        result[pharmacy[0]] = []
+        
+        for m in pharmacy[1][0]:
+            result[pharmacy[0]].append(m)
             found_medicines += 1
             for k, v in pharmacies_goods_list:
                 if m in v[0]:
                     v[0].remove(m)
-        
-        pharmacies_goods_list = pharmacies_goods_list[1:]
         
     return result
     
