@@ -88,3 +88,11 @@ class MedicineWithPharmaciesSerializer(serializers.ModelSerializer):
 #         exclude = ('count',)
 #     medicine = MedicineSerializer()
 #     pharmacy = PharmacySerializer()
+
+
+class MedicineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medicine
+        fields = ('medicine_name', 'medicine_type')
+    medicine_name = CharField(source='name')
+    medicine_type = CharField(source='type')

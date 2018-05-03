@@ -22,7 +22,7 @@ from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, Medicin
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer
-from recipes.services import serve_recipe
+from recipes.services import serve_recipe, get_pharmacies_and_medicines
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 import json
@@ -285,3 +285,23 @@ class MedicineWithPharmaciesViewSet(ReadOnlyModelViewSet):
         else:
             self.queryset = Medicine.objects.all()
         return super().list(request, *args, **kwargs)
+    
+    
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+@authentication_classes((SessionAuthentication,))
+@renderer_classes((JSONRenderer,))
+def find_pharmacies(request):
+    try:
+        data = {
+            'medicines': request.GET.getlist('medicines'),
+            'city_name': request.GET['city_name'],
+            'coordinates': (float(request.GET['latitude']), float(request.GET['longitude'])) if ('latitude'
+                                                                                                 and 'longitude'
+                                                                                                 in request.GET) else None,
+        }
+        result = get_pharmacies_and_medicines(data)
+        return Response(result)
+    except:
+        traceback.print_exc()
+        return Response(status=status.HTTP_400_BAD_REQUEST)

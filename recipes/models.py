@@ -12,6 +12,13 @@ class MedicineType(models.Model):
         return self.type_name
 
 
+class City(models.Model):
+    name = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return self.name
+    
+
 class User(AbstractUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -78,6 +85,7 @@ class Recipe(models.Model):
 
 class Pharmacy(models.Model):
     pharmacy_name = models.CharField(max_length=20)
+    city = models.ForeignKey(City, on_delete=models.CASCADE, null=True)
     pharmacy_address = models.TextField()
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
