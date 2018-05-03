@@ -1,6 +1,7 @@
 import json
 import re
 import traceback
+import math
 
 import requests
 from django.contrib.auth.hashers import MD5PasswordHasher
@@ -8,7 +9,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from recipes.models import Recipe, MedicineDosage, MedicineRequest, MedicineName, MedicinesPharmacies
+from recipes.models import Recipe, MedicineDosage, MedicineRequest, MedicineName, MedicinesPharmacies, Pharmacy, \
+  Medicine
 
 
 def get_recipes(query: str=None, recipes=Recipe.objects):
@@ -108,3 +110,42 @@ def get_coordinates(address: str):
         return y, x
     except:
         pass
+
+
+def find_pharmacies(city_name, medicine_ids, coordinates=None):
+    result = []
+    pharmacies = Pharmacy.objects.filter(city__name=city_name)
+    medicines = [Medicine.objects.get(id=m) for m in medicine_ids]
+    pharmacies_goods = dict()
+    for p in pharmacies:
+        pharmacies_goods[p] = [[], 0]
+        for m in medicines:
+            if MedicinesPharmacies.objects.filter(pharmacy=p, medicine=m).count():
+                pharmacies_goods[p][0].append(m.id)
+                pharmacies_goods[p][1] = get_distance(*coordinates, p.latitude, p.longitude)
+    found_medicines = 0
+    required_medicines = len(medicines)
+    pharmacies_goods_list = [(k, v) for (k, v) in pharmacies_goods.items()]
+    while found_medicines < required_medicines:
+        pharmacies_goods_list = sorted(pharmacies_goods_list, key=lambda x: (-len(x[1][0]), x[1][1]))
+        print(pharmacies_goods_list)
+        if len(pharmacies_goods_list[0][1][0]) == 0:
+            break
+        result.append(pharmacies_goods_list[0][0])
+        
+        for m in pharmacies_goods_list[0][1][0]:
+            print('remove ', m)
+            found_medicines += 1
+            for k, v in pharmacies_goods_list:
+                print('now ', k, v)
+                if m in v[0]:
+                    print('remove', m, 'from', k)
+                    v[0].remove(m)
+        
+        pharmacies_goods_list = pharmacies_goods_list[1:]
+        
+    return result
+    
+    
+def get_distance(x1, y1, x2, y2):
+    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
