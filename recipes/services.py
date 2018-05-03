@@ -114,6 +114,8 @@ def get_coordinates(address: str):
 
 def find_pharmacies(city_name, medicine_ids, coordinates=None):
     result = []
+    if not coordinates:
+        coordinates = get_coordinates(city_name)
     pharmacies = Pharmacy.objects.filter(city__name=city_name)
     medicines = [Medicine.objects.get(id=m) for m in medicine_ids]
     pharmacies_goods = dict()
