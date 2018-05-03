@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.forms import EmailField, CharField, ModelForm
 
-from recipes.models import User
+from recipes.models import User, City
 from recipes.services import get_coordinates
 
 
@@ -22,7 +22,9 @@ class PharmacyForm(ModelForm):
     def is_valid(self):
         if super().is_valid():
             try:
-                x, y = get_coordinates(self.data['pharmacy_address'])
+                city = City.objects.get(id=self.data['city'])
+                address = '{}, {}'.format(city.name, self.data['pharmacy_address'])
+                x, y = get_coordinates(address)
                 self.instance.latitude = x
                 self.instance.longitude = y
                 return True
