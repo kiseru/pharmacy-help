@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from rest_framework import status, permissions, mixins
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
-from recipes.auth import login_not_required, has_role, get_default_url, get_role
+from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
@@ -156,13 +156,13 @@ class TemplateViewForAuthenticated(TemplateView):
 
 
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
-@method_decorator(has_role('apothecary'), name='dispatch')
+@method_decorator(has_role_for_template_view('apothecary'), name='dispatch')
 class TemplateViewForApothecary(TemplateView):
     pass
 
 
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
-@method_decorator(has_role('doctor'), name='dispatch')
+@method_decorator(has_role_for_template_view('doctor'), name='dispatch')
 class TemplateViewForDoctor(TemplateView):
     pass
 

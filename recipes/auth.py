@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.middleware.csrf import get_token
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -46,6 +46,19 @@ def has_role(role, redirect_url=None):
             actual_role = get_role(request.user)
             if actual_role != role:
                 return Response(status=status.HTTP_403_FORBIDDEN)
+            else:
+                return func(request, *args, **kwargs)
+
+        return new_func
+    return wrapper
+
+
+def has_role_for_template_view(role, redirect_url=None):
+    def wrapper(func):
+        def new_func(request, *args, **kwargs):
+            actual_role = get_role(request.user)
+            if actual_role != role:
+                return HttpResponseForbidden()
             else:
                 return func(request, *args, **kwargs)
 
