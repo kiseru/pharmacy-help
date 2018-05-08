@@ -48,7 +48,7 @@ class RecipeFullSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'last_name', 'first_name', 'phone_number', 'role')
+        fields = ('id', 'email', 'last_name', 'first_name', 'phone_number', 'role', 'is_admin')
         
     def save(self, **kwargs):
         super().save(**kwargs)

@@ -25,6 +25,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=150, unique=True)
     password = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=12, unique=True)
+    is_admin = models.BooleanField(default=False)
 
     username = None
 
