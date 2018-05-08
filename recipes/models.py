@@ -44,10 +44,16 @@ class User(AbstractUser):
     @property
     def role(self):
         return get_role(self)
-    
+   
+   
+class Hospital(models.Model):
+    city = models.ForeignKey(City, null=False, on_delete=models.CASCADE)
+    hospital_name = models.CharField(max_length=20)
+
 
 class Doctor(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    hospital = models.ForeignKey(Hospital, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.email
