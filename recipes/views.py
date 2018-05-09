@@ -17,7 +17,8 @@ from rest_framework.views import APIView
 from rest_framework import status, permissions, mixins
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
-from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view
+from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view, \
+  AdminPermission
 from recipes.exceptions import AlreadyExistsException
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
@@ -322,6 +323,8 @@ class WorkerViewSet(mixins.CreateModelMixin,
     
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    
+    permission_classes = (AdminPermission, )
     
     def list(self, request, *args, **kwargs):
         self.queryset = get_workers(request.user, request.GET['query'] if 'query' in request.GET else None)
