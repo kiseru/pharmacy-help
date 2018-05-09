@@ -18,11 +18,12 @@ from rest_framework import status, permissions, mixins
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view
+from recipes.exceptions import AlreadyExistsException
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
-from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine
+from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer
-from recipes.services import serve_recipe, get_pharmacies_and_medicines
+from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 import json
@@ -40,9 +41,12 @@ def response_to_api_format(func):
             elif status.is_client_error(response.status_code):
                 response.data = get_response(is_success=False, data=response.data, error='invalid_data')
             return response
-        except (rest_framework.exceptions.ValidationError, ValidationError, ObjectDoesNotExist):
+        except (rest_framework.exceptions.ValidationError, ValidationError, ObjectDoesNotExist, ValueError):
             traceback.print_exc()
             new_response = get_response(is_success=False, error='invalid_data')
+            return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
+        except AlreadyExistsException:
+            new_response = get_response(is_success=False, error='already_exists')
             return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             traceback.print_exc()
@@ -305,3 +309,29 @@ def find_pharmacies(request):
     except:
         traceback.print_exc()
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@method_decorator(response_to_api_format, name='create')
+@method_decorator(response_to_api_format, name='update')
+class WorkerViewSet(mixins.CreateModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.UpdateModelMixin,
+                            GenericViewSet):
+    renderer_classes = (JSONRenderer,)
+    
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    
+    def create(self, request, *args, **kwargs):
+        data = request.POST
+        serializer = self.get_serializer(data=data)
+        add_worker(user_serializer=serializer, admin=request.user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.POST
+        serializer = self.get_serializer(data=data)
+        update_user(serializer, instance)
+        return Response(status=status.HTTP_200_OK)

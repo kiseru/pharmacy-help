@@ -8,9 +8,12 @@ from django.contrib.auth.hashers import MD5PasswordHasher
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 
+from recipes.auth import get_role
+from recipes.exceptions import AlreadyExistsException
 from recipes.models import Recipe, MedicineDosage, MedicineRequest, MedicineName, MedicinesPharmacies, Pharmacy, \
-  Medicine
+  Medicine, User, Apothecary, Doctor
 from recipes.serializers import PharmacySerializer, MedicineSerializer
 
 
@@ -167,3 +170,42 @@ def get_distance(x1, y1, x2, y2):
     c = 2 * math.asin(math.sqrt(a))
     r = 6371  # radius of Earth in kilometers
     return c * r
+
+
+@transaction.atomic()
+def add_worker(user_serializer, admin):
+    if not user_serializer.is_valid():
+        if 'email' in user_serializer.errors or 'phone_number' in user_serializer.errors:
+            raise AlreadyExistsException(User)
+        else:
+            print(user_serializer.errors)
+            raise ValidationError()
+    user = User.objects.create_user(**user_serializer.validated_data)
+    if get_role(admin) == 'apothecary':
+        pharmacy = admin.apothecary_set.all()[0].pharmacy
+        apothecary = Apothecary(pharmacy=pharmacy, user=user)
+        Apothecary.save(apothecary)
+    else:
+        hospital = admin.doctor_set.all()[0].hospital
+        doctor = Doctor(user=user, hospital=hospital)
+        Doctor.save(doctor)
+    return user
+
+
+def update_user(serializer, user):
+    if serializer.initial_data.get('email', '') and serializer.initial_data['email'] != user.email:
+        if User.objects.filter(email=serializer.initial_data['email']).count():
+            raise AlreadyExistsException(User)
+        user.email = serializer.data['email']
+    if serializer.initial_data.get('phone_number', '') and serializer.initial_data['phone_number'] != user.phone_number:
+        if User.objects.filter(phone_number=serializer.initial_data['phone_number']).count():
+            raise AlreadyExistsException(User)
+        user.phone_number = serializer.data['phone_number']
+    if serializer.initial_data.get('password', ''):
+        user.set_password(serializer.initial_data['password'])
+    if serializer.is_valid() or ('first_name' not in serializer.errors and 'last_name' not in serializer.errors):
+        user.first_name = serializer.data['first_name']
+        user.last_name = serializer.data['last_name']
+        User.save(user)
+    else:
+        raise ValidationError()
