@@ -17,13 +17,14 @@ from rest_framework.views import APIView
 from rest_framework import status, permissions, mixins
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
-from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view
+from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view, \
+  AdminPermission
 from recipes.exceptions import AlreadyExistsException
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer
-from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user
+from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 import json
@@ -316,18 +317,25 @@ def find_pharmacies(request):
 class WorkerViewSet(mixins.CreateModelMixin,
                             mixins.RetrieveModelMixin,
                             mixins.UpdateModelMixin,
+                            mixins.ListModelMixin,
                             GenericViewSet):
     renderer_classes = (JSONRenderer,)
     
     queryset = User.objects.all()
     serializer_class = UserSerializer
     
+    permission_classes = (AdminPermission, )
+    
+    def list(self, request, *args, **kwargs):
+        self.queryset = get_workers(request.user, request.GET['query'] if 'query' in request.GET else None)
+        return super().list(request, *args, **kwargs)
+    
     def create(self, request, *args, **kwargs):
         data = request.POST
         serializer = self.get_serializer(data=data)
-        add_worker(user_serializer=serializer, admin=request.user)
+        user = add_worker(user_serializer=serializer, admin=request.user)
         headers = self.get_success_headers(serializer.data)
-        return Response(status=status.HTTP_201_CREATED, headers=headers)
+        return Response(data={'id': user.id}, status=status.HTTP_201_CREATED, headers=headers)
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

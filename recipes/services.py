@@ -209,3 +209,19 @@ def update_user(serializer, user):
         User.save(user)
     else:
         raise ValidationError()
+
+
+def get_workers(user, query=None):
+    if get_role(user) == 'apothecary':
+        pharmacy = user.apothecary_set.all()[0].pharmacy
+        result = User.objects.filter(apothecary__pharmacy=pharmacy)
+    else:
+        hospital = user.doctor_set.all()[0].hospital
+        result = User.objects.filter(doctor__hospital=hospital)
+    if query:
+        q1 = result.filter(email__icontains=query)
+        q2 = result.filter(phone_number__icontains=query)
+        q3 = result.filter(first_name__icontains=query)
+        q4 = result.filter(last_name__icontains=query)
+        result = q1 | q2 | q3 | q4
+    return result
