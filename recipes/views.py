@@ -330,9 +330,9 @@ class WorkerViewSet(mixins.CreateModelMixin,
     def create(self, request, *args, **kwargs):
         data = request.POST
         serializer = self.get_serializer(data=data)
-        add_worker(user_serializer=serializer, admin=request.user)
+        user = add_worker(user_serializer=serializer, admin=request.user)
         headers = self.get_success_headers(serializer.data)
-        return Response(status=status.HTTP_201_CREATED, headers=headers)
+        return Response(data={'id': user.id}, status=status.HTTP_201_CREATED, headers=headers)
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
