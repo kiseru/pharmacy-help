@@ -23,7 +23,7 @@ from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, Medicin
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer
-from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user
+from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 import json
@@ -316,11 +316,16 @@ def find_pharmacies(request):
 class WorkerViewSet(mixins.CreateModelMixin,
                             mixins.RetrieveModelMixin,
                             mixins.UpdateModelMixin,
+                            mixins.ListModelMixin,
                             GenericViewSet):
     renderer_classes = (JSONRenderer,)
     
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    
+    def list(self, request, *args, **kwargs):
+        self.queryset = get_workers(request.user, request.GET['query'] if 'query' in request.GET else None)
+        return super().list(request, *args, **kwargs)
     
     def create(self, request, *args, **kwargs):
         data = request.POST
