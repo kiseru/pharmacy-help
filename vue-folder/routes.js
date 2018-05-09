@@ -2,6 +2,7 @@ import AddGood from "./components/AddGood";
 import Apothecary from "./components/Apothecary";
 import ConfirmingRecipe from "./components/ConfirmingRecipes";
 import CreateRecipePage from "./components/CreateRecipePage";
+import CreatingWorker from "./components/CreatingWorker";
 import HomePage from "./components/HomePage";
 import PatientRecipe from "./components/PatientRecipe";
 import Recipes from "./components/Recipes";
@@ -19,5 +20,6 @@ export default [
   new Route("/apothecary/new", AddGood),
   new Route("/apothecary", Apothecary),
   new Route("/patient", PatientRecipe),
+  new Route("/moderator", CreatingWorker),
   new Route("", HomePage)
 ];
