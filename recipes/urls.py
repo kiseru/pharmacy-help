@@ -37,6 +37,7 @@ urlpatterns = [
     url('^api/workers/(?P<pk>\d+)', WorkerViewSet.as_view({'post': 'update', 'get': 'retrieve'})),
     url('^api/workers/new$', WorkerViewSet.as_view({'post': 'create'})),
     url('^api/workers/$', WorkerViewSet.as_view({'get': 'list'})),
+    url('^moderator/', TemplateViewForAuthenticated.as_view(template_name='index.html')),
     # url(r'^api/', include(router.urls)),
 ]
 
