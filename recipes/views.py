@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
 from django.views.generic import TemplateView
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes
@@ -90,10 +91,11 @@ def do_login(request):
 
 
 @api_view(['GET', 'POST'])
-# @permission_classes((permissions.AllowAny,))
-@authentication_classes((SessionAuthentication,))
+@permission_classes((permissions.AllowAny,))
+# @authentication_classes((SessionAuthentication,))
 @renderer_classes((JSONRenderer,))
 @response_to_api_format
+@csrf_protect
 def do_login_ajax(request):
     print(request)
     if request.method == 'POST':
