@@ -5,11 +5,14 @@ import math
 
 import requests
 from django.contrib.auth.hashers import MD5PasswordHasher
+from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import Q
+from django.urls import reverse
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from pharmacyhelp import settings
 from recipes.auth import get_role
 from recipes.exceptions import AlreadyExistsException
 from recipes.models import Recipe, MedicineDosage, MedicineRequest, MedicineName, MedicinesPharmacies, Pharmacy, \
@@ -35,7 +38,7 @@ def get_recipes_of_doctor(doctor, query=''):
     
 
 @transaction.atomic
-def create_recipe(recipe, data: dict):
+def create_recipe(recipe, data: dict, request):
         flag = contains_highlevel_medicines(data['medicines'])
         if flag:
             if not (recipe.medicine_policy_number
@@ -53,11 +56,16 @@ def create_recipe(recipe, data: dict):
             medicine_dosage.full_clean()
             medicine_dosage.save()
             
-            request = MedicineRequest(
+            medicine_request = MedicineRequest(
                 medicine_dosage=medicine_dosage,
                 recipe=recipe,
             )
-            request.save()
+            medicine_request.save()
+        try:
+            send_email_recipe(request, recipe)
+        except:
+            traceback.print_exc()
+            raise ValidationError()
 
 
 def contains_highlevel_medicines(medicinelist: list):
@@ -225,3 +233,11 @@ def get_workers(user, query=None):
         q4 = result.filter(last_name__icontains=query)
         result = q1 | q2 | q3 | q4
     return result
+
+
+def send_email_recipe(request, recipe):
+    if settings.SEND_EMAIL:
+        text = 'Здравствуйте, {}!\nВам выписан рецепт. Посмотреть рецепт можно по ссылке: {}'.format(
+            recipe.patient_initials, request.build_absolute_uri(reverse('show_recipe', args=(recipe.token, )))
+        )
+        send_mail('Уведомление о рецепте', text, settings.EMAIL_HOST_USER, [recipe.patient_email])

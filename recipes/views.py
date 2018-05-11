@@ -142,7 +142,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
         print(serializer.is_valid())
         # self.perform_create(serializer)
         recipe = Recipe(**serializer.data, doctor=request.user.doctor_set.all()[0])
-        create_recipe(recipe, data)
+        create_recipe(recipe, data, request)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
