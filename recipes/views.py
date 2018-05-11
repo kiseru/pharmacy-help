@@ -90,7 +90,7 @@ def do_login(request):
 
 
 @api_view(['GET', 'POST'])
-@permission_classes((permissions.AllowAny,))
+# @permission_classes((permissions.AllowAny,))
 @authentication_classes((SessionAuthentication,))
 @renderer_classes((JSONRenderer,))
 @response_to_api_format
