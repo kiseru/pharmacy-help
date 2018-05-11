@@ -56,9 +56,9 @@
       }
     },
     beforeMount() {
-      // axios.get("/api/recipes?id=" + this.searchText)
-      //   .then(response => this.recipes = response.data)
-      //   .catch(error => this.recipes = [])
+      axios.get("/api/recipes?id=" + this.searchObj.text)
+         .then(response => this.recipes = response.data)
+         .catch(error => this.recipes = [])
     }
   }
 </script>

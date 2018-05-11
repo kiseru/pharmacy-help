@@ -20,6 +20,7 @@
 </template>
 
 <script>
+  console.log("I'm a goodCard!")
   export default {
     name: "GoodCard",
     props: {

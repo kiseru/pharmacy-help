@@ -72,17 +72,20 @@
     },
     computed: {
       foundMedicines() {
-        if (this.searchText === "") {
+        //let text = this.searchObj.text
+        let text = this.$store.state.searchText;
+        console.log("foundMedicines() works");
+        if (text == "") {
           return this.medicines;
         } else {
-          return this.medicines.filter(medicine => medicine.name.includes(this.searchText))
+          return this.medicines.filter(medicine => medicine.name.includes(text))
         }
       }
     },
     beforeMount() {
-      // axios.get("/api/medicines")
-      //   .then(response => this.medicines = response.data)
-      //   .catch(error => this.medicines = []);
+       axios.get("/api/medicines")
+         .then(response => this.medicines = response.data)
+         .catch(error => this.medicines = []);
     }
   }
 </script>

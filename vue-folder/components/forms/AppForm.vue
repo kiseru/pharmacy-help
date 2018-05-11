@@ -40,6 +40,9 @@
         type: Array,
         required: true
       }
+    },
+    mount(){
+      console.log(this);
     }
   }
 </script>

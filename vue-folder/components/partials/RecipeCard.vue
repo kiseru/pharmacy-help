@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-body">
-      <div class="card-title">ID: {{ recipe.id }}</div>
+      <div class="card-title"><a :href="'/apothecary/recipes/' + recipe.id">ID: {{ recipe.id }}</div>
       <div class="card-subtitle mb-2 text-muted">{{ recipe.date }}</div>
       <div class="card-text">Пациент: {{ recipe.patientName }}</div>
       <div class="card-text">Доктор: {{ recipe.doctorName }}</div>

@@ -3,7 +3,7 @@
     <div class="col-4  form-group">
       <label for="search-input">Найти</label><br/>
       <input type="text" id="search-input" class="form-control" v-model="searchText">
-      {{ this.$store.state.searchText }}
+      <!--{{ this.$store.state.searchText }}-->
     </div>
   </div>
 </template>

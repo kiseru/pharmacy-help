@@ -16,7 +16,7 @@ class Route {
 
 export default [
   new Route("/apothecary/recipes", Recipes),
-  new Route("/apothecary/recipe", ConfirmingRecipe),
+  new Route("/apothecary/recipes/:id", ConfirmingRecipe),
   new Route("/apothecary/new", AddGood),
   new Route("/apothecary", Apothecary),
   new Route("/patient", PatientRecipe),
