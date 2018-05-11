@@ -37,7 +37,7 @@ def response_to_api_format(func):
             response = func(request, *args, **kwargs)
             if response.__class__ != Response:
                 return response
-            if status.is_success(response.status_code):
+            if status.is_success(response.status_code) or status.is_redirect(response.status_code):
                 response.data = get_response(is_success=True, data=response.data)
             elif status.is_client_error(response.status_code):
                 response.data = get_response(is_success=False, data=response.data, error='invalid_data')
@@ -104,7 +104,8 @@ def do_login_ajax(request):
             user = authenticate(username=data['email'], password=data['password'])
             if user is not None and user.is_active:
                 login(request, user)
-                return Response(status=status.HTTP_200_OK)
+                url = get_default_url(get_role(user))
+                return Response(status=status.HTTP_302_FOUND, headers={'Location': url})
             else:
                 raise Exception('not_found')
         else:
