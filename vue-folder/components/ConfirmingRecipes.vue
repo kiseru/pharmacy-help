@@ -27,7 +27,40 @@
               </tr>
             </thead>
             <tbody>
-
+              <tr>
+                <td>Название</td>
+                <td>
+                  <select class="custom-select custom-select-sm">
+                    <option selected>Выберити тип</option>
+                    <option value="1">Таблетки</option>
+                    <option value="2">Спрей</option>
+                  </select>
+                </td>
+                <td>3</td>
+                <td>1</td>
+                <td>100г</td>
+                <td>2 раза в день</td>
+                <td>3 недели</td>
+                <td><checkmark/></td>
+                <td><input type="checkbox" class="form-check-input" disabled></td>
+              </tr>
+              <tr>
+                <td>Название</td>
+                <td>
+                  <select class="custom-select custom-select-sm">
+                    <option selected>Выберити тип</option>
+                    <option value="1">Таблетки</option>
+                    <option value="2">Спрей</option>
+                  </select>
+                </td>
+                <td>3</td>
+                <td>1</td>
+                <td>100г</td>
+                <td>2 раза в день</td>
+                <td>3 недели</td>
+                <td><close/></td>
+                <td><input type="checkbox" class="form-check-input"></td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -43,13 +76,15 @@
   import ApothecoryHeader from "./header/ApothecaryHeader";
   import AppButton from "./partials/AppButton";
   import Checkmark from "./partials/Checkmark";
+  import Close from "./partials/Close";
 
   export default {
     name: "ConfirmingRecipes",
     components: {
       ApothecoryHeader,
       AppButton,
-      Checkmark
+      Checkmark,
+      Close
     },
     data() {
 
