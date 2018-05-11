@@ -1,11 +1,14 @@
 from django.contrib import admin
+from django.contrib.admin import ModelAdmin
 from django.contrib.auth.admin import UserAdmin
+from django.forms import ModelForm
 from django.utils.translation import gettext, gettext_lazy as _
 
 # Register your models here.
-from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm
+from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm, PharmacyForm
 from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary, Pharmacy, Recipe, MedicineType, \
-  MedicineRequest, MedicineRequestStatus, MedicineDosage, MedicinesPharmacies
+  MedicineRequest, MedicineRequestStatus, MedicineDosage, MedicinesPharmacies, City
+from recipes.services import get_coordinates
 
 
 class MyUserAdmin(UserAdmin):
@@ -31,16 +34,23 @@ class MyUserAdmin(UserAdmin):
     filter_horizontal = []
 
 
+class PharmacyAdminForm(ModelAdmin):
+    def get_form(self, request, obj=None, **kwargs):
+        if request.user.is_superuser:
+            kwargs['form'] = PharmacyForm
+        return super().get_form(request, obj, **kwargs)
+
 
 admin.site.register(User, MyUserAdmin)
 admin.site.register(Medicine)
 admin.site.register(MedicineName)
 admin.site.register(Doctor)
 admin.site.register(Apothecary)
-admin.site.register(Pharmacy)
+admin.site.register(Pharmacy, PharmacyAdminForm)
 admin.site.register(Recipe)
 admin.site.register(MedicineType)
 admin.site.register(MedicineRequest)
 admin.site.register(MedicineRequestStatus)
 admin.site.register(MedicineDosage)
 admin.site.register(MedicinesPharmacies)
+admin.site.register(City)

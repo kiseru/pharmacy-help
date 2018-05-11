@@ -32,6 +32,13 @@ urlpatterns = [
     url('^api/medicines', get_medicine, name='medicine'),
     url('^api/search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
     url('^api/search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
+    url('^api/medicine_pharmacy/', MedicineWithPharmaciesViewSet.as_view({'get': 'list'})),
+    url('^api/pharmacies', find_pharmacies),
+    url('^api/workers/(?P<pk>\d+)', WorkerViewSet.as_view({'post': 'update', 'get': 'retrieve'})),
+    url('^api/workers/new$', WorkerViewSet.as_view({'post': 'create'})),
+    url('^api/workers/$', WorkerViewSet.as_view({'get': 'list'})),
+    url('^moderator/', TemplateViewForAuthenticated.as_view(template_name='index.html')),
+    url('^patient/recipe/(?P<token>.+)', TemplateView.as_view(template_name='index.html'), name='show_recipe')
     # url(r'^api/', include(router.urls)),
 ]
 

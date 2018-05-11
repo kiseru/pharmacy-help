@@ -12,12 +12,20 @@ class MedicineType(models.Model):
         return self.type_name
 
 
+class City(models.Model):
+    name = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return self.name
+    
+
 class User(AbstractUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=150, unique=True)
     password = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=12, unique=True)
+    is_admin = models.BooleanField(default=False)
 
     username = None
 
@@ -36,10 +44,16 @@ class User(AbstractUser):
     @property
     def role(self):
         return get_role(self)
-    
+   
+   
+class Hospital(models.Model):
+    city = models.ForeignKey(City, null=False, on_delete=models.CASCADE)
+    hospital_name = models.CharField(max_length=20)
+
 
 class Doctor(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    hospital = models.ForeignKey(Hospital, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.email
@@ -78,7 +92,10 @@ class Recipe(models.Model):
 
 class Pharmacy(models.Model):
     pharmacy_name = models.CharField(max_length=20)
+    city = models.ForeignKey(City, on_delete=models.CASCADE, null=True)
     pharmacy_address = models.TextField()
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return self.pharmacy_name
@@ -116,6 +133,14 @@ class Medicine(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.medicine_name.medicine_name, self.medicine_type.type_name)
+    
+    @property
+    def name(self):
+        return self.medicine_name.medicine_name
+    
+    @property
+    def type(self):
+        return self.medicine_type.type_name
 
 
 class MedicineDosage(models.Model):

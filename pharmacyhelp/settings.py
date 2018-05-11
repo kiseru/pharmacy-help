@@ -145,3 +145,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "pharmacy.help.info@gmail.com"
+EMAIL_HOST_PASSWORD = "lARBblZwM8sR26s"
+EMAIL_USE_TLS = True
+
+# set True to enable sending mail about recipes
+SEND_EMAIL = False

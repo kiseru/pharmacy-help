@@ -6,10 +6,10 @@
 
 <script>
   export default {
-    name: "PatientHeader"
+    name: "DefaultHeader"
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 
 </style>

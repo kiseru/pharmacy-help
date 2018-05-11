@@ -1,8 +1,9 @@
 <template>
   <div class="row justify-content-center">
-    <div class="col-4 align-self-center form-group">
+    <div class="col-4  form-group">
       <label for="search-input">Найти</label><br/>
-      <input type="text" id="search-input" class="form-control" v-model="searchObj.text">
+      <input type="text" id="search-input" class="form-control" v-model="searchText">
+      {{ this.$store.state.searchText }}
     </div>
   </div>
 </template>
@@ -14,6 +15,16 @@
       searchObj: {
         type: Object,
         required: true
+      }
+    },
+    data() {
+      return {
+        searchText: ""
+      }
+    },
+    watch: {
+      searchText(newSearchText, oldSearchText) {
+        this.$store.commit("changeSearchText", newSearchText);
       }
     }
   }

@@ -16,7 +16,7 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
   #menu-button {
     position: relative;
     height: 56px;
@@ -27,19 +27,18 @@
     background-color: #343a40;
     border: 0;
     outline: none;
-  }
 
-  span {
-    color: #F5f5f5;
-    font-size: 26px;
-  }
+    span {
+      color: #F5f5f5;
+      font-size: 26px;
+    }
 
-  #menu-button:hover {
-    background-color: #f5f5f5;
-  }
+    &:hover {
+      background-color: #f5f5f5;
 
-  #menu-button:hover span {
-    color: #343a40;
+      span {
+        color: #343a40;
+      }
+    }
   }
-
 </style>

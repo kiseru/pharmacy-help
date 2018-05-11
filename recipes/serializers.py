@@ -1,8 +1,10 @@
+from rest_framework.exceptions import ValidationError
 from rest_framework.fields import CharField
 
-from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType, MedicineName
+from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType, MedicineName, Pharmacy, \
+  MedicinesPharmacies
 from rest_framework import serializers
-
+import re
 
 # class JsonSerializer:
 #     @staticmethod
@@ -47,10 +49,28 @@ class RecipeFullSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'last_name', 'first_name', 'phone_number', 'role')
+        fields = ('id', 'email', 'last_name', 'first_name', 'phone_number', 'role', 'is_admin', 'password')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
         
-    def save(self, **kwargs):
-        super().save(**kwargs)
+    def is_valid(self, raise_exception=False):
+        if super().is_valid(raise_exception=raise_exception):
+            if len(self.initial_data['password']) < 5:
+                self._errors['password'] = 'Password can not be less than 5 symbols'
+                if raise_exception:
+                    raise ValidationError()
+            else:
+                self.validated_data['password'] = self.initial_data['password']
+            if not re.fullmatch('([^\W\d_]| )+', self.initial_data['first_name']):
+                self._errors['first_name'] = 'First name should contain only letters or "-"'
+                if raise_exception:
+                    raise ValidationError()
+            if not re.fullmatch('([^\W\d_]| )+', self.initial_data['last_name']):
+                self._errors['first_name'] = 'Last name should contain only letters or "-"'
+                if raise_exception:
+                    raise ValidationError()
+        return not len(self.errors)
         
 
 class MedicineTypeSerializer(serializers.ModelSerializer):
@@ -64,4 +84,34 @@ class MedicineNameSerializer(serializers.ModelSerializer):
         model = MedicineName
         fields = ('id', 'medicine_name', 'medicine_types')
     medicine_types = MedicineTypeSerializer(many=True)
+    
+    
+class PharmacySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pharmacy
+        fields = '__all__'
+        
+        
+class MedicineWithPharmaciesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medicine
+        fields = ('medicine_name', 'medicine_type', 'pharmacies')
+    medicine_name = CharField(source='name')
+    medicine_type = CharField(source='type')
+    pharmacies = PharmacySerializer(many=True)
+    
+    
+# class MedicinePharmacySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = MedicinesPharmacies
+#         exclude = ('count',)
+#     medicine = MedicineSerializer()
+#     pharmacy = PharmacySerializer()
 
+
+class MedicineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medicine
+        fields = ('medicine_name', 'medicine_type')
+    medicine_name = CharField(source='name')
+    medicine_type = CharField(source='type')

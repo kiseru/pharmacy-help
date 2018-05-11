@@ -74,3 +74,8 @@ class ApothecaryPermission(IsAuthenticated):
 class DoctorPermission(IsAuthenticated):
     def has_permission(self, request, view):
         return get_role(request.user) is 'doctor'
+
+
+class AdminPermission(IsAuthenticated):
+    def has_permission(self, request, view):
+        return request.user.is_admin
