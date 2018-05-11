@@ -1,6 +1,6 @@
 <template>
   <div>
-    <patient-header/>
+    <default-header/>
     <div class="card">
       <div class="card-title">Рецепт</div>
       <div class="card-body">
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-  import PatientHeader from "./header/PatientHeader";
+  import DefaultHeader from "./header/DefaultHeader";
   import Checkmark from "./partials/Checkmark";
   import Close from "./partials/Close";
 
@@ -48,7 +48,7 @@
     components: {
       Close,
       Checkmark,
-      PatientHeader
+      DefaultHeader
     },
     data() {
       return {
