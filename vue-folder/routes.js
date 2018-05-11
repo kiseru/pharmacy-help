@@ -21,5 +21,6 @@ export default [
   new Route("/apothecary", Apothecary),
   new Route("/patient", PatientRecipe),
   new Route("/moderator", CreatingWorker),
+  new Route("/doctor", CreateRecipePage),
   new Route("", HomePage)
 ];

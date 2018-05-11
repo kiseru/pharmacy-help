@@ -52,35 +52,19 @@
         </thead>
         <tbody>
           <tr v-for="medicine in patient.medicines">
-            <td>{{medicine.name}}</td>
-            <td>{{medicine.dosage}}</td>
-            <td>{{medicine.frequency}}</td>
-            <td>{{medicine.duration}}</td>
+            <td><input type="text" class="form-control" v-bind:value="medicine.name"></td>
+            <td><input type="text" class="form-control" v-bind:value="medicine.dosage"></td>
+            <td><input type="text" class="form-control" v-bind:value="medicine.frequency"></td>
+            <td><input type="text" class="form-control" v-bind:value="medicine.duration"></td>
+          </tr>
+          <tr>
+            <td><input type="text" class="form-control" v-model="newMedicine.name"></td>
+            <td><input type="text" class="form-control" v-model="newMedicine.dosage"></td>
+            <td><input type="text" class="form-control" v-model="newMedicine.frequency"></td>
+            <td><input type="text" class="form-control" v-model="newMedicine.duration"></td>
           </tr>
         </tbody>
       </table>
-
-      <hr>
-
-      <div>
-        <label for="newMedicineNameInput">Название препарата</label>
-        <input type="text" class="form-control" id="newMedicineNameInput" v-model="newMedicine.name">
-      </div>
-
-      <div>
-        <label for="newMedicineDosageInput">Доза</label>
-        <input type="text" class="form-control" id="newMedicineDosageInput" v-model="newMedicine.dosage">
-      </div>
-
-      <div>
-        <label for="newMedicineFrequencyInput">Частота</label>
-        <input type="text" class="form-control" id="newMedicineFrequencyInput" v-model="newMedicine.frequency">
-      </div>
-
-      <div>
-        <label for="newMedicineDurationInput">Протяженность</label>
-        <input type="text" class="form-control" id="newMedicineDurationInput" v-model="newMedicine.duration">
-      </div>
 
       <button type="button" class="btn btn-primary" v-on:click="createNewMedicine">Добавить препарат</button>
 
@@ -140,7 +124,7 @@
 <style lang="less" scoped>
   .create-recipe-form {
     border: 2px solid #087e8b;
-    width: 550px;
+    width: 850px;
     height: auto;
     margin: 20px auto;
     border-radius: 10px;
@@ -165,6 +149,10 @@
 
       th {
         text-align: center;
+      }
+
+      tr .form-control {
+        font-size: 12px;
       }
     }
   }
