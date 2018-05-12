@@ -55,8 +55,9 @@
 
         if (!this.isPasswordValid && !this.isEmailValid) return;
 
-        axios.post("/api/login", this.user)
-          .then(response => this.error = false, error => this.error = true);
+        axios.post("/api/login", this.user, {
+        	headers: { "X-CSRFTOKEN": this.$cookies.get("csrftoken") }
+        }).then(response => this.error = false, error => this.error = true);
       }
     }
   }
