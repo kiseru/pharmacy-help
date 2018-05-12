@@ -107,7 +107,7 @@ def do_login_ajax(request):
             if user is not None and user.is_active:
                 login(request, user)
                 url = get_default_url(get_role(user))
-                return Response(status=status.HTTP_302_FOUND, headers={'Location': url})
+                return JsonResponse({'location': url}, status=status.HTTP_200_OK)
             else:
                 raise Exception('not_found')
         else:

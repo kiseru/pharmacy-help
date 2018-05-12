@@ -57,7 +57,10 @@
 
         axios.post("/api/login", this.user, {
         	headers: { "X-CSRFTOKEN": this.$cookies.get("csrftoken") }
-        }).then(response => this.error = false, error => this.error = true);
+        }).then(response => {
+        	this.error = false;
+        	window.location = response.data.location;
+        }, error => this.error = true);
       }
     }
   }
