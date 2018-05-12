@@ -28,7 +28,7 @@
               <tr v-for="request in data.requests">
                 <td>{{request.medicine_name}}</td>
                 <td>
-                  <select class="custom-select custom-select-sm">
+                  <select class="custom-select custom-select-sm" v-model="selected_medicines">
                     <option v-for="option in request.medicines" v-bind:value="option.id">
                       {{ option.name }} {{option.type}}
                     </option>
@@ -40,14 +40,14 @@
                 <td v-if="request.is_accepted"><checkmark/></td>
                 <td v-else><close/></td>
                 <td v-if="request.is_accepted"><input type="checkbox" class="form-check-input"  disabled></td>
-                <td v-else><input type="checkbox" class="form-check-input"></td>
+                <td v-else><input type="checkbox" class="form-check-input" v-bind:value="request.medicine_name_id" v-model="checked_medicines"></td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
       <div class="card-footer">
-        <app-button  name="Выдать"/>
+        <button class="btn btn-primary" v-on:click="confirmRecipe"> Выдать</button>
       </div>
     </div>
   </div>
@@ -96,12 +96,16 @@
             }
           ],
           doctor_initials: "Baiburov Airat"
-        }
+        },
+        checked_medicines: [],
+        selected_medicines: [],
       }
     },
-    watch: {
-      requests: function () {
-
+    methods: {
+      confirmRecipe: function() {
+        console.log('clicked');
+        console.log(this.checked_medicines);
+        console.log(this.selected_medicines);
       }
     },
     beforeMount() {
