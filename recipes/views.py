@@ -1,4 +1,5 @@
 import rest_framework
+from django import http
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import *
@@ -48,6 +49,10 @@ def response_to_api_format(func):
             traceback.print_exc()
             new_response = get_response(is_success=False, error='invalid_data')
             return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
+        except http.response.Http404:
+            traceback.print_exc()
+            new_response = get_response(is_success=False, error='not_found')
+            return Response(data=new_response, status=status.HTTP_404_NOT_FOUND)
         except AlreadyExistsException:
             new_response = get_response(is_success=False, error='already_exists')
             return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
