@@ -350,11 +350,12 @@ class WorkerViewSet(mixins.CreateModelMixin,
     
 
 @method_decorator(response_to_api_format, name='create')
-class GoodsViewSet(mixins.CreateModelMixin,
-                            mixins.RetrieveModelMixin,
-                            mixins.UpdateModelMixin,
-                            mixins.ListModelMixin,
-                            GenericViewSet):
+class GoodsViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.UpdateModelMixin,
+        mixins.ListModelMixin,
+        GenericViewSet):
     renderer_classes = (JSONRenderer,)
     queryset = None
     serializer_class = GoodSerializer
@@ -371,4 +372,9 @@ class GoodsViewSet(mixins.CreateModelMixin,
         data = request.POST
         services.add_medicine(data, request.user)
         return Response(status=status.HTTP_201_CREATED)
+    
+    def retrieve(self, request, *args, **kwargs):
+        pharmacy = request.user.apothecary_set.all()[0].pharmacy
+        self.queryset = pharmacy.medicinespharmacies_set.all()
+        return super().retrieve(request, *args, **kwargs)
 
