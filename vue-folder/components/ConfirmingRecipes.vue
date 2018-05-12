@@ -17,8 +17,6 @@
               <tr>
                 <th>Название</th>
                 <th>Тип</th>
-                <th>Количество</th>
-                <th>Уровень</th>
                 <th>Доза</th>
                 <th>Частота</th>
                 <th>Длительность</th>
@@ -27,39 +25,22 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Название</td>
+              <tr v-for="request in data.requests">
+                <td>{{request.medicine_name}}</td>
                 <td>
                   <select class="custom-select custom-select-sm">
-                    <option selected>Выберити тип</option>
-                    <option value="1">Таблетки</option>
-                    <option value="2">Спрей</option>
+                    <option v-for="option in request.medicines" v-bind:value="option.id">
+                      {{ option.name }} {{option.type}}
+                    </option>
                   </select>
                 </td>
-                <td>3</td>
-                <td>1</td>
-                <td>100г</td>
-                <td>2 раза в день</td>
-                <td>3 недели</td>
-                <td><checkmark/></td>
-                <td><input type="checkbox" class="form-check-input" disabled></td>
-              </tr>
-              <tr>
-                <td>Название</td>
-                <td>
-                  <select class="custom-select custom-select-sm">
-                    <option selected>Выберити тип</option>
-                    <option value="1">Таблетки</option>
-                    <option value="2">Спрей</option>
-                  </select>
-                </td>
-                <td>3</td>
-                <td>1</td>
-                <td>100г</td>
-                <td>2 раза в день</td>
-                <td>3 недели</td>
-                <td><close/></td>
-                <td><input type="checkbox" class="form-check-input"></td>
+                <td>{{request.medicine_dosage}}</td>
+                <td>{{request.medicine_frequency}}</td>
+                <td>{{request.medicine_period}}</td>
+                <td v-if="request.is_accepted"><checkmark/></td>
+                <td v-else><close/></td>
+                <td v-if="request.is_accepted"><input type="checkbox" class="form-check-input"  disabled></td>
+                <td v-else><input type="checkbox" class="form-check-input"></td>
               </tr>
             </tbody>
           </table>
@@ -77,6 +58,7 @@
   import AppButton from "./partials/AppButton";
   import Checkmark from "./partials/Checkmark";
   import Close from "./partials/Close";
+  import Vue from "vue";
 
   import axios from "axios";
 
@@ -109,17 +91,35 @@
               medicine_dosage: "1 таблетка",
               medicine_name: "Парацетамол",
               medicine_frequency: "3 раза в день",
-              medicine_name_id: 1
+              medicine_name_id: 1,
+              medicines: []
             }
           ],
           doctor_initials: "Baiburov Airat"
         }
       }
     },
+    watch: {
+      requests: function () {
+
+      }
+    },
     beforeMount() {
       axios.get("/api/recipes/" + this.$route.params.id)
-         .then(response => this.data = response.data.data)
-         .catch(error => this.data = [])
+         .then(function(response) {
+           this.data = response.data.data;
+           console.log(this.data);
+           this.data.requests.forEach((v, i) => {
+             Vue.set(v, 'medicines', []);
+             axios.get('/api/medicines/?name_id=' + v['medicine_name_id']).then(
+               response => v.medicines = response.data,
+             )
+           })
+         }.bind(this))
+         .catch(error => {
+           this.data = [];
+           console.log(error)
+         })
     }
   }
 </script>
