@@ -19,20 +19,22 @@ const router = new VueRouter({
 
 const store = new Vuex.Store({
   getters: {
-    getUser: () => {
-      let user = { first_name: "", last_name: "Not found" };
-      axios.get("/api/user")
-        .then(response => user = response.data);
-      return user;
+    getUser: (state, getters) => {
+      return state.user;
     }
   },
   mutations: {
     changeSearchText(state, text) {
       state.searchText = text;
+    },
+    setUser(state, user){
+      console.log('set user');
+      state.user = user;
     }
   },
   state: {
-    searchText: ""
+    searchText: "",
+    user: {first_name: "", last_name: "Not found" },
   }
 });
 

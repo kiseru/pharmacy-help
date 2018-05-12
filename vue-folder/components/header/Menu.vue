@@ -19,10 +19,16 @@
     name: "Menu",
     data() {
       return {
-        user: {
+       /* user: {
           first_name: "",
           last_name: "Not found"
-        }
+        }*/
+       //user: this.$store.state.user
+      }
+    },
+    computed: {
+      user(){
+        return this.$store.getters.getUser;
       }
     },
     props: {
@@ -36,11 +42,19 @@
       }
     },
     beforeMount() {
-       axios.get("/api/user")
+      if (this.$store.state.user.first_name == ""){
+        axios.get("/api/user")
          .then(
-           response => this.user = response.data,
-           error => this.user = { first_name: "", last_name: "Not found" }
+           response => {
+             //this.user = response.data;
+             this.$store.commit("setUser", response.data);
+             console.log(this.$store.state.user)
+           },
+           error => console.log(error)
+
          );
+      }
+
      }
   }
 </script>
