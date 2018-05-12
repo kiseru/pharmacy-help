@@ -138,7 +138,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     lookup_field = 'token'
     
     def create(self, request, *args, **kwargs):
-        json_str = list(request.POST.dict().keys())[0]
+        json_str = request.POST['data']
         data = json.loads(json_str)
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -151,7 +151,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        json_str = list(request.POST.dict().keys())[0]
+        json_str = request.POST['data']
         medicines = json.loads(json_str)
         print(medicines)
         serve_recipe(medicines, instance, request.user.apothecary_set.all()[0])
