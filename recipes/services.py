@@ -296,3 +296,13 @@ def add_medicine(data, user):
         MedicinesPharmacies.save(good)
     except KeyError:
         raise ValidationError()
+    
+    
+@transaction.atomic()
+def update_medicine(good, data):
+    try:
+        good.count = data['count']
+        good.price = data['price']
+        MedicinesPharmacies.save(good)
+    except KeyError:
+        raise ValidationError()

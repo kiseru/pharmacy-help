@@ -350,6 +350,7 @@ class WorkerViewSet(mixins.CreateModelMixin,
     
 
 @method_decorator(response_to_api_format, name='create')
+@method_decorator(response_to_api_format, name='update')
 class GoodsViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
@@ -377,4 +378,12 @@ class GoodsViewSet(
         pharmacy = request.user.apothecary_set.all()[0].pharmacy
         self.queryset = pharmacy.medicinespharmacies_set.all()
         return super().retrieve(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        pharmacy = request.user.apothecary_set.all()[0].pharmacy
+        self.queryset = pharmacy.medicinespharmacies_set.all()
+        instance = self.get_object()
+        data = request.POST
+        services.update_medicine(instance, data)
+        return Response(status=status.HTTP_200_OK)
 
