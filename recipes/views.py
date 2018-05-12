@@ -18,13 +18,14 @@ from rest_framework.views import APIView
 from rest_framework import status, permissions, mixins
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
+from recipes import services
 from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view, \
-  AdminPermission
+  AdminPermission, ApothecaryPermission
 from recipes.exceptions import AlreadyExistsException
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
-  MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer
+  MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer
 from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
@@ -346,3 +347,28 @@ class WorkerViewSet(mixins.CreateModelMixin,
         serializer = self.get_serializer(data=data)
         update_user(serializer, instance)
         return Response(status=status.HTTP_200_OK)
+    
+
+@method_decorator(response_to_api_format, name='create')
+class GoodsViewSet(mixins.CreateModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.UpdateModelMixin,
+                            mixins.ListModelMixin,
+                            GenericViewSet):
+    renderer_classes = (JSONRenderer,)
+    queryset = None
+    serializer_class = GoodSerializer
+    permission_classes = (ApothecaryPermission, )
+    
+    def list(self, request, *args, **kwargs):
+        pharmacy = request.user.apothecary_set.all()[0].pharmacy
+        self.queryset = pharmacy.medicinespharmacies_set.all()
+        if 'name_id' in request.GET:
+            self.queryset = self.queryset.filter(medicine__medicine_name__id=request.GET['name_id'])
+        return super().list(request, *args, **kwargs)
+    
+    def create(self, request, *args, **kwargs):
+        data = request.POST
+        services.add_medicine(data, request.user)
+        return Response(status=status.HTTP_201_CREATED)
+

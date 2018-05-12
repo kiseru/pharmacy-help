@@ -38,7 +38,9 @@ urlpatterns = [
     url('^api/workers/new$', WorkerViewSet.as_view({'post': 'create'})),
     url('^api/workers/$', WorkerViewSet.as_view({'get': 'list'})),
     url('^moderator/', TemplateViewForAuthenticated.as_view(template_name='index.html')),
-    url('^patient/recipe/(?P<token>.+)', TemplateView.as_view(template_name='index.html'), name='show_recipe')
+    url('^patient/recipe/(?P<token>.+)', TemplateView.as_view(template_name='index.html'), name='show_recipe'),
+    url('^api/test/medicines$', GoodsViewSet.as_view({'get': 'list'})),
+    url('^api/test/medicines/new', GoodsViewSet.as_view({'post': 'create'})),
     # url(r'^api/', include(router.urls)),
 ]
 
