@@ -26,7 +26,7 @@
       $.ajax({
         url:'/api/recipes/00a3669c95551eccb6b2624394caf9c3',
         type:"POST",
-        data: post,
+        data: {'data':post},
         success: function (data) {
           alert(JSON.stringify(data));
         },

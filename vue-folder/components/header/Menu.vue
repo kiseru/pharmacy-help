@@ -19,7 +19,10 @@
     name: "Menu",
     data() {
       return {
-        user: null
+        user: {
+          first_name: "",
+          last_name: "Not found"
+        }
       }
     },
     props: {

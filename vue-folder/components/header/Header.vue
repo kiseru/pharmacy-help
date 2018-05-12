@@ -37,6 +37,11 @@
 <style lang="less" scoped>
   nav {
     height: 56px;
-    padding: 8px 16px 8px 0;
+    padding: 0 16px 8px 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
   }
 </style>

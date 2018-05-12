@@ -6,16 +6,20 @@ from rest_framework.response import Response
 
 
 def get_role(user):
-    if user.doctor_set.count():
+    if user.is_admin:
+        role = 'admin'
+    elif user.doctor_set.count():
         role = 'doctor'
     elif user.apothecary_set.count():
         role = 'apothecary'
     else:
-        role = 'admin'
+        role = ''
     return role
 
 
 def get_default_url(role):
+    if role == 'admin':
+        return '/moderator'
     if role == 'doctor':
         return '/doctor'
     elif role == 'apothecary':

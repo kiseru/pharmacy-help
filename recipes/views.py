@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
 from django.views.generic import TemplateView
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes
@@ -37,7 +38,7 @@ def response_to_api_format(func):
             response = func(request, *args, **kwargs)
             if response.__class__ != Response:
                 return response
-            if status.is_success(response.status_code):
+            if status.is_success(response.status_code) or status.is_redirect(response.status_code):
                 response.data = get_response(is_success=True, data=response.data)
             elif status.is_client_error(response.status_code):
                 response.data = get_response(is_success=False, data=response.data, error='invalid_data')
@@ -91,9 +92,10 @@ def do_login(request):
 
 @api_view(['GET', 'POST'])
 @permission_classes((permissions.AllowAny,))
-@authentication_classes((SessionAuthentication,))
+# @authentication_classes((SessionAuthentication,))
 @renderer_classes((JSONRenderer,))
 @response_to_api_format
+@csrf_protect
 def do_login_ajax(request):
     print(request)
     if request.method == 'POST':
@@ -104,7 +106,8 @@ def do_login_ajax(request):
             user = authenticate(username=data['email'], password=data['password'])
             if user is not None and user.is_active:
                 login(request, user)
-                return Response(status=status.HTTP_200_OK)
+                url = get_default_url(get_role(user))
+                return JsonResponse({'location': url}, status=status.HTTP_200_OK)
             else:
                 raise Exception('not_found')
         else:
@@ -135,20 +138,20 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     lookup_field = 'token'
     
     def create(self, request, *args, **kwargs):
-        json_str = list(request.POST.dict().keys())[0]
+        json_str = request.POST['data']
         data = json.loads(json_str)
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         print(serializer.is_valid())
         # self.perform_create(serializer)
         recipe = Recipe(**serializer.data, doctor=request.user.doctor_set.all()[0])
-        create_recipe(recipe, data)
+        create_recipe(recipe, data, request)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        json_str = list(request.POST.dict().keys())[0]
+        json_str = request.POST['data']
         medicines = json.loads(json_str)
         print(medicines)
         serve_recipe(medicines, instance, request.user.apothecary_set.all()[0])

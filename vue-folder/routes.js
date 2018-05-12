@@ -6,6 +6,7 @@ import CreatingWorker from "./components/CreatingWorker";
 import HomePage from "./components/HomePage";
 import PatientRecipe from "./components/PatientRecipe";
 import Recipes from "./components/Recipes";
+import Workers from "./components/Workers";
 
 class Route {
     constructor(path, component) {
@@ -20,6 +21,8 @@ export default [
   new Route("/apothecary/new", AddGood),
   new Route("/apothecary", Apothecary),
   new Route("/patient", PatientRecipe),
-  new Route("/moderator", CreatingWorker),
+  new Route("/doctor", CreateRecipePage),
+  new Route("/moderator/new", CreatingWorker),
+  new Route("/moderator", Workers),
   new Route("", HomePage)
 ];

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <patient-header/>
+    <default-header/>
     <div class="create-new-worker-form">
       <h4>Добавить сотрудника</h4>
 
@@ -45,13 +45,13 @@
 
 <script>
   import AppButton from "./partials/AppButton";
-  import PatientHeader from "./header/PatientHeader";
+  import DefaultHeader from "./header/DefaultHeader";
 
   export default {
     name: "CreatingWorker",
     components: {
       AppButton,
-      PatientHeader
+      DefaultHeader
     },
     data() {
       return {
