@@ -1,6 +1,6 @@
 from django.forms import ModelForm, PasswordInput, CharField
 
-from recipes.models import User, Medicine, MedicineType, MedicineName
+from recipes.models import User, Medicine, MedicineType, MedicineName, MedicinesPharmacies
 
 
 class UserForm(ModelForm):
@@ -36,10 +36,11 @@ class MedicineForm(ModelForm):
         model = Medicine
         fields = ()
 
-    def save(self, m1, m2, *args, **kwargs):
+    def save(self, m1, m2, m3, *args, **kwargs):
         instance = self.instance
-        instance.medicine_name_id = m2
-        instance.medicine_type_id = m1
+        instance.medicine_name = m2
+        instance.medicine_type = m1
+        instance.medicine_pharmacy = m3
         instance.save()
         return super()
 
@@ -53,3 +54,8 @@ class MedicineNamesForm(ModelForm):
     class Meta:
         model = MedicineName
         fields = ('medicine_name', 'medicine_description','medicine_level',)
+
+class MedicinePharmacyForm(ModelForm):
+    class Meta:
+        model = MedicinesPharmacies
+        fields = ('pharmacy','count','price')
