@@ -192,3 +192,16 @@ class MedicinesPharmacies(models.Model):
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
     count = models.PositiveIntegerField()
     price = models.FloatField()
+    
+    @property
+    def name(self):
+        return self.medicine.name
+    
+    @property
+    def type(self):
+        return self.medicine.type
+    
+    @property
+    def description(self):
+        return self.medicine.medicine_name.medicine_description
+    
