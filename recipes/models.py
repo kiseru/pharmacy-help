@@ -184,7 +184,7 @@ class MedicineRequest(models.Model):
 
     @property
     def medicine_name_id(self):
-        return self.medicine_dosage.medicine.medicine_name.id
+        return self.medicine_dosage.medicine.id
     
 
 class MedicinesPharmacies(models.Model):
