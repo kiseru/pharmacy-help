@@ -80,7 +80,7 @@
       $.ajax({
         url:'/api/recipes/new',
         type:"POST",
-        data: JSON.stringify(post),
+        data: {'data': JSON.stringify(post)},
         success: success,
         error: function (request, textStatus, errorThrown) {
           alert(textStatus);
