@@ -26,7 +26,7 @@ $('#submit').click(function () {
       $.ajax({
         url:'/api/login',
         type:"POST",
-        data: JSON.stringify(post),
+        data: post,
         success: success,
         error: function (request, textStatus, errorThrown) {
           alert(textStatus);
