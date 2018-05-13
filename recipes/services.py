@@ -294,6 +294,7 @@ def add_medicine(data, user):
             price=data['price'],
         )
         MedicinesPharmacies.save(good)
+        return good
     except KeyError:
         raise ValidationError()
     

@@ -374,8 +374,8 @@ class GoodsViewSet(
     
     def create(self, request, *args, **kwargs):
         data = request.data
-        services.add_medicine(data, request.user)
-        return Response(status=status.HTTP_201_CREATED)
+        good = services.add_medicine(data, request.user)
+        return Response(data={'id': good.id}, status=status.HTTP_201_CREATED)
     
     def retrieve(self, request, *args, **kwargs):
         pharmacy = request.user.apothecary_set.all()[0].pharmacy
