@@ -1,4 +1,5 @@
 import rest_framework
+from django import http
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import *
@@ -18,13 +19,14 @@ from rest_framework.views import APIView
 from rest_framework import status, permissions, mixins
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
+from recipes import services
 from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view, \
-  AdminPermission
+  AdminPermission, ApothecaryPermission
 from recipes.exceptions import AlreadyExistsException
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
-  MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer
+  MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer
 from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
@@ -47,6 +49,10 @@ def response_to_api_format(func):
             traceback.print_exc()
             new_response = get_response(is_success=False, error='invalid_data')
             return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
+        except http.response.Http404:
+            traceback.print_exc()
+            new_response = get_response(is_success=False, error='not_found')
+            return Response(data=new_response, status=status.HTTP_404_NOT_FOUND)
         except AlreadyExistsException:
             new_response = get_response(is_success=False, error='already_exists')
             return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
@@ -138,8 +144,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     lookup_field = 'token'
     
     def create(self, request, *args, **kwargs):
-        json_str = request.POST['data']
-        data = json.loads(json_str)
+        data = request.data
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         print(serializer.is_valid())
@@ -151,8 +156,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        json_str = request.POST['data']
-        medicines = json.loads(json_str)
+        medicines = request.data
         print(medicines)
         serve_recipe(medicines, instance, request.user.apothecary_set.all()[0])
         return Response(status=status.HTTP_200_OK)
@@ -233,7 +237,7 @@ class UserInfoView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        data = request.POST
+        data = request.data
         serializer = UserSerializer(instance=request.user, data=data)
         if serializer.is_valid():
             serializer.save()
@@ -334,7 +338,7 @@ class WorkerViewSet(mixins.CreateModelMixin,
         return super().list(request, *args, **kwargs)
     
     def create(self, request, *args, **kwargs):
-        data = request.POST
+        data = request.data
         serializer = self.get_serializer(data=data)
         user = add_worker(user_serializer=serializer, admin=request.user)
         headers = self.get_success_headers(serializer.data)
@@ -342,7 +346,47 @@ class WorkerViewSet(mixins.CreateModelMixin,
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        data = request.POST
+        data = request.data
         serializer = self.get_serializer(data=data)
         update_user(serializer, instance)
         return Response(status=status.HTTP_200_OK)
+    
+
+@method_decorator(response_to_api_format, name='create')
+@method_decorator(response_to_api_format, name='update')
+class GoodsViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.UpdateModelMixin,
+        mixins.ListModelMixin,
+        GenericViewSet):
+    renderer_classes = (JSONRenderer,)
+    queryset = None
+    serializer_class = GoodSerializer
+    permission_classes = (ApothecaryPermission, )
+    
+    def list(self, request, *args, **kwargs):
+        pharmacy = request.user.apothecary_set.all()[0].pharmacy
+        self.queryset = pharmacy.medicinespharmacies_set.all()
+        if 'name_id' in request.GET:
+            self.queryset = self.queryset.filter(medicine__medicine_name__id=request.GET['name_id'])
+        return super().list(request, *args, **kwargs)
+    
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        services.add_medicine(data, request.user)
+        return Response(status=status.HTTP_201_CREATED)
+    
+    def retrieve(self, request, *args, **kwargs):
+        pharmacy = request.user.apothecary_set.all()[0].pharmacy
+        self.queryset = pharmacy.medicinespharmacies_set.all()
+        return super().retrieve(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        pharmacy = request.user.apothecary_set.all()[0].pharmacy
+        self.queryset = pharmacy.medicinespharmacies_set.all()
+        instance = self.get_object()
+        data = request.data
+        services.update_medicine(instance, data)
+        return Response(status=status.HTTP_200_OK)
+

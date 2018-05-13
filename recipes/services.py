@@ -16,7 +16,7 @@ from pharmacyhelp import settings
 from recipes.auth import get_role
 from recipes.exceptions import AlreadyExistsException
 from recipes.models import Recipe, MedicineDosage, MedicineRequest, MedicineName, MedicinesPharmacies, Pharmacy, \
-  Medicine, User, Apothecary, Doctor
+  Medicine, User, Apothecary, Doctor, MedicineType
 from recipes.serializers import PharmacySerializer, MedicineSerializer
 
 
@@ -94,9 +94,9 @@ def serve_recipe(medicines, recipe, apothecary):
                 medicine_request.apothecary = apothecary
                 medicine_request.medicine_count = m['medicine_count']
                 medicine_request.request_confirmation_time = timezone.now()
-                medicine_request.given_medicine_id = m['medicine_id']
+                medicine_request.given_medicine_id = MedicinesPharmacies.objects.get(id=m['medicine_id']).medicine.id
                 pharmacy = apothecary.pharmacy
-                goods = pharmacy.medicinespharmacies_set.filter(medicine_id=m['medicine_id'])
+                goods = pharmacy.medicinespharmacies_set.filter(id=m['medicine_id'])
                 if goods.count():
                     good = goods.all()[0]
                     if good.count >= m['medicine_count']:
@@ -241,3 +241,68 @@ def send_email_recipe(request, recipe):
             recipe.patient_initials, request.build_absolute_uri(reverse('show_recipe', args=(recipe.token, )))
         )
         send_mail('Уведомление о рецепте', text, settings.EMAIL_HOST_USER, [recipe.patient_email])
+
+
+def get_or_create_medicine_name(name, level, description):
+    medicines = MedicineName.objects.filter(
+        medicine_name__iexact=name,
+        medicine_level=level,
+        medicine_description__iexact=description
+    )
+    if medicines.count():
+        return medicines.all()[0]
+    else:
+        medicine_name = MedicineName(medicine_name=name, medicine_description=description, medicine_level=level)
+        MedicineName.save(medicine_name)
+        return medicine_name
+
+
+def get_or_create_medicine_type(type):
+    medicines = MedicineType.objects.filter(type_name__iexact=type)
+    if medicines.count():
+        return medicines.all()[0]
+    else:
+        medicine_type = MedicineType(type_name=type)
+        MedicineType.save(medicine_type)
+        return medicine_type
+
+
+def get_or_create_medicine(medicine_name, medicine_type):
+    medicines = Medicine.objects.filter(medicine_name=medicine_name, medicine_type=medicine_type)
+    if medicines.count():
+        return medicines.all()[0]
+    else:
+        medicine = Medicine(medicine_type=medicine_type, medicine_name=medicine_name)
+        Medicine.save(medicine)
+        return medicine
+
+
+@transaction.atomic()
+def add_medicine(data, user):
+    try:
+        medicine_name = get_or_create_medicine_name(data['name'], data['level'], data.get('description', '-'))
+        medicine_type = get_or_create_medicine_type(data['type'])
+        medicine = get_or_create_medicine(medicine_name=medicine_name, medicine_type=medicine_type)
+        pharmacy = user.apothecary_set.all()[0].pharmacy
+        goods = MedicinesPharmacies.objects.filter(medicine=medicine, pharmacy=pharmacy)
+        if goods.count():
+            raise AlreadyExistsException(MedicinesPharmacies)
+        good = MedicinesPharmacies(
+            medicine=medicine,
+            pharmacy=pharmacy,
+            count=data['count'],
+            price=data['price'],
+        )
+        MedicinesPharmacies.save(good)
+    except KeyError:
+        raise ValidationError()
+    
+    
+@transaction.atomic()
+def update_medicine(good, data):
+    try:
+        good.count = data['count']
+        good.price = data['price']
+        MedicinesPharmacies.save(good)
+    except KeyError:
+        raise ValidationError()
