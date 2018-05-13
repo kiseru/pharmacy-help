@@ -205,3 +205,7 @@ class MedicinesPharmacies(models.Model):
     def description(self):
         return self.medicine.medicine_name.medicine_description
     
+    @property
+    def level(self):
+        return self.medicine.medicine_name.medicine_level
+    
