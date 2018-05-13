@@ -89,7 +89,8 @@
         	headers: { "X-CSRFTOKEN": this.$cookies.get("csrftoken") }
         }).then(response => {
         	this.error = false;
-        	window.location = '/apothecary'
+        	console.log(response);
+        	window.location = '/apothecary/' + response.data.data.id
         }, error => this.error = true);
       }
     }
