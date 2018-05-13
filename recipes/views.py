@@ -138,8 +138,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     lookup_field = 'token'
     
     def create(self, request, *args, **kwargs):
-        json_str = request.POST['data']
-        data = json.loads(json_str)
+        data = request.data
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         print(serializer.is_valid())
@@ -151,8 +150,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        json_str = request.POST['data']
-        medicines = json.loads(json_str)
+        medicines = request.data
         print(medicines)
         serve_recipe(medicines, instance, request.user.apothecary_set.all()[0])
         return Response(status=status.HTTP_200_OK)
@@ -233,7 +231,7 @@ class UserInfoView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        data = request.POST
+        data = request.data
         serializer = UserSerializer(instance=request.user, data=data)
         if serializer.is_valid():
             serializer.save()
@@ -334,7 +332,7 @@ class WorkerViewSet(mixins.CreateModelMixin,
         return super().list(request, *args, **kwargs)
     
     def create(self, request, *args, **kwargs):
-        data = request.POST
+        data = request.data
         serializer = self.get_serializer(data=data)
         user = add_worker(user_serializer=serializer, admin=request.user)
         headers = self.get_success_headers(serializer.data)
@@ -342,7 +340,7 @@ class WorkerViewSet(mixins.CreateModelMixin,
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        data = request.POST
+        data = request.data
         serializer = self.get_serializer(data=data)
         update_user(serializer, instance)
         return Response(status=status.HTTP_200_OK)
