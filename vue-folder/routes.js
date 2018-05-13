@@ -20,11 +20,15 @@ export default [
   new Route("/apothecary/recipes", Recipes),
   new Route("/apothecary/recipes/:id", ConfirmingRecipe),
   new Route("/apothecary/new", AddGood),
+  new Route("/apothecary/workers/new", CreatingWorker),
+  new Route("/apothecary/workers/:id", CreatingWorker),
+  new Route("/apothecary/workers", Workers),
   new Route("/apothecary/:id", ChangeGoodInfo),
   new Route("/apothecary", Apothecary),
   new Route("/patient", PatientRecipe),
+  new Route("/doctor/workers/new", CreatingWorker),
+  new Route("/doctor/workers/:id", CreatingWorker),
+  new Route("/doctor/workers", Workers),
   new Route("/doctor", CreateRecipePage),
-  new Route("/moderator/new", CreatingWorker),
-  new Route("/moderator", Workers),
   new Route("", HomePage)
 ];

@@ -1,11 +1,12 @@
 <template>
   <div>
-    <default-header/>
+    <apothecary-header v-if="user.role == 'apothecary'"/>
+    <doctor-header v-else/>
     <div class="card col-md-10 align-self-center">
       <div class="card-body">
         <div class="row">
           <div class="card-title col-md-10">Сотрудники</div>
-          <div class="col-md-2"><button class="btn btn-primary">Добавить</button></div>
+          <div class="col-md-2"><a v-bind:href="this.$route.path + '/new'"><button class="btn btn-primary">Добавить</button></a></div>
         </div>
         <div class="card-text">
           <table class="table">
@@ -18,10 +19,10 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Новикова</td>
-                <td>Анна</td>
-                <td>anna.novikova@mail.ru</td>
+              <tr v-for="worker in workers">
+                <td>{{worker.last_name}}</td>
+                <td>{{worker.first_name}}</td>
+                <td><a v-bind:href="'/' + user.role + '/workers/' + worker.id">{{worker.email}}</a></td>
                 <td><button class="btn btn-danger btn-sm">Удалить</button></td>
               </tr>
             </tbody>
@@ -33,12 +34,40 @@
 </template>
 
 <script>
-  import DefaultHeader from "./header/DefaultHeader";
+  import ApothecaryHeader from "./header/ApothecaryHeader";
+  import DoctorHeader from "./header/DoctorHeader"
+  import axios from "axios";
 
   export default {
     name: "Workers",
     components: {
-      DefaultHeader
+      ApothecaryHeader,
+      DoctorHeader,
+    },
+    data() {
+      return {
+        'workers': []
+      }
+    },
+    methods: {
+      getWorkers() {
+        axios.get("/api/workers")
+         .then(function(response) {
+           this.workers = response.data;
+           console.log(this.workers);
+         }.bind(this))
+         .catch(error => {
+           console.log(error)
+         })
+      }
+    },
+    computed: {
+      user(){
+        return this.$store.getters.getUser;
+      }
+    },
+    beforeMount() {
+      this.getWorkers()
     }
   }
 </script>
