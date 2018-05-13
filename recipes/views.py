@@ -373,7 +373,7 @@ class GoodsViewSet(
         return super().list(request, *args, **kwargs)
     
     def create(self, request, *args, **kwargs):
-        data = request.POST
+        data = request.data
         services.add_medicine(data, request.user)
         return Response(status=status.HTTP_201_CREATED)
     
@@ -386,7 +386,7 @@ class GoodsViewSet(
         pharmacy = request.user.apothecary_set.all()[0].pharmacy
         self.queryset = pharmacy.medicinespharmacies_set.all()
         instance = self.get_object()
-        data = request.POST
+        data = request.data
         services.update_medicine(instance, data)
         return Response(status=status.HTTP_200_OK)
 
