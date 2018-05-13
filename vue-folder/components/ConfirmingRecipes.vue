@@ -25,10 +25,10 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="request in data.requests">
+              <tr v-for="(request, index) in data.requests">
                 <td>{{request.medicine_name}}</td>
                 <td>
-                  <select class="custom-select custom-select-sm" v-model="selected_medicines">
+                  <select class="custom-select custom-select-sm" v-model="selected_medicines[index]">
                     <option v-for="option in request.medicines" v-bind:value="option.id">
                       {{ option.name }} {{option.type}}
                     </option>
@@ -40,7 +40,7 @@
                 <td v-if="request.is_accepted"><checkmark/></td>
                 <td v-else><close/></td>
                 <td v-if="request.is_accepted"><input type="checkbox" class="form-check-input"  disabled></td>
-                <td v-else><input type="checkbox" class="form-check-input" v-bind:value="request.medicine_name_id" v-model="checked_medicines"></td>
+                <td v-else><input type="checkbox" class="form-check-input" v-bind:value="request.medicine_name_id" v-model="checked_medicines[index]"></td>
               </tr>
             </tbody>
           </table>
@@ -99,6 +99,7 @@
         },
         checked_medicines: [],
         selected_medicines: [],
+        error: false,
       }
     },
     methods: {
@@ -106,10 +107,29 @@
         console.log('clicked');
         console.log(this.checked_medicines);
         console.log(this.selected_medicines);
-      }
-    },
-    beforeMount() {
-      axios.get("/api/recipes/" + this.$route.params.id)
+        let result = [];
+        this.checked_medicines.forEach((v, k)=> {
+          if (v) {
+            result.push({
+              'medicine_id': this.selected_medicines[k],
+              'medicine_name_id': this.data.requests[k].medicine_name_id,
+              'medicine_count': 1
+            })
+          }
+        });
+        console.log(result);
+        axios.post('/api/recipes/' + this.$route.params.id, result, {
+        	headers: { "X-CSRFTOKEN": this.$cookies.get("csrftoken") }
+        })
+          .then(
+            response => {
+        	    this.error = false;
+        	    this.getRecipe();
+            },
+            error => this.error = true)
+      },
+      getRecipe() {
+        axios.get("/api/recipes/" + this.$route.params.id)
          .then(function(response) {
            this.data = response.data.data;
            console.log(this.data);
@@ -124,6 +144,10 @@
            this.data = [];
            console.log(error)
          })
+      }
+    },
+    beforeMount() {
+      this.getRecipe();
     }
   }
 </script>
