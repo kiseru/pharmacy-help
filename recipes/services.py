@@ -94,9 +94,9 @@ def serve_recipe(medicines, recipe, apothecary):
                 medicine_request.apothecary = apothecary
                 medicine_request.medicine_count = m['medicine_count']
                 medicine_request.request_confirmation_time = timezone.now()
-                medicine_request.given_medicine_id = m['medicine_id']
+                medicine_request.given_medicine_id = MedicinesPharmacies.objects.get(id=m['medicine_id']).medicine.id
                 pharmacy = apothecary.pharmacy
-                goods = pharmacy.medicinespharmacies_set.filter(medicine_id=m['medicine_id'])
+                goods = pharmacy.medicinespharmacies_set.filter(id=m['medicine_id'])
                 if goods.count():
                     good = goods.all()[0]
                     if good.count >= m['medicine_count']:
