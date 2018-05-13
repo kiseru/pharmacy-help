@@ -37,35 +37,40 @@
             description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
             type: "asdfasdf",
             count: 123,
-            price: 1234
+            price: 1234,
+            id: 1
           },
           {
             name: "asdfasdf",
             description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
             type: "asdfasdf",
             count: 123,
-            price: 1234
+            price: 1234,
+            id: 1
           },
           {
             name: "asdfasdf",
             description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
             type: "asdfasdf",
             count: 123,
-            price: 1234
+            price: 1234,
+            id: 1
           },
           {
             name: "asdfasdf",
             description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
             type: "asdfasdf",
             count: 123,
-            price: 1234
+            price: 1234,
+            id: 1
           },
           {
             name: "asdfasdf",
             description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
             type: "asdfasdf",
             count: 123,
-            price: 1234
+            price: 1234,
+            id: 1
           }
         ]
       }

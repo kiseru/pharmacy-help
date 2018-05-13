@@ -1,7 +1,7 @@
 <template>
   <div class="good-card card bg-light mb-3">
     <div class="card-body">
-      <div class="card-title">{{medicine.name}}</div>
+      <div class="card-title"><a v-bind:href="'/apothecary/' + medicine.id">{{medicine.name}}</a></div>
       <div class="card-subtitle mb-2 text-muted">{{medicine.type}}</div>
       <div class="card-text">{{medicine.description}}</div>
     </div>
