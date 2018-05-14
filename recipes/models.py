@@ -66,7 +66,7 @@ class Pharmacy(models.Model):
 
 class Apothecary(models.Model):
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} - {}'.format(self.user.email, self.pharmacy.pharmacy_name)
@@ -88,7 +88,7 @@ class MedicineName(models.Model):
 class Medicine(models.Model):
     medicine_name = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
     medicine_type = models.ForeignKey(MedicineType, on_delete=models.CASCADE)
-    pharmacies = models.ManyToManyField(Pharmacy, through='recipes.MedicinesPharmacies')
+    pharmacies = models.ManyToManyField(Pharmacy, through='MedicinesPharmacies')
 
     def __str__(self):
         return '{} {}'.format(self.medicine_name.medicine_name, self.medicine_type.type_name)
@@ -117,5 +117,5 @@ class MedicineRequest(models.Model):
 class MedicinesPharmacies(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
-    count = models.PositiveIntegerField()
-    price = models.FloatField()
+    count = models.PositiveIntegerField(default=0)
+    price = models.FloatField(default=0.0)

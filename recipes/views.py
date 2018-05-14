@@ -146,23 +146,15 @@ def add_medicine(request):
         ctx['medicine_type_form'] = MedicineTypeForm(request.POST)
         ctx['medicine_form'] = MedicineForm(request.POST)
         ctx['medicine_pharmacy_form'] = MedicinePharmacyForm(request.POST)
-        if (ctx['medicine_name_form'].is_valid()) and (ctx['medicine_type_form'].is_valid()) and (ctx['medicine_form'].is_valid()) and (ctx['medicine_pharmacy_form'].is_valid()):
+        if (ctx['medicine_name_form'].is_valid()) and (ctx['medicine_type_form'].is_valid()) and (ctx['medicine_form'].is_valid()):
             instance_medicine_name = ctx['medicine_name_form'].save()
             instance_medicine_type = ctx['medicine_type_form'].save()
-            instance_medicine_pharmacy = ctx['medicine_pharmacy_form'].save()
-            instance = ctx['medicine_form'].save(m1=instance_medicine_type, m2=instance_medicine_name, m3=instance_medicine_pharmacy)
+            instance_medicine_pharmacy = ctx['medicine_pharmacy_form']
+            instance = ctx['medicine_form'].save(request, m1=instance_medicine_type,
+                                                 m2=instance_medicine_name, m3=instance_medicine_pharmacy)
             instance.save()
             return redirect('recipes/medicine')
     return render(request, 'recipes/add_medicine.html', ctx)
-
-# def get_medicine(request):
-#     medicines = Medicines_pharmacies.objects.values('medicine_id',
-#                                                     'medicine_id__medicine_name_id__medicine_name',
-#                                                     'medicine_id__medicine_name_id__description',
-#                                                     'medicine_id__medicine_type_id__type_name',
-#                                                     'medicine_id__medicines_pharmacies__count',
-#                                                     'medicine_id__medicines_pharmacies__price',)
-#     return JsonResponse({'medicines': list(medicines)})
 
 
 def get_medicine(request):

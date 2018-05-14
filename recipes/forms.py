@@ -1,6 +1,7 @@
 from django.forms import ModelForm, PasswordInput, CharField
+from django.shortcuts import get_object_or_404
 
-from recipes.models import User, Medicine, MedicineType, MedicineName, MedicinesPharmacies
+from recipes.models import User, Medicine, MedicineType, MedicineName, MedicinesPharmacies, Apothecary
 
 
 class UserForm(ModelForm):
@@ -36,12 +37,13 @@ class MedicineForm(ModelForm):
         model = Medicine
         fields = ()
 
-    def save(self, m1, m2, m3, *args, **kwargs):
+    def save(self, request, m1, m2, m3, *args, **kwargs):
         instance = self.instance
         instance.medicine_name = m2
         instance.medicine_type = m1
-        instance.medicine_pharmacy = m3
         instance.save()
+        MedicinesPharmacies(pharmacy=get_object_or_404(Apothecary,**{'user':request.user}).pharmacy,
+                            medicine=instance, count=m3.data['count'], price=m3.data['price']).save()
         return super()
 
 
@@ -53,9 +55,9 @@ class MedicineTypeForm(ModelForm):
 class MedicineNamesForm(ModelForm):
     class Meta:
         model = MedicineName
-        fields = ('medicine_name', 'medicine_description','medicine_level',)
+        fields = ('medicine_name', 'medicine_description', 'medicine_level',)
 
 class MedicinePharmacyForm(ModelForm):
     class Meta:
         model = MedicinesPharmacies
-        fields = ('pharmacy','count','price')
+        fields = ('count','price')
