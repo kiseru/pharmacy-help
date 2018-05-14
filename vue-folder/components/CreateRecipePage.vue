@@ -116,7 +116,6 @@
     },
     methods: {
       createNewMedicine() {
-        if (this.newMedicine.medicine_id === 0) return;
         if (this.newMedicine.name === "") return;
         if (this.newMedicine.dosage === "") return;
         if (this.newMedicine.frequency === "") return;
