@@ -46,6 +46,7 @@
           </table>
         </div>
       </div>
+      <div class="validate-error" v-if="error">Убедитесь, что все товары для выдачи выбраны</div>
       <div class="card-footer">
         <button class="btn btn-primary" v-on:click="confirmRecipe"> Выдать</button>
       </div>
@@ -104,12 +105,17 @@
     },
     methods: {
       confirmRecipe: function() {
+        this.error = false;
         console.log('clicked');
         console.log(this.checked_medicines);
         console.log(this.selected_medicines);
         let result = [];
         this.checked_medicines.forEach((v, k)=> {
           if (v) {
+            if (!this.selected_medicines[k]) {
+              this.error = true;
+              return;
+            }
             result.push({
               'medicine_id': this.selected_medicines[k],
               'medicine_name_id': this.data.requests[k].medicine_name_id,
@@ -117,6 +123,9 @@
             })
           }
         });
+        if (this.error) {
+          return;
+        }
         console.log(result);
         axios.post('/api/recipes/' + this.$route.params.id, result, {
         	headers: { "X-CSRFTOKEN": this.$cookies.get("csrftoken") }
@@ -168,6 +177,10 @@
 
     .card-footer {
       padding: 0;
+    }
+    .validate-error {
+      color: #dc3545;
+      font-size: 12px;
     }
   }
 </style>
