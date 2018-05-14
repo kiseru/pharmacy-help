@@ -17,7 +17,8 @@
 </template>
 
 <script>
-  import axios from 'axios'
+  import axios from "axios";
+
   export default {
     name: "Menu",
     data() {
@@ -45,6 +46,7 @@
       }
     },
     beforeMount() {
+
       if (this.$store.state.user.first_name == ""){
         axios.get("/api/user")
          .then(
@@ -59,6 +61,15 @@
       }
 
      }
+
+      /*axios.get("/api/user")
+        .then(response => this.user = response.data)
+        .catch(error => this.user = {
+          first_name: "",
+          last_name: "Not Found"
+        });
+    }*/
+
   }
 </script>
 
