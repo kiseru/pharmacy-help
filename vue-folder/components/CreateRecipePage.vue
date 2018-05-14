@@ -52,16 +52,22 @@
         </thead>
         <tbody>
           <tr v-for="medicine in patient.medicines">
-            <td><input type="text" class="form-control" v-bind:value="medicine.name"></td>
-            <td><input type="text" class="form-control" v-bind:value="medicine.dosage"></td>
-            <td><input type="text" class="form-control" v-bind:value="medicine.frequency"></td>
-            <td><input type="text" class="form-control" v-bind:value="medicine.duration"></td>
+            <td>{{ medicine.name }}</td>
+            <td>{{ medicine.dosage }}</td>
+            <td>{{ medicine.frequency }}</td>
+            <td>{{ medicine.period }}</td>
+            <td><button class="btn btn-danger">Удалить</button></td>
           </tr>
           <tr>
-            <td><input type="text" class="form-control" v-model="newMedicine.name"></td>
+            <td>
+              <input type="text" class="form-control" v-model="newMedicine.name" list="medicines">
+              <datalist id="medicines">
+                <option v-for="option in options" v-bind:value="option.medicine_name"></option>
+              </datalist>
+            </td>
             <td><input type="text" class="form-control" v-model="newMedicine.dosage"></td>
             <td><input type="text" class="form-control" v-model="newMedicine.frequency"></td>
-            <td><input type="text" class="form-control" v-model="newMedicine.duration"></td>
+            <td><input type="text" class="form-control" v-model="newMedicine.period"></td>
           </tr>
         </tbody>
       </table>
@@ -76,6 +82,8 @@
 </template>
 
 <script>
+  import axios from "axios";
+
   import AppInput from "./partials/AppInput";
   import DoctorHeader from "./header/DoctorHeader";
 
@@ -97,25 +105,70 @@
           policeNumber: ""
         },
         newMedicine: {
+          medicine_id: 0,
           name: "",
           dosage: "",
           frequency: "",
-          duration: ""
-        }
+          period: ""
+        },
+        options: []
       }
     },
     methods: {
       createNewMedicine() {
+        if (this.newMedicine.medicine_id === 0) return;
+        if (this.newMedicine.name === "") return;
+        if (this.newMedicine.dosage === "") return;
+        if (this.newMedicine.frequency === "") return;
+        if (this.newMedicine.period === "") return;
+        this.newMedicine.medicine_id = this.options[0].id;
         this.patient.medicines.push(this.newMedicine);
         this.newMedicine = {
+          medicine_id: 0,
           name: "",
           dosage: "",
           frequency: "",
-          duration: ""
+          period: ""
         };
       },
       createRecipe() {
-
+        if (this.patient.confirmationPeriod < 1) return;
+        this.patient.medicines.forEach(medicine => delete medicine.name);
+        axios.post("/api/recipes/new", {
+            patient_initials: this.patient.name,
+            patient_email: this.patient.email,
+            medicine_policy_number: this.patient.policeNumber,
+            medicine_card_number: this.patient.cardNumber,
+            patient_age: this.patient.age,
+            day_duration: this.patient.confirmationPeriod,
+            medicines: this.patient.medicines
+          },
+          { headers: { "X-CSRFTOKEN": this.$cookies.get("csrftoken") } })
+          .then(response => {
+            this.patient = {
+              age: "",
+              cardNumber: "",
+              confirmationPeriod: -1,
+              email: "",
+              medicines: [],
+              name: "",
+              policeNumber: ""
+            };
+            this.newMedicine = {
+              medicine_id: 0,
+              name: "",
+              dosage: "",
+              frequency: "",
+              period: ""
+            };
+            this.options = [];
+          });
+      }
+    },
+    watch: {
+      "newMedicine.name"(newValue, oldValue) {
+        axios.get("/api/search/medicine?medicine_name=" + newValue)
+          .then(response => this.options = response.data);
       }
     }
   }
