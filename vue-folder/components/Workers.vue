@@ -23,7 +23,7 @@
                 <td>{{worker.last_name}}</td>
                 <td>{{worker.first_name}}</td>
                 <td><a v-bind:href="'/' + user.role + '/workers/' + worker.id">{{worker.email}}</a></td>
-                <td><button class="btn btn-danger btn-sm">Удалить</button></td>
+                <td><button v-if="worker.email != user.email" class="btn btn-danger btn-sm">Удалить</button></td>
               </tr>
             </tbody>
           </table>
