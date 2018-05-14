@@ -17,6 +17,11 @@
       </div>
 
       <div class="form-group">
+        <label for="description">Описание</label>
+        <input type="text" v-model="newMedicine.description" class="form-control" id="description" name="description"/>
+      </div>
+
+      <div class="form-group">
         <label for="newMedicineLevelInput">Уровень содержания наркотиков</label>
         <select class="form-control" id="newMedicineLevelInput" v-model="newMedicine.level">
           <option>0</option>
@@ -58,6 +63,7 @@
         newMedicine: {
           name: "",
           type: "",
+          description: "",
           level: 0,
           count: 0,
           price: 0
@@ -70,7 +76,7 @@
           headers: {
             "X-CSRFTOKEN": this.$cookies.get("csrftoken")
           }
-        }).then(response => window.location = "/apothecary");
+        }).then(response => window.location = '/apothecary/' + response.data.data.id);
       },
       back() {
         window.location = "/apothecary";

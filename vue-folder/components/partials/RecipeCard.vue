@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-body">
-      <div class="card-title"><a :href="'/apothecary/recipes/' + recipe.id">ID: {{ recipe.id }}</div>
+      <div class="card-title"><a :href="'/' + user.role + '/recipes/' + recipe.id">ID: {{ recipe.id }}</a></div>
       <div class="card-subtitle mb-2 text-muted">{{ recipe.date }}</div>
       <div class="card-text">Пациент: {{ recipe.patientName }}</div>
       <div class="card-text">Доктор: {{ recipe.doctorName }}</div>
@@ -16,6 +16,11 @@
       recipe: {
         type: Object,
         required: true
+      }
+    },
+    computed: {
+      user(){
+        return this.$store.getters.getUser;
       }
     }
   }

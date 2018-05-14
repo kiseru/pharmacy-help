@@ -1,6 +1,7 @@
 <template>
   <div>
-    <apothecary-header/>
+    <apothecary-header v-if="user.role == 'apothecary'"/>
+    <doctor-header v-else/>
     <div class="container">
       <search-bar v-bind:search-obj="searchObj"/>
       <div id="recipes">
@@ -16,6 +17,7 @@
   import axios from "axios";
 
   import ApothecaryHeader from "./header/ApothecaryHeader";
+  import DoctorHeader from "./header/DoctorHeader";
   import AppInput from "./partials/AppInput";
   import RecipeCard from "./partials/RecipeCard";
   import SearchBar from "./partials/SearchBar";
@@ -26,6 +28,7 @@
       RecipeCard,
       AppInput,
       ApothecaryHeader,
+      DoctorHeader,
       SearchBar
     },
     data() {
@@ -71,6 +74,11 @@
             date: "24.02.1994"
           }
         ]
+      }
+    },
+    computed: {
+      user(){
+        return this.$store.getters.getUser;
       }
     },
     beforeMount() {

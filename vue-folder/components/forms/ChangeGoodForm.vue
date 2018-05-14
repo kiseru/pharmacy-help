@@ -26,6 +26,7 @@
       </div>
       <!--<app-button v-bind:name="buttonName"/>-->
       <button type="submit" class="btn btn-primary" v-on:click="updateGood">Сохранить</button>
+      <button class="btn btn-danger" v-on:click="back">Назад</button>
     </div>
   </div>
 </template>
@@ -97,6 +98,9 @@
          .catch(error => {
            console.log(error)
          })
+      },
+      back() {
+        window.location = "/apothecary";
       }
     },
     beforeMount() {

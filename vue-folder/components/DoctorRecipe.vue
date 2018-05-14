@@ -1,6 +1,6 @@
 <template>
   <div>
-    <apothecory-header/>
+    <doctor-header/>
     <div class="card col-md-10 align-self-center">
       <div class="card-body">
         <div class="card-title">Рецепт ID: {{$route.params.id}}</div>
@@ -15,39 +15,22 @@
           <table class="table">
             <thead>
               <tr>
-                <th>Название</th>
-                <th>Тип</th>
+                <th>Лекарство</th>
                 <th>Доза</th>
                 <th>Частота</th>
                 <th>Длительность</th>
-                <th>Выдан</th>
-                <th>Выдать</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(request, index) in data.requests">
                 <td>{{request.medicine_name}}</td>
-                <td>
-                  <select class="custom-select custom-select-sm" v-model="selected_medicines[index]">
-                    <option v-for="option in request.medicines" v-bind:value="option.id">
-                      {{ option.name }} {{option.type}}
-                    </option>
-                  </select>
-                </td>
                 <td>{{request.dosage}}</td>
                 <td>{{request.medicine_frequency}}</td>
                 <td>{{request.medicine_period}}</td>
-                <td v-if="request.is_accepted"><checkmark/></td>
-                <td v-else><close/></td>
-                <td v-if="request.is_accepted"><input type="checkbox" class="form-check-input"  disabled></td>
-                <td v-else><input type="checkbox" class="form-check-input" v-bind:value="request.medicine_name_id" v-model="checked_medicines[index]"></td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
-      <div class="card-footer">
-        <button class="btn btn-primary" v-on:click="confirmRecipe"> Выдать</button>
       </div>
     </div>
   </div>
@@ -61,10 +44,12 @@
   import Vue from "vue";
 
   import axios from "axios";
+  import DoctorHeader from "./header/DoctorHeader";
 
   export default {
     name: "ConfirmingRecipes",
     components: {
+      DoctorHeader,
       ApothecaryHeader,
       AppButton,
       Checkmark,
@@ -103,46 +88,15 @@
       }
     },
     methods: {
-      confirmRecipe: function() {
-        console.log('clicked');
-        console.log(this.checked_medicines);
-        console.log(this.selected_medicines);
-        let result = [];
-        this.checked_medicines.forEach((v, k)=> {
-          if (v) {
-            result.push({
-              'medicine_id': this.selected_medicines[k],
-              'medicine_name_id': this.data.requests[k].medicine_name_id,
-              'medicine_count': 1
-            })
-          }
-        });
-        console.log(result);
-        axios.post('/api/recipes/' + this.$route.params.id, result, {
-        	headers: { "X-CSRFTOKEN": this.$cookies.get("csrftoken") }
-        })
-          .then(
-            response => {
-        	    this.error = false;
-        	    this.getRecipe();
-            },
-            error => this.error = true)
-      },
       getRecipe() {
         axios.get("/api/recipes/" + this.$route.params.id)
          .then(function(response) {
            this.data = response.data.data;
            console.log(this.data);
-           this.data.requests.forEach((v, i) => {
-             Vue.set(v, 'medicines', []);
-             axios.get('/api/medicines/?name_id=' + v['medicine_name_id']).then(
-               response => v.medicines = response.data,
-             )
-           })
          }.bind(this))
          .catch(error => {
            this.data = [];
-           console.log(error)
+           console.log(error);
          })
       }
     },

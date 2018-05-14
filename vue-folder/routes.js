@@ -8,6 +8,7 @@ import PatientRecipe from "./components/PatientRecipe";
 import Recipes from "./components/Recipes";
 import Workers from "./components/Workers";
 import ChangeGoodInfo from "./components/ChangeGoodInfo"
+import DoctorRecipe from "./components/DoctorRecipe"
 
 class Route {
     constructor(path, component) {
@@ -29,6 +30,8 @@ export default [
   new Route("/doctor/workers/new", CreatingWorker),
   new Route("/doctor/workers/:id", CreatingWorker),
   new Route("/doctor/workers", Workers),
+  new Route("/doctor/recipes/:id", DoctorRecipe),
+  new Route("/doctor/recipes", Recipes),
   new Route("/doctor", CreateRecipePage),
   new Route("", HomePage)
 ];

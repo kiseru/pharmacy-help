@@ -14,6 +14,14 @@
       return {
         menuItems: [
           {
+            url: "/doctor/",
+            text: "Cоздать рецепт"
+          },
+          {
+            url: "/doctor/recipes",
+            text: "Рецепты"
+          },
+          {
             url: "/logout",
             text: "Выйти"
           }
