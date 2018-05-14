@@ -31,7 +31,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 class MedicineRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicineRequest
-        fields = ['id', 'medicine_name_id', 'is_accepted', 'medicine_name', 'medicine_frequency', 'medicine_dosage', 'medicine_period']
+        fields = ['id', 'medicine_name_id', 'is_accepted', 'medicine_name', 'medicine_frequency', 'dosage', 'medicine_period']
 
 
 class RecipeFullSerializer(serializers.ModelSerializer):
