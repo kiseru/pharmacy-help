@@ -72,12 +72,12 @@
           }
         ],
         data: {
-          'name': '',
-          'type': '',
-          'description': '',
-          'count': '1',
-          'price': '0.00',
-          'level': 0,
+          name: '',
+          type: '',
+          description: '',
+          count: '1',
+          price: '0.00',
+          level: 0,
         }
       }
     },
@@ -85,7 +85,7 @@
       addGood() {
         console.log('add good');
         console.log(this.data);
-        axios.post("/api/test/medicines/new", this.data, {
+        axios.post("/api/medicines/new", this.data, {
         	headers: { "X-CSRFTOKEN": this.$cookies.get("csrftoken") }
         }).then(response => {
         	this.error = false;

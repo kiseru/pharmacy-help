@@ -25,7 +25,7 @@ export default [
   new Route("/apothecary/workers", Workers),
   new Route("/apothecary/:id", ChangeGoodInfo),
   new Route("/apothecary", Apothecary),
-  new Route("/patient", PatientRecipe),
+  new Route("/patient/recipe/:id", PatientRecipe),
   new Route("/doctor/workers/new", CreatingWorker),
   new Route("/doctor/workers/:id", CreatingWorker),
   new Route("/doctor/workers", Workers),

@@ -42,6 +42,7 @@ urlpatterns = [
     url('^api/medicines/$', GoodsViewSet.as_view({'get': 'list'})),
     url('^api/medicines/new', GoodsViewSet.as_view({'post': 'create'})),
     url('^api/medicines/(?P<pk>\d+)', GoodsViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
+    url('^patient/', TemplateView.as_view(template_name='index.html'))
     # url(r'^api/', include(router.urls)),
 ]
 

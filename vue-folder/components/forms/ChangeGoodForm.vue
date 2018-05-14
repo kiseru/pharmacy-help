@@ -89,7 +89,7 @@
         }, error => this.error = true);
       },
       getGood() {
-        axios.get("/api/test/medicines/" + this.$route.params.id)
+        axios.get("/api/medicines/" + this.$route.params.id)
          .then(function(response) {
            this.good = response.data;
            console.log(this.good);
