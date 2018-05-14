@@ -28,8 +28,8 @@ urlpatterns = [
     url('^doctor/recipes/$', TemplateViewForAuthenticated.as_view(template_name='index.html')),
     url('^apothecary/', TemplateViewForApothecary.as_view(template_name='index.html')),
     url('^doctor/', TemplateViewForDoctor.as_view(template_name='index.html')),
-    url('^api/medicines/new/', add_medicine, name='add_medicine'),
-    url('^api/medicines', get_medicine, name='medicine'),
+    # url('^api/medicines/new/', add_medicine, name='add_medicine'),
+    # url('^api/medicines', get_medicine, name='medicine'),
     url('^api/search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
     url('^api/search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
     url('^api/medicine_pharmacy/', MedicineWithPharmaciesViewSet.as_view({'get': 'list'})),
@@ -39,9 +39,9 @@ urlpatterns = [
     url('^api/workers/$', WorkerViewSet.as_view({'get': 'list'})),
     url('^moderator/', TemplateViewForAuthenticated.as_view(template_name='index.html')),
     url('^patient/recipe/(?P<token>.+)', TemplateView.as_view(template_name='index.html'), name='show_recipe'),
-    url('^api/test/medicines/$', GoodsViewSet.as_view({'get': 'list'})),
-    url('^api/test/medicines/new', GoodsViewSet.as_view({'post': 'create'})),
-    url('^api/test/medicines/(?P<pk>\d+)', GoodsViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
+    url('^api/medicines/$', GoodsViewSet.as_view({'get': 'list'})),
+    url('^api/medicines/new', GoodsViewSet.as_view({'post': 'create'})),
+    url('^api/medicines/(?P<pk>\d+)', GoodsViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
     # url(r'^api/', include(router.urls)),
 ]
 
