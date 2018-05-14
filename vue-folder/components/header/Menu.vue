@@ -14,6 +14,8 @@
 </template>
 
 <script>
+  import axios from "axios";
+
   export default {
     name: "Menu",
     data() {
@@ -34,13 +36,14 @@
         required: true
       }
     },
-    // beforeMount() {
-    //   axios.get("/api/user")
-    //     .then(
-    //       response => this.user = response.data,
-    //       error => this.user = { first_name: "", last_name: "Not found" }
-    //     );
-    // }
+    beforeMount() {
+      axios.get("/api/user")
+        .then(response => this.user = response.data)
+        .catch(error => this.user = {
+          first_name: "",
+          last_name: "Not Found"
+        });
+    }
   }
 </script>
 
