@@ -66,6 +66,10 @@
     },
     methods: {
       addMedicine() {
+        if (this.newMedicine.name === "") return;
+        if (this.newMedicine.type === "") return;
+        if (this.newMedicine.count === 0) return;
+        if (this.newMedicine.price === 0) return;
         axios.post("/api/medicines/new", this.newMedicine, {
           headers: {
             "X-CSRFTOKEN": this.$cookies.get("csrftoken")
