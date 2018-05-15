@@ -28,61 +28,22 @@
     },
     data() {
       return {
-        searchObj: {
-          text: ""
-        },
-        medicines: [
-          {
-            name: "asdfasdf",
-            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
-            type: "asdfasdf",
-            count: 123,
-            price: 1234
-          },
-          {
-            name: "asdfasdf",
-            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
-            type: "asdfasdf",
-            count: 123,
-            price: 1234
-          },
-          {
-            name: "asdfasdf",
-            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
-            type: "asdfasdf",
-            count: 123,
-            price: 1234
-          },
-          {
-            name: "asdfasdf",
-            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
-            type: "asdfasdf",
-            count: 123,
-            price: 1234
-          },
-          {
-            name: "asdfasdf",
-            description: "asdfasdfasdfasdfasdfasdfasdfasdfasdf",
-            type: "asdfasdf",
-            count: 123,
-            price: 1234
-          }
-        ]
+        medicines: []
       }
     },
     computed: {
       foundMedicines() {
-        if (this.searchText === "") {
+        if (this.$store.state.searchText === "") {
           return this.medicines;
         } else {
-          return this.medicines.filter(medicine => medicine.name.includes(this.searchText))
+          return this.medicines.filter(medicine => medicine.name.includes(this.$store.state.searchText));
         }
       }
     },
     beforeMount() {
-      // axios.get("/api/medicines")
-      //   .then(response => this.medicines = response.data)
-      //   .catch(error => this.medicines = []);
+      axios.get("/api/medicines")
+        .then(response => this.medicines = response.data)
+        .catch(error => this.medicines = []);
     }
   }
 </script>

@@ -9,13 +9,6 @@
       <small>{{medicine.count}} шт.</small>
       <small>{{medicine.price}} &#x20bd;</small>
     </div>
-    <!--<h3>{{ medicine.name }}</h3>-->
-    <!--<p>{{ medicine.description }}</p>-->
-    <!--<p>{{ medicine.type }}</p>-->
-    <!--<div class="medicine-info">-->
-      <!--<div class="medicine-count">{{ medicine.count }} шт.</div>-->
-      <!--<div class="medicine-price">{{ medicine.price }} &#x20bd;</div>-->
-    <!--</div>-->
   </div>
 </template>
 
@@ -33,7 +26,7 @@
 
 <style lang="less" scoped>
   .good-card {
-    background-color: #ffffff;
+    background-color: #ffffff !important;
     width: 200px;
     height: 300px;
     border: 2px solid #0062cc;
