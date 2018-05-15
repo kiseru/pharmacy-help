@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="container">
-      <search-bar v-bind:search-obj="searchObj"/>
+      <search-bar/>
       <div id="goods-cards">
         <new-good-card/>
         <div v-for="medicine in foundMedicines">
