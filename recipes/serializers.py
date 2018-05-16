@@ -38,7 +38,7 @@ class RecipeFullSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'doctor_initials', 'doctor_email', 'patient_initials', 'patient_email',
-                  'date', 'day_duration', 'patient_age', 'medicine_card_number', 'medicine_policy_number', 'requests')
+                  'date', 'day_duration', 'patient_age', 'medicine_card_number', 'medicine_policy_number', 'requests', 'comment')
     id = CharField(source='token', required=False)
     doctor_initials = CharField(source='get_doctor_initials', required=False)
     doctor_email = CharField(source='get_doctor_email', required=False)

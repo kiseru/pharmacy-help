@@ -72,6 +72,7 @@ class Recipe(models.Model):
     patient_age = models.PositiveSmallIntegerField()
     medicine_card_number = models.CharField(max_length=10, null=True, blank=True)
     medicine_policy_number = models.CharField(max_length=16, null=True, blank=True)
+    comment = models.TextField(blank=True, null=True)
     
     def get_date_str(self):
         return self.date.strftime('%d.%m.%Y')
