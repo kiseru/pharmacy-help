@@ -21,7 +21,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from recipes import services
 from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view, \
-  AdminPermission, ApothecaryPermission
+  AdminPermission, ApothecaryPermission, is_admin_for_template_view
 from recipes.exceptions import AlreadyExistsException
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
@@ -164,6 +164,12 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
 
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
 class TemplateViewForAuthenticated(TemplateView):
+    pass
+
+
+@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
+@method_decorator(is_admin_for_template_view, name='dispatch')
+class TemplateViewForAdmins(TemplateView):
     pass
 
 
