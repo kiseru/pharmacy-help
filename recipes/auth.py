@@ -68,11 +68,13 @@ def has_role_for_template_view(role, redirect_url=None):
 
 def is_admin_for_template_view(func):
     def new_func(request, *args, **kwargs):
+        print(request.user.is_admin)
         if not request.user.is_admin:
             return HttpResponseForbidden()
         else:
             return func(request, *args, **kwargs)
-        
+    return new_func
+    
 
 class ApothecaryPermission(IsAuthenticated):
     def has_permission(self, request, view):
