@@ -16,7 +16,9 @@ urlpatterns = [
     url('^recipes/$', TemplateViewForAuthenticated.as_view(template_name='index.html')),
     url('^apothecary/', TemplateViewForApothecary.as_view(template_name='index.html')),
     url('^doctor/', TemplateViewForDoctor.as_view(template_name='index.html')),
-    url('^api/medicines/new/', add_medicine, name='add_medicine'),
-    url('^api/medicines', get_medicine, name='medicine')
+    url('^api/medicines/$', index, name='index'),
+    url('^api/medicines/new/$', add_medicine, name='add_medicine'),
+    # url('^api/medicines', get_medicine, name='medicine'),
+    url('^api/medicines/edit/(?P<id>\d+)/$', edit_medicine, name='edit_medicine'),
 ]
 
