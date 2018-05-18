@@ -149,7 +149,8 @@ def add_medicine(request):
         ctx['medicine_type_form'] = MedicineTypeForm(request.POST)
         ctx['medicine_form'] = MedicineForm(request.POST)
         ctx['medicine_pharmacy_form'] = MedicinePharmacyForm(request.POST)
-        if (ctx['medicine_name_form'].is_valid()) and (ctx['medicine_type_form'].is_valid()) and (ctx['medicine_form'].is_valid()):
+        if (ctx['medicine_name_form'].is_valid()) and (ctx['medicine_type_form'].is_valid()) and \
+          (ctx['medicine_form'].is_valid()) and (ctx['medicine_pharmacy_form'].is_valid()):
             instance_medicine_name = ctx['medicine_name_form'].save()
             instance_medicine_type = ctx['medicine_type_form'].save()
             instance_medicine_pharmacy = ctx['medicine_pharmacy_form']

@@ -51,6 +51,7 @@ class MedicineTypeForm(ModelForm):
     class Meta:
         model = MedicineType
         fields = ('type_name',)
+    type_name = CharField(required=False)
 
 class MedicineNamesForm(ModelForm):
     class Meta:
