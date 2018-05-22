@@ -17,7 +17,7 @@
     },
     watch: {
       searchText(newSearchText, oldSearchText) {
-        this.$store.commit("changeSearchText", newSearchText);
+        this.$store.commit("changeSearchText", newSearchText.toLowerCase());
       }
     }
   }
