@@ -36,7 +36,7 @@
         if (this.$store.state.searchText === "") {
           return this.medicines;
         } else {
-          return this.medicines.filter(medicine => medicine.name.includes(this.$store.state.searchText));
+          return this.medicines.filter(medicine => medicine.name.toLowerCase().includes(this.$store.state.searchText));
         }
       }
     },
