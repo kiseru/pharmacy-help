@@ -27,7 +27,7 @@ from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, Medicin
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
-  MedicineRequestSerializerForUpdate
+  MedicineRequestSerializer
 from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
@@ -99,15 +99,11 @@ def do_login(request):
 
 @api_view(['GET', 'POST'])
 @permission_classes((permissions.AllowAny,))
-# @authentication_classes((SessionAuthentication,))
 @renderer_classes((JSONRenderer,))
 @response_to_api_format
 @csrf_protect
 def do_login_ajax(request):
-    print(request)
     if request.method == 'POST':
-        print(request.is_ajax())
-        # json_str = list(request.POST.dict().keys())[0]
         data = request.data
         if 'email' in data and 'password' in data:
             user = authenticate(username=data['email'], password=data['password'])
@@ -148,8 +144,6 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
         data = request.data
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        print(serializer.is_valid())
-        # self.perform_create(serializer)
         recipe = Recipe(**serializer.data, doctor=request.user.doctor_set.all()[0])
         create_recipe(recipe, data, request)
         headers = self.get_success_headers(serializer.data)
@@ -157,7 +151,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        requests = MedicineRequestSerializerForUpdate(data=request.data['requests'], many=True)
+        requests = MedicineRequestSerializer(data=request.data['requests'], many=True)
         requests.is_valid(raise_exception=True)
         print(requests.data)
         serve_recipe(requests.data, instance, request.user.apothecary_set.first())
@@ -263,7 +257,7 @@ class RecipesViewSet(ReadOnlyModelViewSet):
     def list(self, request, *args, **kwargs):
         token = request.GET['id'] if 'id' in request.GET else ''
         if request.user.role is 'doctor':
-            self.queryset = get_recipes_of_doctor(request.user.doctor_set.all()[0], token).order_by('-date')[:10]
+            self.queryset = get_recipes_of_doctor(request.user.doctor_set.first(), token).order_by('-date')[:10]
         else:
             self.queryset = get_recipes(token).order_by('-date')[:10]
         return super().list(request, *args, **kwargs)
@@ -330,10 +324,10 @@ def find_pharmacies(request):
 @method_decorator(response_to_api_format, name='create')
 @method_decorator(response_to_api_format, name='update')
 class WorkerViewSet(mixins.CreateModelMixin,
-                            mixins.RetrieveModelMixin,
-                            mixins.UpdateModelMixin,
-                            mixins.ListModelMixin,
-                            GenericViewSet):
+                    mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.ListModelMixin,
+                    GenericViewSet):
     renderer_classes = (JSONRenderer,)
     
     queryset = User.objects.all()

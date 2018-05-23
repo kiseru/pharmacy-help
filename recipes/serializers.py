@@ -31,19 +31,13 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 class MedicineRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicineRequest
-        fields = ['id', 'medicine_name_id', 'is_accepted', 'medicine_name', 'medicine_frequency', 'dosage', 'medicine_period']
+        fields = ['id', 'medicine_name_id', 'is_accepted', 'medicine_name', 'medicine_frequency', 'dosage', 'medicine_period', 'given_medicine', 'medicine_count']
 
-
-class MedicineRequestSerializerForUpdate(serializers.ModelSerializer):
-    class Meta:
-        model = MedicineRequest
-        fields = ['id', 'given_medicine', 'medicine_count']
-    id = IntegerField(required=True)
     extra_kwargs = {
       'given_medicine': {'write_only': True},
       'medicine_count': {'write_only': True},
     }
-    
+
     def is_valid(self, raise_exception=False):
         if super().is_valid(raise_exception):
             if not MedicineRequest.objects.filter(id=self.initial_data['id']).count():
@@ -56,12 +50,12 @@ class MedicineRequestSerializerForUpdate(serializers.ModelSerializer):
                     self.errors['medicine_count'] = 'Medicine count can not be negative'
             except ValueError:
                 self.errors['medicine_count'] = 'Medicine count must be integer'
-                
+    
         if len(self.errors) and raise_exception:
             raise ValidationError
         return not len(self.errors)
+   
         
-
 class RecipeFullSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
