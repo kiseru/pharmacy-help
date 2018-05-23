@@ -22,7 +22,7 @@ export default [
   new Route("/apothecary", Apothecary),
   new Route("/patient", PatientRecipe),
   new Route("/doctor", CreateRecipePage),
-  new Route("/moderator/new", CreatingWorker),
-  new Route("/moderator", Workers),
+  new Route("/workers/new", CreatingWorker),
+  new Route("/workers", Workers),
   new Route("", HomePage)
 ];
