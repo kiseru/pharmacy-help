@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark pb-0">
     <burger-button v-bind:menu="menu" class="navbar-text navbar-brand"/>
     <a href="/" class="navbar-brand">Pharmacy Help</a>
     <div class="navbar-collapse offcanvas-collapse">
