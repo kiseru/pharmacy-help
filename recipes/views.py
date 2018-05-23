@@ -16,7 +16,7 @@ from rest_framework.renderers import JSONRenderer
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status, permissions, mixins
+from rest_framework import status, permissions, mixins, generics
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from recipes import services
@@ -26,7 +26,8 @@ from recipes.exceptions import AlreadyExistsException
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
-  MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer
+  MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
+  MedicineRequestSerializerForUpdate
 from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
@@ -156,11 +157,12 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        medicines = request.data
-        print(medicines)
-        serve_recipe(medicines, instance, request.user.apothecary_set.all()[0])
+        requests = MedicineRequestSerializerForUpdate(data=request.data['requests'], many=True)
+        requests.is_valid(raise_exception=True)
+        print(requests.data)
+        serve_recipe(requests.data, instance, request.user.apothecary_set.first())
         return Response(status=status.HTTP_200_OK)
-
+    
 
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
 class TemplateViewForAuthenticated(TemplateView):
