@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark pb-0">
     <span class="navbar-brand">Pharmacy Help</span>
   </nav>
 </template>
