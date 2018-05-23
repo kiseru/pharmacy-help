@@ -27,7 +27,7 @@ from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, Medicin
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
-  MedicineRequestSerializer
+  MedicineRequestSerializer, MedicineRequestSerializerForUpdate
 from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
@@ -139,7 +139,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     serializer_class = RecipeFullSerializer
     
     lookup_field = 'token'
-    
+
     def create(self, request, *args, **kwargs):
         data = request.data
         serializer = self.get_serializer(data=data)
@@ -148,13 +148,12 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
         create_recipe(recipe, data, request)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        requests = MedicineRequestSerializer(data=request.data['requests'], many=True)
-        requests.is_valid(raise_exception=True)
-        print(requests.data)
-        serve_recipe(requests.data, instance, request.user.apothecary_set.first())
+        requests = MedicineRequestSerializerForUpdate(data=request.data['requests'], many=True)
+        print(requests.initial_data)
+        serve_recipe(requests.initial_data, instance, request.user.apothecary_set.first())
         return Response(status=status.HTTP_200_OK)
     
 

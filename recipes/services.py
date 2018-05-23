@@ -97,7 +97,7 @@ def serve_recipe(requests, recipe, apothecary):
             # проверяем, действительно ли выдается препарат, соответствующий данному medicine_request
             if request.medicine_dosage.medicine.id != good.medicine.medicine_name.id:
                 raise ValidationError()
-            if good.count >= r['medicine_count']:
+            if good.count >= r['medicine_count'] >= 0:
                 good.count -= r['medicine_count']
                 MedicinesPharmacies.save(good)
                 request.medicine_count = r['medicine_count']

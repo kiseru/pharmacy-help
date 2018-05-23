@@ -73,7 +73,6 @@ class Recipe(models.Model):
     medicine_card_number = models.CharField(max_length=10, null=True, blank=True)
     medicine_policy_number = models.CharField(max_length=16, null=True, blank=True)
     comment = models.TextField(blank=True, null=True)
-    requests = models.ManyToManyField('MedicineRequest', related_name='request_recipe')
     
     def get_date_str(self):
         return self.date.strftime('%d.%m.%Y')
@@ -86,6 +85,10 @@ class Recipe(models.Model):
     
     def get_doctor_email(self):
         return self.doctor.user.email
+
+    @property
+    def requests(self):
+        return MedicineRequest.objects.filter(recipe=self)
     
     
 
