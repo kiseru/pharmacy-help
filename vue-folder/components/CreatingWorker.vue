@@ -1,6 +1,7 @@
 <template>
   <div>
     <default-header/>
+    
     <div class="create-new-worker-form">
       <h4>Добавить сотрудника</h4>
 
@@ -45,7 +46,7 @@
 
 <script>
   import AppButton from "./partials/AppButton";
-  import DefaultHeader from "./header/DefaultHeader";
+  import DefaultHeader from "./headers/DefaultHeader";
 
   export default {
     name: "CreatingWorker",
