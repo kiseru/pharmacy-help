@@ -18,10 +18,10 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Новикова</td>
-                <td>Анна</td>
-                <td>anna.novikova@mail.ru</td>
+              <tr v-for="worker in workers">
+                <td>{{ worker.first_name }}</td>
+                <td>{{ worker.last_name }}</td>
+                <td>{{ worker.email }}</td>
                 <td><button class="btn btn-danger btn-sm">Удалить</button></td>
               </tr>
             </tbody>
@@ -33,12 +33,23 @@
 </template>
 
 <script>
+  import axios from 'axios';
+
   import DefaultHeader from "./header/DefaultHeader";
 
   export default {
     name: "Workers",
     components: {
       DefaultHeader
+    },
+    data() {
+      return {
+        workers: []
+      };
+    },
+    beforeMount() {
+      axios.get("/api/workers?query=")
+        .then(response = this.workers = response.data);
     }
   }
 </script>
