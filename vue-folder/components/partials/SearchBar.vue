@@ -3,7 +3,6 @@
     <div class="col-4  form-group">
       <label for="search-input">Найти</label><br/>
       <input type="text" id="search-input" class="form-control" v-model="searchText">
-      {{ this.$store.state.searchText }}
     </div>
   </div>
 </template>
@@ -11,12 +10,6 @@
 <script>
   export default {
     name: 'SearchBar',
-    props: {
-      searchObj: {
-        type: Object,
-        required: true
-      }
-    },
     data() {
       return {
         searchText: ""
@@ -24,7 +17,7 @@
     },
     watch: {
       searchText(newSearchText, oldSearchText) {
-        this.$store.commit("changeSearchText", newSearchText);
+        this.$store.commit("changeSearchText", newSearchText.toLowerCase());
       }
     }
   }

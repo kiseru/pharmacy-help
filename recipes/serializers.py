@@ -1,5 +1,5 @@
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import CharField
+from rest_framework.fields import CharField, IntegerField
 
 from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType, MedicineName, Pharmacy, \
   MedicinesPharmacies
@@ -31,14 +31,36 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 class MedicineRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicineRequest
-        fields = ['id', 'medicine_name_id', 'is_accepted', 'medicine_name', 'medicine_frequency', 'dosage', 'medicine_period']
+        fields = ['id', 'medicine_name_id', 'is_accepted', 'medicine_name', 'medicine_frequency', 'dosage', 'medicine_period', 'given_medicine', 'medicine_count']
 
+    extra_kwargs = {
+      'given_medicine': {'write_only': True},
+      'medicine_count': {'write_only': True},
+    }
 
+    def is_valid(self, raise_exception=False):
+        if super().is_valid(raise_exception):
+            if not MedicineRequest.objects.filter(id=self.initial_data['id']).count():
+                self.errors['id'] = 'Medicine request with such id not found'
+            if not MedicinesPharmacies.objects.filter(id=self.initial_data['given_medicine']).count():
+                self.errors['given_medicine'] = 'Medicine not found'
+            try:
+                count = int(self.initial_data['medicine_count'])
+                if count < 0:
+                    self.errors['medicine_count'] = 'Medicine count can not be negative'
+            except ValueError:
+                self.errors['medicine_count'] = 'Medicine count must be integer'
+    
+        if len(self.errors) and raise_exception:
+            raise ValidationError
+        return not len(self.errors)
+   
+        
 class RecipeFullSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'doctor_initials', 'doctor_email', 'patient_initials', 'patient_email',
-                  'date', 'day_duration', 'patient_age', 'medicine_card_number', 'medicine_policy_number', 'requests')
+                  'date', 'day_duration', 'patient_age', 'medicine_card_number', 'medicine_policy_number', 'requests', 'comment')
     id = CharField(source='token', required=False)
     doctor_initials = CharField(source='get_doctor_initials', required=False)
     doctor_email = CharField(source='get_doctor_email', required=False)

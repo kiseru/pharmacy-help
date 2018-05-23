@@ -2,11 +2,18 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <burger-button v-bind:menu="menu" class="navbar-text navbar-brand"/>
     <a href="/" class="navbar-brand">Pharmacy Help</a>
+    <div class="navbar-collapse offcanvas-collapse">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item active text-light">{{ user.first_name }} {{ user.last_name }}</li>
+      </ul>
+    </div>
     <app-menu v-bind:menu="menu" v-bind:menuItems="menuItems"/>
   </nav>
 </template>
 
 <script>
+  import axios from 'axios';
+
   import BurgerButton from './MenuButton';
   import Logo from './Logo';
   import AppMenu from './Menu';
@@ -22,6 +29,10 @@
       return {
         menu: {
           showMenu: false
+        },
+        user: {
+          firstName: "NotFound",
+          lastName: ""
         }
       }
     },
@@ -30,6 +41,14 @@
         type: Array,
         required: true
       }
+    },
+    beforeMount() {
+      axios.get("/api/user")
+        .then(response => this.user = response.data)
+        .catch(error => this.user = {
+          first_name: "",
+          last_name: "Not Found"
+        });
     }
   }
 </script>

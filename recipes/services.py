@@ -83,34 +83,31 @@ def get_hash(*args):
 
 
 @transaction.atomic()
-def serve_recipe(medicines, recipe, apothecary):
-    for m in medicines:
-        medicine_requests = MedicineRequest.objects.filter(
-              recipe=recipe,
-              medicine_dosage__medicine__pk=m['medicine_name_id'])
-        if medicine_requests.count():
-            medicine_request = medicine_requests[0]
-            if not medicine_request.request_confirmation_time:
-                medicine_request.apothecary = apothecary
-                medicine_request.medicine_count = m['medicine_count']
-                medicine_request.request_confirmation_time = timezone.now()
-                medicine_request.given_medicine_id = MedicinesPharmacies.objects.get(id=m['medicine_id']).medicine.id
-                pharmacy = apothecary.pharmacy
-                goods = pharmacy.medicinespharmacies_set.filter(id=m['medicine_id'])
-                if goods.count():
-                    good = goods.all()[0]
-                    if good.count >= m['medicine_count']:
-                        good.count -= m['medicine_count']
-                        MedicinesPharmacies.save(good)
-                    else:
-                        raise Exception('invalid_data')
-                else:
-                    raise Exception('invalid_data')
-                MedicineRequest.save(medicine_request)
-            else:
-                raise Exception('invalid_data')
-        else:
+def serve_recipe(requests, recipe, apothecary):
+    for r in requests:
+        request = MedicineRequest.objects.get(pk=r['id'])
+        if request.recipe.id != recipe.id:
             raise Exception('invalid_data')
+        request.apothecary = apothecary
+        request.request_confirmation_time = timezone.now()
+        pharmacy = apothecary.pharmacy
+        goods = pharmacy.medicinespharmacies_set.filter(id=r['given_medicine'])
+        if goods.count():
+            good = goods.first()
+            # проверяем, действительно ли выдается препарат, соответствующий данному medicine_request
+            if request.medicine_dosage.medicine.id != good.medicine.medicine_name.id:
+                raise ValidationError()
+            if good.count >= r['medicine_count']:
+                good.count -= r['medicine_count']
+                MedicinesPharmacies.save(good)
+                request.medicine_count = r['medicine_count']
+                request.given_medicine_id = good.medicine.id
+                MedicineRequest.save(request)
+            else:
+                raise ValidationError()
+        else:
+            raise ValidationError()
+        MedicineRequest.save(request)
 
 
 def get_coordinates(address: str):
