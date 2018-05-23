@@ -13,7 +13,7 @@ from recipes.services import get_coordinates
 
 class MyUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {'fields': ('email', 'phone_number', 'password')}),
+        (None, {'fields': ('email', 'phone_number', 'password', 'is_admin')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name',)}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
                                         )}),
