@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from recipes.managers import CustomUserManager
+from recipes.validators import validate_pos_value
 
 
 class MedicineType(models.Model):
@@ -77,7 +78,7 @@ class MedicineRequestStatus(models.Model):
 
 
 class MedicineName(models.Model):
-    medicine_name = models.CharField(max_length=50)
+    medicine_name = models.CharField(max_length=50, unique=True)
     medicine_description = models.TextField()
     medicine_level = models.PositiveSmallIntegerField(default=0)
 
@@ -117,5 +118,5 @@ class MedicineRequest(models.Model):
 class MedicinesPharmacies(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
-    count = models.PositiveIntegerField(default=0)
-    price = models.FloatField(default=0.0)
+    count = models.PositiveIntegerField(default=0, validators=[validate_pos_value])
+    price = models.FloatField(default=0.0, validators=[validate_pos_value])
