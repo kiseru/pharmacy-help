@@ -128,7 +128,6 @@ def do_logout(request):
 @method_decorator(has_role('apothecary'), name='update')
 @method_decorator(response_to_api_format, name='create')
 @method_decorator(response_to_api_format, name='update')
-@method_decorator(response_to_api_format, name='retrieve')
 class RecipeCreationViewSet(mixins.CreateModelMixin,
                             mixins.RetrieveModelMixin,
                             mixins.UpdateModelMixin,

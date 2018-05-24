@@ -27,6 +27,7 @@ urlpatterns = [
     url('^apothecary/workers/', TemplateViewForAdmins.as_view(template_name='index.html')),
     url('^doctor/workers/', TemplateViewForAdmins.as_view(template_name='index.html')),
     url('^workers/', TemplateViewForAdmins.as_view(template_name='index.html')),
+    url('^recipes/', TemplateViewForAuthenticated.as_view(template_name='index.html')),
     url('^apothecary/new', TemplateViewForApothecary.as_view(template_name='index.html')),
     url('^apothecary/(?P<token>.+)/$', TemplateViewForApothecary.as_view(template_name='index.html')),
     url('^apothecary/$', TemplateViewForApothecary.as_view(template_name='index.html')),
