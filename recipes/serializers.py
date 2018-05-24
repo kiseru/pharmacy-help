@@ -133,4 +133,4 @@ class MedicineSerializer(serializers.ModelSerializer):
 class GoodSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicinesPharmacies
-        fields = ('count', 'price', 'name', 'type', 'description', 'id', 'level')
+        fields = ('count', 'price', 'name', 'type', 'id', 'level')

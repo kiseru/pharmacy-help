@@ -54,4 +54,4 @@ class MedicineTypeForm(ModelForm):
 class MedicineNamesForm(ModelForm):
     class Meta:
         model = MedicineName
-        fields = ('medicine_name', 'medicine_description','medicine_level',)
+        fields = ('medicine_name', 'medicine_level',)
