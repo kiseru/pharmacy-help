@@ -2,9 +2,9 @@
   <div>
     <apothecary-header/>
     <div class="container">
-      <search-bar v-bind:search-obj="searchObj"/>
+      <search-bar/>
       <div id="recipes">
-        <div v-for="recipe in recipes">
+        <div v-for="recipe in foundRecipes">
           <recipe-card v-bind:recipe="recipe"/>
         </div>
       </div>
@@ -16,7 +16,6 @@
   import axios from "axios";
 
   import ApothecaryHeader from "./header/ApothecaryHeader";
-  import AppInput from "./partials/AppInput";
   import RecipeCard from "./partials/RecipeCard";
   import SearchBar from "./partials/SearchBar";
 
@@ -24,59 +23,24 @@
     name: "Recipes",
     components: {
       RecipeCard,
-      AppInput,
       ApothecaryHeader,
       SearchBar
     },
     data() {
       return {
-        searchObj: {
-          text: ""
-        },
-        recipes: [
-          {
-            id: 1,
-            patientName: "asdfasdf",
-            doctorName: "asdfasdf",
-            date: "24.02.1994"
-          },
-          {
-            id: 1,
-            patientName: "asdfasdf",
-            doctorName: "asdfasdf",
-            date: "24.02.1994"
-          },
-          {
-            id: 1,
-            patientName: "asdfasdf",
-            doctorName: "asdfasdf",
-            date: "24.02.1994"
-          },
-          {
-            id: 1,
-            patientName: "asdfasdf",
-            doctorName: "asdfasdf",
-            date: "24.02.1994"
-          },
-          {
-            id: 1,
-            patientName: "asdfasdf",
-            doctorName: "asdfasdf",
-            date: "24.02.1994"
-          },
-          {
-            id: 1,
-            patientName: "asdfasdf",
-            doctorName: "asdfasdf",
-            date: "24.02.1994"
-          }
-        ]
+        recipes: []
+      }
+    },
+    computed: {
+      foundRecipes() {
+        if (this.$store.state.searchText === "") return this.recipes;
+        return this.recipes.filter(recipe => recipe.id.toLowerCase().includes(this.$store.state.searchText))
       }
     },
     beforeMount() {
-      // axios.get("/api/recipes?id=" + this.searchText)
-      //   .then(response => this.recipes = response.data)
-      //   .catch(error => this.recipes = [])
+      axios.get("/api/recipes?id=")
+        .then(response => this.recipes = response.data)
+        .catch(error => this.recipes = [])
     }
   }
 </script>

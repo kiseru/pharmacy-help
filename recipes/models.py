@@ -49,6 +49,9 @@ class User(AbstractUser):
 class Hospital(models.Model):
     city = models.ForeignKey(City, null=False, on_delete=models.CASCADE)
     hospital_name = models.CharField(max_length=20)
+    
+    def __str__(self):
+        return self.hospital_name
 
 
 class Doctor(models.Model):
@@ -89,7 +92,6 @@ class Recipe(models.Model):
     @property
     def requests(self):
         return MedicineRequest.objects.filter(recipe=self)
-    
     
 
 class Pharmacy(models.Model):

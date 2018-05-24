@@ -7,7 +7,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 # Register your models here.
 from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm, PharmacyForm
 from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary, Pharmacy, Recipe, MedicineType, \
-  MedicineRequest, MedicineRequestStatus, MedicineDosage, MedicinesPharmacies, City
+  MedicineRequest, MedicineRequestStatus, MedicineDosage, MedicinesPharmacies, City, Hospital
 from recipes.services import get_coordinates
 
 
@@ -54,3 +54,4 @@ admin.site.register(MedicineRequestStatus)
 admin.site.register(MedicineDosage)
 admin.site.register(MedicinesPharmacies)
 admin.site.register(City)
+admin.site.register(Hospital)

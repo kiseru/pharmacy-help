@@ -1,13 +1,22 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <burger-button v-bind:menu="menu" class="navbar-text navbar-brand"/>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <a href="/" class="navbar-brand">Pharmacy Help</a>
     <div class="navbar-collapse offcanvas-collapse">
       <ul class="navbar-nav ml-auto">
-        <li class="nav-item active text-light">{{ user.first_name }} {{ user.last_name }}</li>
+        <li class="nav-item" v-if="user.is_admin">
+          <a href="/workers" class="nav-link">Сотрудники</a>
+        </li>
+        <li class="nav-item" v-for="item in menuItems">
+          <a v-bind:href="item.url" class="nav-link">{{item.text}}</a>
+        </li>
+        <li class="nav-item active text-light dropdown">
+          <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.first_name }} {{ user.last_name }}</a>
+          <div class="dropdown-menu mt-1">
+            <a href="/logout" class="dropdown-item">Выйти</a>
+          </div>
+        </li>
       </ul>
     </div>
-    <app-menu v-bind:menu="menu" v-bind:menuItems="menuItems"/>
   </nav>
 </template>
 
@@ -54,13 +63,4 @@
 </script>
 
 <style lang="less" scoped>
-  nav {
-    height: 56px;
-    padding: 0 16px 8px 0;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    right: 0;
-  }
 </style>

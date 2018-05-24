@@ -14,6 +14,13 @@
       <div class="validate-error" v-if="!validator.isNameValid">Неправильно введено название препарата</div>
 
       <div class="form-group">
+        <label for="newMedicineDescriptionInput">Описание</label>
+        <input type="text" class="form-control" id="newMedicineDescriptionInput" v-model="newMedicine.description">
+      </div>
+
+      <div class="validate-error" v-if="!validator.isDescriptionValid">Неправильно введено описание</div>
+
+      <div class="form-group">
         <label for="newMedicineTypeInput">Тип препарата</label>
         <input type="text" class="form-control" id="newMedicineTypeInput" v-model="newMedicine.type">
       </div>
@@ -52,13 +59,11 @@
 <script>
   import axios from "axios";
 
-  import AddGoodForm from "./forms/AddGoodForm";
   import ApothecaryHeader from "./header/ApothecaryHeader";
 
   export default {
     name: "AddGood",
     components: {
-      AddGoodForm,
       ApothecaryHeader
     },
     data() {
@@ -68,13 +73,15 @@
           type: "",
           level: 0,
           count: 0,
-          price: 0
+          price: 0,
+          description: ""
         },
         validator: {
           isNameValid: true,
           isTypeValid: true,
           isCountValid: true,
-          isPriceValid: true
+          isPriceValid: true,
+          isDescriptionValid: true
         }
       }
     },
@@ -84,9 +91,10 @@
         this.validator.isTypeValid = this.newMedicine.type !== "";
         this.validator.isCountValid = this.newMedicine.count > 0;
         this.validator.isPriceValid = this.newMedicine.price > 0;
+        this.validator.isDescriptionValid = this.newMedicine.description !== "";
 
         if (!this.validator.isNameValid || !this.validator.isTypeValid
-          || !this.validator.isCountValid || !this.validator.isPriceValid) return;
+          || !this.validator.isCountValid || !this.validator.isPriceValid || !this.validator.isDescriptionValid) return;
 
         axios.post("/api/medicines/new", this.newMedicine, {
           headers: {
