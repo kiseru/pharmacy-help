@@ -29,7 +29,7 @@ from recipes.serializers import serialize_user, RecipeShortSerializer, UserSeria
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
   MedicineRequestSerializer, MedicineRequestSerializerForUpdate
 from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
-  delete_worker
+  delete_worker, get_recipe_with_goods
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 import json
@@ -139,7 +139,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     serializer_class = RecipeFullSerializer
     
     lookup_field = 'token'
-
+    
     def create(self, request, *args, **kwargs):
         data = request.data
         serializer = self.get_serializer(data=data)
@@ -156,6 +156,15 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
         serve_recipe(requests.initial_data, instance, request.user.apothecary_set.first())
         return Response(status=status.HTTP_200_OK)
     
+    
+@api_view(['GET'])
+@permission_classes((ApothecaryPermission,))
+@renderer_classes((JSONRenderer,))
+def get_recipe_for_apothecary(request, token):
+    instance = Recipe.objects.get(token=token)
+    serializer = RecipeFullSerializer(instance=instance)
+    return Response(get_recipe_with_goods(serializer.data, request), status=status.HTTP_200_OK)
+
 
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
 class TemplateViewForAuthenticated(TemplateView):
