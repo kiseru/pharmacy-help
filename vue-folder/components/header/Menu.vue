@@ -5,6 +5,9 @@
         <li class="sidebar-brand">
           <p>{{ user.first_name }} {{ user.last_name }}</p>
         </li>
+        <li v-if="user.is_admin">
+          <a href="/workers">Сотрудники</a>
+        </li>
         <li v-for="item in menuItems">
           <a v-bind:href="item.url">{{item.text}}</a>
         </li>
