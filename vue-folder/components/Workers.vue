@@ -5,7 +5,7 @@
       <div class="card-body">
         <div class="row">
           <div class="card-title col-md-10">Сотрудники</div>
-          <div class="col-md-2"><button class="btn btn-primary">Добавить</button></div>
+          <div class="col-md-2"><a class="btn btn-primary" href="/workers/new">Добавить</a></div>
         </div>
         <div class="card-text">
           <table class="table">
@@ -22,7 +22,11 @@
                 <td>{{ worker.first_name }}</td>
                 <td>{{ worker.last_name }}</td>
                 <td>{{ worker.email }}</td>
-                <td><button class="btn btn-danger btn-sm">Удалить</button></td>
+                <td>
+                  <button class="material-icons bg-danger border-0 rounded text-light p-1 mx-1">
+                    delete_forever
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -49,7 +53,7 @@
     },
     beforeMount() {
       axios.get("/api/workers?query=")
-        .then(response = this.workers = response.data);
+        .then(response => this.workers = response.data);
     }
   }
 </script>
