@@ -20,10 +20,6 @@
           {
             url: "/recipes",
             text: "Рецепты"
-          },
-          {
-            url: "/logout",
-            text: "Выйти"
           }
         ]
       }
