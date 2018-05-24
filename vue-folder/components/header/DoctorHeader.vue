@@ -13,10 +13,6 @@
     data() {
       return {
         menuItems: [
-          {
-            url: "/logout",
-            text: "Выйти"
-          }
         ]
       }
     }

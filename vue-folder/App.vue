@@ -9,9 +9,4 @@ export default {
 </script>
 
 <style>
-  body {
-    margin: 0;
-    background-color: #f5f5f5;
-    padding-top: 56px;
-  }
 </style>
