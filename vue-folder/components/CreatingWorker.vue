@@ -1,6 +1,7 @@
 <template>
   <div>
     <default-header/>
+
     <div class="create-new-worker-form">
       <h4>Добавить сотрудника</h4>
 
@@ -38,12 +39,14 @@
 
       <hr>
 
-      <button type="button" class="btn btn-success" v-on:click="createRecipe">Добавить сотрудника</button>
+      <button type="button" class="btn btn-success" v-on:click="add()">Добавить сотрудника</button>
     </div>
   </div>
 </template>
 
 <script>
+  import axios from 'axios';
+
   import AppButton from "./partials/AppButton";
   import DefaultHeader from "./header/DefaultHeader";
 
@@ -63,6 +66,18 @@
           password: "",
           matchPassword: ""
         }
+      }
+    },
+    methods: {
+      add() {
+        axios.post({
+          email: this.newWorker.email,
+          phone_number: this.newWorker.phoneNumber,
+          last_name: this.newWorker.lastName,
+          first_name: this.newWorker.firstName,
+          password: this.newWorker.password
+        })
+        windows.location = "/workers"
       }
     }
   }

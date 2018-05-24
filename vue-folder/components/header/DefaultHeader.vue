@@ -1,12 +1,28 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark pb-0">
-    <span class="navbar-brand">Pharmacy Help</span>
-  </nav>
+  <div>
+    <apothecary-header v-if="user.role === 'apothecary'"/>
+    <doctor-header v-if="user.role === 'doctor'"/>
+  </div>
 </template>
 
 <script>
+  import ApothecaryHeader from "./ApothecaryHeader";
+  import DoctorHeader from "./DoctorHeader";
+
   export default {
-    name: "DefaultHeader"
+    name: "DefaultHeader",
+    components: {
+      ApothecaryHeader,
+      DoctorHeader
+    },
+    data() {
+      return {
+        user: null
+      };
+    },
+    beforeMount() {
+      this.user = this.$state.getters.getUser();
+    }
   }
 </script>
 
