@@ -30,7 +30,7 @@
                 <td>
                   <select class="custom-select custom-select-sm" v-model="medicine.given_medicine">
                     <option selected>Выберите тип</option>
-                    <option v-bind:value="good.id" v-for="good in medicine.goods" v-if="good.count > 0">{{ good.type }}</option>
+                    <option v-bind:value="good.id" v-for="good in medicine.goods" v-if="good.count > medicine.medicine_count">{{ good.type }}</option>
                   </select>
                 </td>
                 <td>{{ medicine.medicine_count }}</td>
