@@ -1,72 +1,136 @@
-from recipes.auth import *
-from recipes.models import Recipe, MedicineRequest
+from rest_framework.exceptions import ValidationError
+from rest_framework.fields import CharField, IntegerField
 
+from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType, MedicineName, Pharmacy, \
+  MedicinesPharmacies
+from rest_framework import serializers
+import re
 
-class JsonSerializer:
-    @staticmethod
-    def get_json(object):
-        return object.__str__()
+# class JsonSerializer:
+#     @staticmethod
+#     def get_json(object):
+#         return object.__str__()
 
 
 def serialize_user(user, errors: list):
-    result = UserSerializer.get_json(user)
-    result['error'] = None if not errors else ''.join([''.join([j[1][0]['message'] for j in i.items()]) for i in errors])
-    return result
+    result = UserSerializer(instance=user)
+    result.data['error'] = None if not errors else ''.join([''.join([j[1][0]['message'] for j in i.items()]) for i in errors])
+    return result.data
 
 
-class RecipeSerializerShort(JsonSerializer):
-    @staticmethod
-    def get_json(object: Recipe):
-        recipe = dict()
-        recipe['id'] = object.token
-        recipe['doctorName'] = object.doctor.user.last_name + ' ' + object.doctor.user.first_name
-        recipe['patientName'] = object.patient_initials
-        # recipe['patient_email'] = object.patient_email
-        recipe['date'] = object.date.strftime('%d.%m.%Y')
-        return recipe
+class RecipeShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'doctorName', 'patientName', 'patient_email', 'date')
+    id = CharField(source='token')
+    doctorName = CharField(source='get_doctor_initials')
+    patientName = CharField(source='patient_initials')
+    date = CharField(source='get_date_str')
 
 
-class MedicineRequestSerializer(JsonSerializer):
-    @staticmethod
-    def get_json(object: MedicineRequest):
-        result = dict()
-        result['is_accepted'] = object.medicine_count > 0
-        result['medicine_name'] = object.medicine_dosage.medicine.medicine_name
-        result['medicine_frequency'] = object.medicine_dosage.frequency
-        result['medicine_dosage'] = object.medicine_dosage.dosage
-        result['medicine_period'] = object.medicine_dosage.period
-        return result
+class MedicineRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicineRequest
+        fields = ['id', 'medicine_name_id', 'is_accepted', 'medicine_name', 'medicine_frequency', 'dosage',
+                  'medicine_period', 'given_medicine', 'medicine_count']
 
 
-class RecipeSerializerFull(JsonSerializer):
-    @staticmethod
-    def get_json(object: Recipe):
-        recipe = dict()
-        recipe['id'] = object.id
-        recipe['doctor_initials'] = object.doctor.user.last_name + ' ' + object.doctor.user.first_name
-        recipe['doctor_email'] = object.doctor.user.email
-        recipe['patient_initials'] = object.patient_initials
-        recipe['patient_email'] = object.patient_email
-        recipe['date'] = object.date.strftime('%Y-%m-%d %H:%M')
-        recipe['day_duration'] = object.day_duration
-        recipe['patient_age'] = object.patient_age
-        recipe['medicine_card_number'] = object.medicine_card_number
-        recipe['medicine_policy_number'] = object.medicine_policy_number
-        medicineRequests = object.medicinerequest_set.all()
-        requests = [MedicineRequestSerializer.get_json(i) for i in medicineRequests]
-        recipe['requests'] = requests
-        return recipe
+class MedicineRequestSerializerForUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = MedicineRequest
+        fields = ['id', 'given_medicine', 'medicine_count']
+    
+    id = IntegerField(required=True)
+    extra_kwargs = {
+        'given_medicine': {'write_only': True},
+        'medicine_count': {'write_only': True},
+    }
+   
+    
+class RecipeFullSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'doctor_initials', 'doctor_email', 'patient_initials', 'patient_email',
+                  'date', 'day_duration', 'patient_age', 'medicine_card_number', 'medicine_policy_number', 'requests', 'comment')
+    id = CharField(source='token', required=False)
+    doctor_initials = CharField(source='get_doctor_initials', required=False)
+    doctor_email = CharField(source='get_doctor_email', required=False)
+    date = CharField(source='get_date_str', required=False)
+    requests = MedicineRequestSerializer(many=True, required=False)
 
 
-class UserSerializer(JsonSerializer):
-    @staticmethod
-    def get_json(object):
-        role = get_role(object)
-        return {
-          'id': object.id,
-          'email': object.email,
-          'last_name': object.last_name,
-          'first_name': object.first_name,
-          'phone_number': object.phone_number,
-          'role': role,
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'last_name', 'first_name', 'phone_number', 'role', 'is_admin', 'password')
+        extra_kwargs = {
+            'password': {'write_only': True}
         }
+        
+    def is_valid(self, raise_exception=False):
+        if super().is_valid(raise_exception=raise_exception):
+            if len(self.initial_data['password']) < 5:
+                self._errors['password'] = 'Password can not be less than 5 symbols'
+                if raise_exception:
+                    raise ValidationError()
+            else:
+                self.validated_data['password'] = self.initial_data['password']
+            if not re.fullmatch('([^\W\d_]| )+', self.initial_data['first_name']):
+                self._errors['first_name'] = 'First name should contain only letters or "-"'
+                if raise_exception:
+                    raise ValidationError()
+            if not re.fullmatch('([^\W\d_]| )+', self.initial_data['last_name']):
+                self._errors['first_name'] = 'Last name should contain only letters or "-"'
+                if raise_exception:
+                    raise ValidationError()
+        return not len(self.errors)
+        
+
+class MedicineTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicineType
+        fields = ('id', 'type_name')
+
+
+class MedicineNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicineName
+        fields = ('id', 'medicine_name', 'medicine_types')
+    medicine_types = MedicineTypeSerializer(many=True)
+    
+    
+class PharmacySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pharmacy
+        fields = '__all__'
+        
+        
+class MedicineWithPharmaciesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medicine
+        fields = ('medicine_name', 'medicine_type', 'pharmacies')
+    medicine_name = CharField(source='name')
+    medicine_type = CharField(source='type')
+    pharmacies = PharmacySerializer(many=True)
+    
+    
+# class MedicinePharmacySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = MedicinesPharmacies
+#         exclude = ('count',)
+#     medicine = MedicineSerializer()
+#     pharmacy = PharmacySerializer()
+
+
+class MedicineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medicine
+        fields = ('medicine_name', 'medicine_type')
+    medicine_name = CharField(source='name')
+    medicine_type = CharField(source='type')
+
+
+class GoodSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicinesPharmacies
+        fields = ('count', 'price', 'name', 'type', 'id', 'level')

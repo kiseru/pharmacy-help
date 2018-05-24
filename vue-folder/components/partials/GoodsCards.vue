@@ -1,13 +1,12 @@
 <template>
   <div>
-    <div id="search-block">
-      <label for="search-input">Найти</label><br/>
-      <input type="text" id="search-input" v-model="searchText">
-    </div>
-    <div id="goods-cards">
-      <new-good-card/>
-      <div v-for="medicine in foundMedicines">
-        <good-card v-bind:medicine="medicine"></good-card>
+    <div class="container">
+      <search-bar/>
+      <div id="goods-cards">
+        <new-good-card/>
+        <div v-for="medicine in foundMedicines">
+          <good-card v-bind:medicine="medicine"></good-card>
+        </div>
       </div>
     </div>
   </div>
@@ -18,25 +17,26 @@
 
   import GoodCard from "./GoodCard";
   import NewGoodCard from "./NewGoodCard";
+  import SearchBar from "./SearchBar";
 
   export default {
     name: "GoodsCards",
     components: {
       GoodCard,
-      NewGoodCard
+      NewGoodCard,
+      SearchBar
     },
     data() {
       return {
-        searchText: "",
         medicines: []
       }
     },
     computed: {
       foundMedicines() {
-        if (this.searchText === "") {
+        if (this.$store.state.searchText === "") {
           return this.medicines;
         } else {
-          return this.medicines.filter(medicine => medicine.name.includes(this.searchText))
+          return this.medicines.filter(medicine => medicine.name.toLowerCase().includes(this.$store.state.searchText));
         }
       }
     },
@@ -48,7 +48,7 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
   #goods-cards {
     display: grid;
     margin: 10px auto;
@@ -99,5 +99,13 @@
   #search-block label {
     font-size: 25px;
     font-weight: normal;
+  }
+
+  .container {
+    margin-top: 20px;
+
+    .form-group {
+      text-align: center;
+    }
   }
 </style>

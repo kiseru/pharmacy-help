@@ -16,30 +16,29 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
   #menu-button {
     position: relative;
-    height: 40px;
-    width: 40px;
+    height: 56px;
+    width: 56px;
     padding: 3px;
     transition: ease 0.3s;
     z-index: 2;
-    background-color: #087E8B;
+    background-color: #343a40;
     border: 0;
     outline: none;
-  }
 
-  span {
-    color: #F5f5f5;
-    font-size: 26px;
-  }
+    span {
+      color: #F5f5f5;
+      font-size: 26px;
+    }
 
-  #menu-button:hover {
-    background-color: #f5f5f5;
-  }
+    &:hover {
+      background-color: #f5f5f5;
 
-  #menu-button:hover span {
-    color: #087e8b;
+      span {
+        color: #343a40;
+      }
+    }
   }
-
 </style>

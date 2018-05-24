@@ -13,16 +13,12 @@
     data() {
       return {
         menuItems: [
-          {
-            url: "/logout",
-            text: "Выйти"
-          }
         ]
       }
     }
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 
 </style>

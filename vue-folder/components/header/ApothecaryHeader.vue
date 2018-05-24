@@ -14,16 +14,12 @@
       return {
         menuItems: [
           {
-            url: "/goods",
+            url: "/apothecary/goods",
             text: "Товары"
           },
           {
-            url: "/recipes",
+            url: "/apothecary/recipes",
             text: "Рецепты"
-          },
-          {
-            url: "/logout",
-            text: "Выйти"
           }
         ]
       }
@@ -31,6 +27,6 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 
 </style>

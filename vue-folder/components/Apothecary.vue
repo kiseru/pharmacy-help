@@ -8,7 +8,7 @@
 <script>
   import ApothecaryHeader from "./header/ApothecaryHeader";
   import GoodsCards from "./partials/GoodsCards";
-  
+
   export default {
     name: "Apothecary",
     components: {
@@ -18,6 +18,6 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 
 </style>

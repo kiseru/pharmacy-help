@@ -1,8 +1,12 @@
 import AddGood from "./components/AddGood";
 import Apothecary from "./components/Apothecary";
-import Doctor from "./components/Doctor";
-import HomePage from "./components/HomePage";
-import NotFound from "./components/NotFound";
+import ConfirmingRecipe from "./components/ConfirmingRecipes";
+import CreateRecipePage from "./components/CreateRecipePage";
+import CreatingWorker from "./components/CreatingWorker";
+import LoginPage from "./components/LoginPage";
+import PatientRecipe from "./components/PatientRecipe";
+import Recipes from "./components/Recipes";
+import Workers from "./components/Workers";
 
 class Route {
     constructor(path, component) {
@@ -12,9 +16,13 @@ class Route {
 }
 
 export default [
+  new Route("/apothecary/recipes", Recipes),
+  new Route("/apothecary/recipe", ConfirmingRecipe),
   new Route("/apothecary/new", AddGood),
   new Route("/apothecary", Apothecary),
-  new Route("/doctor", Doctor),
-  new Route("/error", NotFound),
-  new Route("", HomePage)
+  new Route("/patient/recipe/:id", PatientRecipe),
+  new Route("/doctor", CreateRecipePage),
+  new Route("/workers/new", CreatingWorker),
+  new Route("/workers", Workers),
+  new Route("", LoginPage)
 ];

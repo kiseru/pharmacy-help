@@ -1,4 +1,4 @@
-from captcha.fields import CaptchaField
+# from captcha.fields import CaptchaField
 from django.forms import ModelForm, PasswordInput, CharField
 from django.shortcuts import get_object_or_404
 
@@ -32,7 +32,8 @@ class LoginForm(ModelForm):
         fields = ['email', 'password']
     password = CharField(widget=PasswordInput())
 
-#Формы для добавления лекарств
+
+# Формы для добавления лекарств
 class MedicineForm(ModelForm):
     class Meta:
         model = Medicine
@@ -54,18 +55,23 @@ class MedicineTypeForm(ModelForm):
         fields = ('type_name',)
     type_name = CharField(required=False)
 
+
 class MedicineNamesForm(ModelForm):
     class Meta:
         model = MedicineName
-        fields = ('medicine_name', 'medicine_description', 'medicine_level',)
+        fields = ('medicine_name',  'medicine_level',)
+
 
 class MedicinePharmacyForm(ModelForm):
     class Meta:
         model = MedicinesPharmacies
         fields = ('count','price')
 
-class CaptchaModelForm(ModelForm):
+
+"""class CaptchaModelForm(ModelForm):
     captcha = CaptchaField()
     class Meta:
         model = User
-        fields = "__all__"
+        fields = "__all__"""""
+
+
