@@ -59,13 +59,11 @@
 <script>
   import axios from "axios";
 
-  import AddGoodForm from "./forms/AddGoodForm";
   import ApothecaryHeader from "./header/ApothecaryHeader";
 
   export default {
     name: "AddGood",
     components: {
-      AddGoodForm,
       ApothecaryHeader
     },
     data() {

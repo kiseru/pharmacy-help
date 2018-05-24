@@ -3,7 +3,7 @@ import Apothecary from "./components/Apothecary";
 import ConfirmingRecipe from "./components/ConfirmingRecipes";
 import CreateRecipePage from "./components/CreateRecipePage";
 import CreatingWorker from "./components/CreatingWorker";
-import HomePage from "./components/HomePage";
+import LoginPage from "./components/LoginPage";
 import PatientRecipe from "./components/PatientRecipe";
 import Recipes from "./components/Recipes";
 import Workers from "./components/Workers";
@@ -24,5 +24,5 @@ export default [
   new Route("/doctor", CreateRecipePage),
   new Route("/workers/new", CreatingWorker),
   new Route("/workers", Workers),
-  new Route("", HomePage)
+  new Route("", LoginPage)
 ];
