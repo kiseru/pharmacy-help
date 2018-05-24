@@ -140,11 +140,6 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     
     lookup_field = 'token'
     
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.serializer_class(instance=instance)
-        return Response(get_recipe_with_goods(serializer.data, request), status=status.HTTP_200_OK)
-
     def create(self, request, *args, **kwargs):
         data = request.data
         serializer = self.get_serializer(data=data)
@@ -161,6 +156,15 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
         serve_recipe(requests.initial_data, instance, request.user.apothecary_set.first())
         return Response(status=status.HTTP_200_OK)
     
+    
+@api_view(['GET'])
+@permission_classes((ApothecaryPermission,))
+@renderer_classes((JSONRenderer,))
+def get_recipe_for_apothecary(request, token):
+    instance = Recipe.objects.get(token=token)
+    serializer = RecipeFullSerializer(instance=instance)
+    return Response(get_recipe_with_goods(serializer.data, request), status=status.HTTP_200_OK)
+
 
 @method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
 class TemplateViewForAuthenticated(TemplateView):
