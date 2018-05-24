@@ -6,6 +6,8 @@
 </template>
 
 <script>
+  import axios from "axios";
+
   import ApothecaryHeader from "./ApothecaryHeader";
   import DoctorHeader from "./DoctorHeader";
 
@@ -21,7 +23,8 @@
       };
     },
     beforeMount() {
-      this.user = this.$state.getters.getUser();
+      axios.get("/api/user")
+        .then(response => this.user = response.data);
     }
   }
 </script>
