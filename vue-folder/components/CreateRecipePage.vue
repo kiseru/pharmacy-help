@@ -34,6 +34,11 @@
         <input type="number" class="form-control" id="patientСonfirmationPeriodInput" v-model="patient.confirmationPeriod">
       </div>
 
+      <div>
+        <label for="commentInput">Комментарий</label>
+        <input type="text" class="form-control" id="commentInput" v-model="patient.comment">
+      </div>
+
       <h4 class="border-top p-2 mt-4 mb-0">Выписываемые препараты</h4>
 
       <table class="table mx-auto mb-0">
@@ -103,7 +108,8 @@
           email: "",
           medicines: [],
           name: "",
-          policeNumber: ""
+          policeNumber: "",
+          comment: ""
         },
         newMedicine: {
           medicine_id: 0,
@@ -152,7 +158,8 @@
               email: "",
               medicines: [],
               name: "",
-              policeNumber: ""
+              policeNumber: "",
+              comment: ""
             };
             this.newMedicine = {
               medicine_id: 0,
