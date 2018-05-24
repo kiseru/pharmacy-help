@@ -1,3 +1,4 @@
+from captcha.fields import CaptchaField
 from django.forms import ModelForm, PasswordInput, CharField
 from django.shortcuts import get_object_or_404
 
@@ -62,3 +63,9 @@ class MedicinePharmacyForm(ModelForm):
     class Meta:
         model = MedicinesPharmacies
         fields = ('count','price')
+
+class CaptchaModelForm(ModelForm):
+    captcha = CaptchaField()
+    class Meta:
+        model = User
+        fields = "__all__"

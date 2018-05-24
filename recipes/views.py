@@ -9,7 +9,8 @@ from django.views.generic import TemplateView
 from django.views.generic.list import BaseListView
 
 from recipes.auth import login_not_required, has_role, get_default_url, get_role
-from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm, MedicinePharmacyForm
+from recipes.forms import UserForm, LoginForm, MedicineNamesForm, MedicineTypeForm, MedicineForm, MedicinePharmacyForm, \
+  CaptchaModelForm
 from recipes.models import Recipe, MedicinesPharmacies, Medicine
 from recipes.serializers import serialize_user, JsonSerializer, RecipeSerializerShort
 from recipes.services import get_recipes
@@ -40,6 +41,7 @@ def do_login(request):
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
+        captcha = CaptchaModelForm(request.POST)
         user = authenticate(username=email, password=password)
         if user is not None and user.is_active:
             login(request, user)
@@ -50,6 +52,7 @@ def do_login(request):
         else:
             return HttpResponseRedirect(reverse('home'))
     else:
+        captcha = CaptchaModelForm()
         # return render(request, 'recipes/login.html', {'form': LoginForm})
         return render(request, 'index.html')
 
