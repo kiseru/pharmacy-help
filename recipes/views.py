@@ -23,7 +23,8 @@ from recipes import services
 from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view, \
   AdminPermission, ApothecaryPermission, is_admin_for_template_view
 from recipes.exceptions import AlreadyExistsException
-from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm
+from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm, MedicinePharmacyForm
+
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
@@ -189,31 +190,32 @@ class TemplateViewForDoctor(TemplateView):
     pass
 
 
+def index(request):
+    medicines = MedicinesPharmacies.objects.all()
+    return render(request, 'recipes/medicines.html', {"medicines": medicines})
+
+
 def add_medicine(request):
     ctx = {
          'medicine_name_form': MedicineNamesForm(),
          'medicine_type_form': MedicineTypeForm(),
-         'medicine_form': MedicineForm()}
+         'medicine_form': MedicineForm(),
+         'medicine_pharmacy_form': MedicinePharmacyForm()}
     if request.method == 'POST':
         ctx['medicine_name_form'] = MedicineNamesForm(request.POST)
         ctx['medicine_type_form'] = MedicineTypeForm(request.POST)
         ctx['medicine_form'] = MedicineForm(request.POST)
-        if (ctx['medicine_name_form'].is_valid()) and (ctx['medicine_type_form'].is_valid()) and (ctx['medicine_form'].is_valid()):
+        ctx['medicine_pharmacy_form'] = MedicinePharmacyForm(request.POST)
+        if (ctx['medicine_name_form'].is_valid()) and (ctx['medicine_type_form'].is_valid()) and \
+          (ctx['medicine_form'].is_valid()) and (ctx['medicine_pharmacy_form'].is_valid()):
             instance_medicine_name = ctx['medicine_name_form'].save()
             instance_medicine_type = ctx['medicine_type_form'].save()
-            instance = ctx['medicine_form'].save(m1=instance_medicine_type, m2=instance_medicine_name)
+            instance_medicine_pharmacy = ctx['medicine_pharmacy_form']
+            instance = ctx['medicine_form'].save(request, m1=instance_medicine_type,
+                                                 m2=instance_medicine_name, m3=instance_medicine_pharmacy)
             instance.save()
-            return redirect('medicine')
+            return redirect('/api/medicines/')
     return render(request, 'recipes/add_medicine.html', ctx)
-
-# def get_medicine(request):
-#     medicines = Medicines_pharmacies.objects.values('medicine_id',
-#                                                     'medicine_id__medicine_name_id__medicine_name',
-#                                                     'medicine_id__medicine_name_id__description',
-#                                                     'medicine_id__medicine_type_id__type_name',
-#                                                     'medicine_id__medicines_pharmacies__count',
-#                                                     'medicine_id__medicines_pharmacies__price',)
-#     return JsonResponse({'medicines': list(medicines)})
 
 
 def get_medicine(request):
@@ -236,6 +238,25 @@ def get_medicine_json(medicinepharmacy):
         'name': medicinepharmacy.medicine.medicine_name.medicine_name,
         'type': medicinepharmacy.medicine.medicine_type.type_name,
     }
+
+
+def edit_medicine(request, id):
+    try:
+      medicine = MedicinesPharmacies.objects.get(id=id)
+      if request.method == "POST":
+        medicine.medicine.medicine_name.medicine_name = request.POST.get("name")
+        medicine.medicine.medicine_type.type_name = request.POST.get("type_name")
+        medicine.medicine.medicine_name.medicine_description = request.POST.get("description")
+        medicine.count = request.POST.get("count")
+        medicine.price = request.POST.get("price")
+        medicine.medicine.medicine_name.save()
+        medicine.medicine.medicine_type.save()
+        medicine.save()
+        return HttpResponseRedirect("/api/medicines/")
+      else:
+        return render(request, "recipes/edit_medicine.html", {"medicine": medicine})
+    except MedicinesPharmacies.DoesNotExist:
+      return HttpResponseNotFound("<h2>Medicine not found</h2>")
 
 
 @method_decorator(response_to_api_format, name='post')
@@ -405,4 +426,5 @@ class GoodsViewSet(
         data = request.data
         services.update_medicine(instance, data)
         return Response(status=status.HTTP_200_OK)
+
 

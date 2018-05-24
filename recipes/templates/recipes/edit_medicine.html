@@ -1,0 +1,28 @@
+{% extends 'recipes/base.html' %}
+
+{% block content %}
+    <h1>Edit Medicines</h1>
+    <form method="POST" class="edit_medicine">{% csrf_token %}
+        <p>
+            <label>Change name</label><br>
+            <input type="text" name="name" value="{{medicine.medicine.medicine_name.medicine_name}}" />
+        </p>
+        <p>
+            <label>Change type</label><br>
+            <input type="text" name="type_name" value="{{medicine.medicine.medicine_type.type_name}}" />
+        </p>
+        <p>
+            <label>Change description</label><br>
+            <input type="text" name="description" value="{{medicine.medicine.medicine_name.medicine_description}}" />
+        </p>
+        <p>
+            <label>Change count</label><br>
+            <input type="number" name="count" value="{{medicine.count}}" />
+        </p>
+        <p>
+            <label>Change price</label><br>
+            <input type="number" name="price" value="{{medicine.price}}" />
+        </p>
+        <button type="submit" class="save btn btn-default">Save Changes</button>
+    </form>
+{% endblock %}

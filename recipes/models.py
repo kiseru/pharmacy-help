@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from recipes.managers import CustomUserManager
+from recipes.validators import validate_pos_value
 from recipes.auth import  *
 
 
@@ -107,7 +108,7 @@ class Pharmacy(models.Model):
 
 class Apothecary(models.Model):
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} - {}'.format(self.user.email, self.pharmacy.pharmacy_name)
@@ -118,7 +119,8 @@ class MedicineRequestStatus(models.Model):
 
 
 class MedicineName(models.Model):
-    medicine_name = models.CharField(max_length=50)
+    medicine_name = models.CharField(max_length=50, unique=True)
+    medicine_description = models.TextField()
     medicine_level = models.PositiveSmallIntegerField(default=0)
     
     @property
@@ -132,7 +134,7 @@ class MedicineName(models.Model):
 class Medicine(models.Model):
     medicine_name = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
     medicine_type = models.ForeignKey(MedicineType, on_delete=models.CASCADE)
-    pharmacies = models.ManyToManyField(Pharmacy, through='recipes.MedicinesPharmacies')
+    pharmacies = models.ManyToManyField(Pharmacy, through='MedicinesPharmacies')
 
     def __str__(self):
         return '{} {}'.format(self.medicine_name.medicine_name, self.medicine_type.type_name)
@@ -193,8 +195,8 @@ class MedicineRequest(models.Model):
 class MedicinesPharmacies(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
-    count = models.PositiveIntegerField()
-    price = models.FloatField()
+    count = models.PositiveIntegerField(default=0, validators=[validate_pos_value])
+    price = models.FloatField(default=0.0, validators=[validate_pos_value])
     
     @property
     def name(self):
@@ -207,4 +209,4 @@ class MedicinesPharmacies(models.Model):
     @property
     def level(self):
         return self.medicine.medicine_name.medicine_level
-    
+
