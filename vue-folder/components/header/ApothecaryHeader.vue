@@ -14,11 +14,11 @@
       return {
         menuItems: [
           {
-            url: "/goods",
+            url: "/apothecary/goods",
             text: "Товары"
           },
           {
-            url: "/recipes",
+            url: "/apothecary/recipes",
             text: "Рецепты"
           }
         ]
