@@ -29,7 +29,7 @@ from recipes.serializers import serialize_user, RecipeShortSerializer, UserSeria
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
   MedicineRequestSerializer, MedicineRequestSerializerForUpdate
 from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
-  delete_worker
+  delete_worker, get_recipe_with_goods
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 import json
@@ -139,6 +139,11 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
     serializer_class = RecipeFullSerializer
     
     lookup_field = 'token'
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.serializer_class(instance=instance)
+        return Response(get_recipe_with_goods(serializer.data, request), status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         data = request.data

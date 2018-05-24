@@ -17,7 +17,7 @@ from recipes.auth import get_role
 from recipes.exceptions import AlreadyExistsException
 from recipes.models import Recipe, MedicineDosage, MedicineRequest, MedicineName, MedicinesPharmacies, Pharmacy, \
   Medicine, User, Apothecary, Doctor, MedicineType
-from recipes.serializers import PharmacySerializer, MedicineSerializer
+from recipes.serializers import PharmacySerializer, MedicineSerializer, GoodSerializer
 
 
 def get_recipes(query: str=None, recipes=Recipe.objects):
@@ -195,6 +195,15 @@ def add_worker(user_serializer, admin):
         doctor = Doctor(user=user, hospital=hospital)
         Doctor.save(doctor)
     return user
+
+
+def get_recipe_with_goods(data, request):
+    for i in data['requests']:
+        medicine_id = i['medicine_name_id']
+        pharmacy = request.user.apothecary_set.first().pharmacy
+        medicine_pharmacies = MedicinesPharmacies.objects.filter(medicine__medicine_name__id=medicine_id, pharmacy=pharmacy)
+        i['goods'] = [GoodSerializer(instance=m).data for m in medicine_pharmacies]
+    return data
 
 
 def delete_worker(user):
