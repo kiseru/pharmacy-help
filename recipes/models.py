@@ -119,7 +119,6 @@ class MedicineRequestStatus(models.Model):
 
 class MedicineName(models.Model):
     medicine_name = models.CharField(max_length=50)
-    medicine_description = models.TextField()
     medicine_level = models.PositiveSmallIntegerField(default=0)
     
     @property
@@ -204,11 +203,7 @@ class MedicinesPharmacies(models.Model):
     @property
     def type(self):
         return self.medicine.type
-    
-    @property
-    def description(self):
-        return self.medicine.medicine_name.medicine_description
-    
+        
     @property
     def level(self):
         return self.medicine.medicine_name.medicine_level

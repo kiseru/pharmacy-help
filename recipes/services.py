@@ -240,16 +240,15 @@ def send_email_recipe(request, recipe):
         send_mail('Уведомление о рецепте', text, settings.EMAIL_HOST_USER, [recipe.patient_email])
 
 
-def get_or_create_medicine_name(name, level, description):
+def get_or_create_medicine_name(name, level):
     medicines = MedicineName.objects.filter(
         medicine_name__iexact=name,
         medicine_level=level,
-        medicine_description__iexact=description
     )
     if medicines.count():
         return medicines.all()[0]
     else:
-        medicine_name = MedicineName(medicine_name=name, medicine_description=description, medicine_level=level)
+        medicine_name = MedicineName(medicine_name=name,  medicine_level=level)
         MedicineName.save(medicine_name)
         return medicine_name
 
@@ -277,7 +276,7 @@ def get_or_create_medicine(medicine_name, medicine_type):
 @transaction.atomic()
 def add_medicine(data, user):
     try:
-        medicine_name = get_or_create_medicine_name(data['name'], data['level'], data.get('description', '-'))
+        medicine_name = get_or_create_medicine_name(data['name'], data['level'])
         medicine_type = get_or_create_medicine_type(data['type'])
         medicine = get_or_create_medicine(medicine_name=medicine_name, medicine_type=medicine_type)
         pharmacy = user.apothecary_set.all()[0].pharmacy
