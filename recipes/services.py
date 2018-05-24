@@ -197,6 +197,10 @@ def add_worker(user_serializer, admin):
     return user
 
 
+def delete_worker(user):
+    User.delete(user)
+  
+
 def update_user(serializer, user):
     if serializer.initial_data.get('email', '') and serializer.initial_data['email'] != user.email:
         if User.objects.filter(email=serializer.initial_data['email']).count():

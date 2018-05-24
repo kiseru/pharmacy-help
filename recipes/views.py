@@ -28,7 +28,8 @@ from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmaci
 from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
   MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
   MedicineRequestSerializer, MedicineRequestSerializerForUpdate
-from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers
+from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
+  delete_worker
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
 
 import json
@@ -325,6 +326,7 @@ class WorkerViewSet(mixins.CreateModelMixin,
                     mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     mixins.ListModelMixin,
+                    mixins.DestroyModelMixin,
                     GenericViewSet):
     renderer_classes = (JSONRenderer,)
     
@@ -349,6 +351,11 @@ class WorkerViewSet(mixins.CreateModelMixin,
         data = request.data
         serializer = self.get_serializer(data=data)
         update_user(serializer, instance)
+        return Response(status=status.HTTP_200_OK)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        delete_worker(instance)
         return Response(status=status.HTTP_200_OK)
     
 
