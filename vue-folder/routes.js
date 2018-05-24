@@ -20,7 +20,7 @@ export default [
   new Route("/apothecary/recipe", ConfirmingRecipe),
   new Route("/apothecary/new", AddGood),
   new Route("/apothecary", Apothecary),
-  new Route("/patient", PatientRecipe),
+  new Route("/patient/recipe/:id", PatientRecipe),
   new Route("/doctor", CreateRecipePage),
   new Route("/workers/new", CreatingWorker),
   new Route("/workers", Workers),

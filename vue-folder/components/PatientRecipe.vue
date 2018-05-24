@@ -1,45 +1,44 @@
 <template>
-  <div>
-    <default-header/>
-    <div class="card">
-      <div class="card-title">Рецепт</div>
-      <div class="card-body">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Название</th>
-              <th>Тип</th>
-              <th>Количество</th>
-              <th>Уровень</th>
-              <th>Доза</th>
-              <th>Частота</th>
-              <th>Длительность</th>
-              <th>Выдан</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="medicine in recipe.medicines">
-              <td>{{ medicine.name }}</td>
-              <td>{{ medicine.type }}</td>
-              <td>{{ medicine.count }}</td>
-              <td>{{ medicine.level }}</td>
-              <td>{{ medicine.dosage }}</td>
-              <td>{{ medicine.frequency }}</td>
-              <td>{{ medicine.period }}</td>
-              <td>
-                <checkmark v-if="medicine.confirmed"/>
-                <close v-else/>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  <main role="main" class="container">
+    <div class="my-3 p-3 bg-white rounded">
+      <h2 class="text-center mt-2">Рецепт</h2>
+      <div class="border-top p-3">
+        <h4 class="text-center">ID: {{ data.id }}</h4>
+        <h6 class="text-center">Кому: {{ data.patient_initials }}</h6>
+        <h6 class="text-center">Кем: {{ data.doctor_initials }}</h6>
       </div>
+      <table class="table mt-3 text-center">
+        <thead class="thead-light">
+          <tr>
+            <th>Название</th>
+            <th>Количество</th>
+            <th>Доза</th>
+            <th>Частота</th>
+            <th>Длительность</th>
+            <th>Выдан</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="medicine in data.requests">
+            <td>{{ medicine.medicine_name }}</td>
+            <td>{{ medicine.medicine_count }}</td>
+            <td>{{ medicine.dosage }}</td>
+            <td>{{ medicine.medicine_frequency }}</td>
+            <td>{{ medicine.medicine_period }}</td>
+            <td>
+              <checkmark v-if="medicine.is_accepted"/>
+              <close v-else/>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </div>
+  </main>
 </template>
 
 <script>
-  import DefaultHeader from "./header/DefaultHeader";
+  import axios from 'axios';
+
   import Checkmark from "./partials/Checkmark";
   import Close from "./partials/Close";
 
@@ -47,51 +46,20 @@
     name: "PatientRecipe",
     components: {
       Close,
-      Checkmark,
-      DefaultHeader
+      Checkmark
     },
     data() {
       return {
-        recipe: {
-          date: "24.03.1995",
-          token: "asdfasdfa",
-          duration: 3,
-          medicines: [
-            {
-              name: "name",
-              type: "type",
-              count: 45,
-              level: 0,
-              dosage: "dosage",
-              frequency: "frequency",
-              period: "period",
-              confirmed: true
-            },
-            {
-              name: "name",
-              type: "type",
-              count: 45,
-              level: 0,
-              dosage: "dosage",
-              frequency: "frequency",
-              period: "period",
-              confirmed: false
-            }
-          ]
-        }
+        data: null
       }
+    },
+    beforeMount() {
+      console.log(this.$route.params.id);
+      axios.get("/api/recipes/" + this.$route.params.id)
+        .then(response => this.data = response.data);
     }
   }
 </script>
 
-<style lang="less" scoped>
-  .card {
-    width: 1000px;
-    margin: 20px auto;
-
-    .card-title {
-      font-size: 32px;
-      text-align: center;
-    }
-  }
+<style lang="less">
 </style>
