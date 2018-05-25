@@ -4,7 +4,7 @@
     <div class="container">
       <search-bar/>
       <div id="recipes">
-        <div v-for="recipe in foundRecipes">
+        <div v-for="recipe in foundRecipes" class="p-3">
           <recipe-card v-bind:recipe="recipe"/>
         </div>
       </div>

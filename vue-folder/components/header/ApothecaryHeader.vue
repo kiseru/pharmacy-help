@@ -14,7 +14,7 @@
       return {
         menuItems: [
           {
-            url: "/apothecary/goods",
+            url: "/apothecary",
             text: "Товары"
           },
           {

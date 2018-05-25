@@ -147,7 +147,8 @@
             medicine_card_number: this.patient.cardNumber,
             patient_age: this.patient.age,
             day_duration: this.patient.confirmationPeriod,
-            medicines: this.patient.medicines
+            medicines: this.patient.medicines,
+            comment: this.patient.comment
           },
           { headers: { "X-CSRFTOKEN": this.$cookies.get("csrftoken") } })
           .then(response => {
