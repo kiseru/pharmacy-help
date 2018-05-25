@@ -1,7 +1,7 @@
 <template>
   <div>
     <doctor-header/>
-    <div class="create-recipe-form mx-auto my-4 rounded bg-white p-4 border border-light">
+    <div class="create-recipe-form mx-auto my-4 rounded bg-white p-4 border border-light text-center">
       <h4 class="border-bottom pb-2 mb-3">Создать рецепт</h4>
 
       <div class="form-group">
