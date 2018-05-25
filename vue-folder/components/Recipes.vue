@@ -1,6 +1,6 @@
 <template>
   <div>
-    <apothecary-header/>
+    <default-header/>
     <div class="container">
       <search-bar/>
       <div id="recipes">
@@ -15,7 +15,7 @@
 <script>
   import axios from "axios";
 
-  import ApothecaryHeader from "./header/ApothecaryHeader";
+  import DefaultHeader from "./header/DefaultHeader";
   import RecipeCard from "./partials/RecipeCard";
   import SearchBar from "./partials/SearchBar";
 
@@ -23,7 +23,7 @@
     name: "Recipes",
     components: {
       RecipeCard,
-      ApothecaryHeader,
+      DefaultHeader,
       SearchBar
     },
     data() {

@@ -17,16 +17,11 @@
             url: "/apothecary",
             text: "Товары"
           },
-          {
-            url: "/apothecary/recipes",
-            text: "Рецепты"
-          }
         ]
       }
     }
   }
 </script>
 
-<style lang="less" scoped>
-
+<style lang="less">
 </style>

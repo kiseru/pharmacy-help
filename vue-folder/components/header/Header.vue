@@ -6,6 +6,9 @@
         <li class="nav-item" v-if="user.is_admin">
           <a href="/workers" class="nav-link">Сотрудники</a>
         </li>
+        <li class="nav-item">
+          <a href="/recipes" class="nav-link">Рецепты</a>
+        </li>
         <li class="nav-item" v-for="item in menuItems">
           <a v-bind:href="item.url" class="nav-link">{{item.text}}</a>
         </li>
@@ -62,5 +65,5 @@
   }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 </style>

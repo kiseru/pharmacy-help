@@ -13,12 +13,15 @@
     data() {
       return {
         menuItems: [
+          {
+            url: "/doctor",
+            text: "Выдать рецепт"
+          },
         ]
       }
     }
   }
 </script>
 
-<style lang="less" scoped>
-
+<style lang="less">
 </style>

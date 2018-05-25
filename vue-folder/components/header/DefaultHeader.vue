@@ -1,8 +1,6 @@
 <template>
-  <div>
-    <apothecary-header v-if="user.role === 'apothecary'"/>
-    <doctor-header v-if="user.role === 'doctor'"/>
-  </div>
+  <apothecary-header v-if="isUserApothecary"/>
+  <doctor-header v-else-if="isUserDoctor"/>
 </template>
 
 <script>
@@ -19,28 +17,22 @@
     },
     data() {
       return {
-        user: null
+        isUserDoctor: false,
+        isUserApothecary: false
       };
     },
     beforeMount() {
       axios.get("/api/user")
-        .then(response => this.user = response.data);
+        .then(response => {
+          if (response.data.role === "doctor") this.isUserDoctor = true;
+          else if (response.data.role === "apothecary") this.isUserApothecary = true; 
+        });
+    },
+    computed: {
+      
     }
   }
 </script>
 
-<style lang="less" scoped>
-  nav {
-    height: 56px;
-    padding: 0 16px 8px 0;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    right: 0;
-
-    .navbar-brand {
-      margin-left: 16px;
-    }
-  }
+<style lang="less">
 </style>
