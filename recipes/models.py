@@ -154,7 +154,7 @@ class MedicineDosage(models.Model):
     medicine = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
 
     def __str__(self):
-        return '{} {} {}'.format(self.medicine.medicine_name.medicine_name, self.dosage, self.frequency)
+        return '{} {} {}'.format(self.medicine.medicine_name, self.dosage, self.frequency)
 
 
 class MedicineRequest(models.Model):
