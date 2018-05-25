@@ -5,7 +5,9 @@
       <div id="goods-cards">
         <new-good-card/>
         <div v-for="medicine in foundMedicines">
-          <good-card v-bind:medicine="medicine"></good-card>
+          <a v-bind:href="'/apothecary/' + medicine.id">
+            <good-card v-bind:medicine="medicine"></good-card>
+          </a>
         </div>
       </div>
     </div>
