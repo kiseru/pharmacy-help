@@ -1,0 +1,21 @@
+{% extends 'recipes/base.html' %}
+
+{% block content %}
+  {% if medicines.count > 0 %}
+        <h1>List of Medicines</h1>
+        <table>
+          <tr><th>Id </th><th>Имя </th><th>Тип </th><th>Описание </th><th>Количество </th><th>Цена </th></tr>
+          {% for medicine in medicines %}
+          <tr>
+            <td>{{ medicine.id }}</td>
+            <td>{{ medicine.medicine.medicine_name.medicine_name }}</td>
+            <td>{{ medicine.medicine.medicine_type.type_name}}</td>
+            <td>{{ medicine.medicine.medicine_name.medicine_description}}</td>
+            <td>{{ medicine.count}}</td>
+            <td>{{ medicine.price}}</td>
+            <td><a href="edit/{{medicine.id}}">Изменить</a></td>
+          </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+{% endblock %}

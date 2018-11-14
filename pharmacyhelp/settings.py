@@ -31,12 +31,17 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # 'captcha',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'recipes.apps.RecipesConfig',
+    'rest_framework',
+    'rest_framework_swagger',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +59,9 @@ ROOT_URLCONF = 'pharmacyhelp.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,8 +82,12 @@ WSGI_APPLICATION = 'pharmacyhelp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'pharmacy',
+        'USER': 'pharmacy_admin',
+        'PASSWORD': 'pharmkety',
+        'HOST': '',
+        'PORT': 5432
     }
 }
 
@@ -113,8 +124,46 @@ USE_L10N = True
 
 USE_TZ = True
 
-
+LOGIN_URL = '/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# общая статика
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+TEMPLATE_DIRS = [
+    os.path.join(BASE_DIR, 'templates')
+]
+
+AUTH_USER_MODEL = 'recipes.User'
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "pharmacy.help.info@gmail.com"
+EMAIL_HOST_PASSWORD = "lARBblZwM8sR26s"
+EMAIL_USE_TLS = True
+
+# set True to enable sending mail about recipes
+SEND_EMAIL = False
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'basic': {
+            'type': 'basic'
+        }
+    },
+    'SHOW_REQUEST_HEADERS': True,
+    'JSON_EDITOR': True,
+}
