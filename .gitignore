@@ -112,3 +112,6 @@ yarn.lock
 # Static vue.js files
 build.js
 build.js.map
+
+package-lock.json
+db.sqlite3
