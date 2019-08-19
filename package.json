@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "less": "^3.0.1",
+    "less": "~3.0.1",
     "less-loader": "^4.1.0",
     "vue": "^2.5.11",
     "vue-cookies": "^1.5.6",
