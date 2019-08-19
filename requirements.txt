@@ -1,5 +1,4 @@
-django
-psycopg2
-djangorestframework
+django==2.2.4
+djangorestframework==3.10.2
 django-rest-swagger
 drf-yasg
