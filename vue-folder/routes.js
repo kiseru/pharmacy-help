@@ -26,5 +26,4 @@ export default [
   new Route("/doctor", CreateRecipePage),
   new Route("/workers/new", CreatingWorker),
   new Route("/workers", Workers),
-  new Route("/login", LoginPage)
 ];
