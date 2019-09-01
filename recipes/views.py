@@ -1,40 +1,38 @@
+import json
+import traceback
+
 import rest_framework
 from django import http
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.http import *
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import *
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_protect
 from django.views.generic import TemplateView
+from rest_framework import status, permissions, mixins, viewsets, authentication
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes
 from rest_framework.renderers import JSONRenderer
-
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status, permissions, mixins, generics
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
-from recipes import services
-from recipes.auth import login_not_required, has_role, get_default_url, get_role, has_role_for_template_view, \
-  AdminPermission, ApothecaryPermission, is_admin_for_template_view
+from recipes import services, serializers, models
+from recipes.auth import has_role, has_role_for_template_view, \
+    AdminPermission, ApothecaryPermission, is_admin_for_template_view
 from recipes.exceptions import AlreadyExistsException
 from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm, MedicinePharmacyForm
-
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
-from recipes.serializers import serialize_user, RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
-  MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
-  MedicineRequestSerializer, MedicineRequestSerializerForUpdate
-from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
-  delete_worker, get_recipe_with_goods
+from recipes.serializers import RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
+    MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
+    MedicineRequestSerializerForUpdate
 from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
-
-import json
-import traceback
+from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
+    delete_worker, get_recipe_with_goods
 
 
 def response_to_api_format(func):
@@ -63,7 +61,7 @@ def response_to_api_format(func):
             traceback.print_exc()
             new_response = get_response(is_success=False, error=str(e))
             return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
-    
+
     return new_func
 
 
@@ -80,46 +78,30 @@ def test_user_info(request):
     return render(request, 'recipes/test_user_info.html', {'form': UserForm(instance=request.user)})
 
 
-@login_not_required()
-def do_login(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
-        user = authenticate(username=email, password=password)
-        if user is not None and user.is_active:
-            login(request, user)
-            if 'next' in request.GET:
-                return HttpResponseRedirect(request.GET['next'])
-            else:
-                return HttpResponseRedirect(get_default_url(get_role(user)))
-        else:
-            return HttpResponseRedirect(reverse('home'))
-    else:
-        # return render(request, 'recipes/login.html', {'form': LoginForm})
-        return render(request, 'index.html')
+class LoginViewSet(viewsets.GenericViewSet):
+    queryset = models.User.objects.none()
+    serializer_class = serializers.LoginSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = User.objects.filter(email=serializer.validated_data['email']).first()
+        if user is None or not user.check_password(serializer.validated_data['password']):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        token, _ = Token.objects.get_or_create(user_id=user.id)
+        return Response({'token': token.key})
 
 
-@api_view(['GET', 'POST'])
-@permission_classes((permissions.AllowAny,))
-@renderer_classes((JSONRenderer,))
-@response_to_api_format
-@csrf_protect
-def do_login_ajax(request):
-    if request.method == 'POST':
-        data = request.data
-        if 'email' in data and 'password' in data:
-            user = authenticate(username=data['email'], password=data['password'])
-            if user is not None and user.is_active:
-                login(request, user)
-                url = get_default_url(get_role(user))
-                return JsonResponse({'location': url}, status=status.HTTP_200_OK)
-            else:
-                raise Exception('not_found')
-        else:
-            raise Exception('invalid_data')
-    else:
-        return render(request, 'recipes/test_login.html')
-  
+class UserViewSet(viewsets.GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = serializers.UserSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    authentication_classes = (authentication.TokenAuthentication,)
+
+    def list(self, request, *args, **kwargs):
+        return Response(self.serializer_class(request.user).data)
+
 
 def do_logout(request):
     logout(request)
@@ -135,12 +117,12 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
                             mixins.UpdateModelMixin,
                             GenericViewSet):
     renderer_classes = (JSONRenderer,)
-    
+
     queryset = Recipe.objects.all()
     serializer_class = RecipeFullSerializer
-    
+
     lookup_field = 'token'
-    
+
     def create(self, request, *args, **kwargs):
         data = request.data
         serializer = self.get_serializer(data=data)
@@ -156,8 +138,8 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
         print(requests.initial_data)
         serve_recipe(requests.initial_data, instance, request.user.apothecary_set.first())
         return Response(status=status.HTTP_200_OK)
-    
-    
+
+
 @api_view(['GET'])
 @permission_classes((ApothecaryPermission,))
 @renderer_classes((JSONRenderer,))
@@ -197,17 +179,17 @@ def index(request):
 
 def add_medicine(request):
     ctx = {
-         'medicine_name_form': MedicineNamesForm(),
-         'medicine_type_form': MedicineTypeForm(),
-         'medicine_form': MedicineForm(),
-         'medicine_pharmacy_form': MedicinePharmacyForm()}
+        'medicine_name_form': MedicineNamesForm(),
+        'medicine_type_form': MedicineTypeForm(),
+        'medicine_form': MedicineForm(),
+        'medicine_pharmacy_form': MedicinePharmacyForm()}
     if request.method == 'POST':
         ctx['medicine_name_form'] = MedicineNamesForm(request.POST)
         ctx['medicine_type_form'] = MedicineTypeForm(request.POST)
         ctx['medicine_form'] = MedicineForm(request.POST)
         ctx['medicine_pharmacy_form'] = MedicinePharmacyForm(request.POST)
         if (ctx['medicine_name_form'].is_valid()) and (ctx['medicine_type_form'].is_valid()) and \
-          (ctx['medicine_form'].is_valid()) and (ctx['medicine_pharmacy_form'].is_valid()):
+            (ctx['medicine_form'].is_valid()) and (ctx['medicine_pharmacy_form'].is_valid()):
             instance_medicine_name = ctx['medicine_name_form'].save()
             instance_medicine_type = ctx['medicine_type_form'].save()
             instance_medicine_pharmacy = ctx['medicine_pharmacy_form']
@@ -242,27 +224,27 @@ def get_medicine_json(medicinepharmacy):
 
 def edit_medicine(request, id):
     try:
-      medicine = MedicinesPharmacies.objects.get(id=id)
-      if request.method == "POST":
-        medicine.medicine.medicine_name.medicine_name = request.POST.get("name")
-        medicine.medicine.medicine_type.type_name = request.POST.get("type_name")
-        medicine.medicine.medicine_name.medicine_description = request.POST.get("description")
-        medicine.count = request.POST.get("count")
-        medicine.price = request.POST.get("price")
-        medicine.medicine.medicine_name.save()
-        medicine.medicine.medicine_type.save()
-        medicine.save()
-        return HttpResponseRedirect("/api/medicines/")
-      else:
-        return render(request, "recipes/edit_medicine.html", {"medicine": medicine})
+        medicine = MedicinesPharmacies.objects.get(id=id)
+        if request.method == "POST":
+            medicine.medicine.medicine_name.medicine_name = request.POST.get("name")
+            medicine.medicine.medicine_type.type_name = request.POST.get("type_name")
+            medicine.medicine.medicine_name.medicine_description = request.POST.get("description")
+            medicine.count = request.POST.get("count")
+            medicine.price = request.POST.get("price")
+            medicine.medicine.medicine_name.save()
+            medicine.medicine.medicine_type.save()
+            medicine.save()
+            return HttpResponseRedirect("/api/medicines/")
+        else:
+            return render(request, "recipes/edit_medicine.html", {"medicine": medicine})
     except MedicinesPharmacies.DoesNotExist:
-      return HttpResponseNotFound("<h2>Medicine not found</h2>")
+        return HttpResponseNotFound("<h2>Medicine not found</h2>")
 
 
 @method_decorator(response_to_api_format, name='post')
 class UserInfoView(APIView):
     renderer_classes = (JSONRenderer,)
-    
+
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
@@ -279,10 +261,10 @@ class UserInfoView(APIView):
 
 class RecipesViewSet(ReadOnlyModelViewSet):
     renderer_classes = (JSONRenderer,)
-    
+
     queryset = None
     serializer_class = RecipeShortSerializer
-    
+
     def list(self, request, *args, **kwargs):
         token = request.GET['id'] if 'id' in request.GET else ''
         if request.user.role is 'doctor':
@@ -294,10 +276,10 @@ class RecipesViewSet(ReadOnlyModelViewSet):
 
 class SearchMedicineViewSet(ReadOnlyModelViewSet):
     renderer_classes = (JSONRenderer,)
-    
+
     queryset = MedicineName.objects.all()
     serializer_class = MedicineNameSerializer
-    
+
     def list(self, request, *args, **kwargs):
         if 'medicine_name' in request.GET:
             self.queryset = self.queryset.filter(medicine_name__icontains=request.GET['medicine_name'])
@@ -306,10 +288,10 @@ class SearchMedicineViewSet(ReadOnlyModelViewSet):
 
 class SearchMedicineTypesViewSet(ReadOnlyModelViewSet):
     renderer_classes = (JSONRenderer,)
-    
+
     queryset = MedicineType.objects.all()
     serializer_class = MedicineTypeSerializer
-    
+
     def list(self, request, *args, **kwargs):
         if 'type_name' in request.GET:
             self.queryset = self.queryset.filter(type_name__icontains=request.GET['type_name'])
@@ -318,18 +300,18 @@ class SearchMedicineTypesViewSet(ReadOnlyModelViewSet):
 
 class MedicineWithPharmaciesViewSet(ReadOnlyModelViewSet):
     renderer_classes = (JSONRenderer,)
-    
+
     queryset = None
     serializer_class = MedicineWithPharmaciesSerializer
-    
+
     def list(self, request, *args, **kwargs):
         if 'id' in request.GET:
             self.queryset = Medicine.objects.filter(medicine_name__pk=request.GET['id'])
         else:
             self.queryset = Medicine.objects.all()
         return super().list(request, *args, **kwargs)
-    
-    
+
+
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 @authentication_classes((SessionAuthentication,))
@@ -359,66 +341,66 @@ class WorkerViewSet(mixins.CreateModelMixin,
                     mixins.DestroyModelMixin,
                     GenericViewSet):
     renderer_classes = (JSONRenderer,)
-    
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
-    permission_classes = (AdminPermission, )
-    
+
+    permission_classes = (AdminPermission,)
+
     def list(self, request, *args, **kwargs):
         self.queryset = get_workers(request.user, request.GET['query'] if 'query' in request.GET else None)
         return super().list(request, *args, **kwargs)
-    
+
     def create(self, request, *args, **kwargs):
         data = request.data
         serializer = self.get_serializer(data=data)
         user = add_worker(user_serializer=serializer, admin=request.user)
         headers = self.get_success_headers(serializer.data)
         return Response(data={'id': user.id}, status=status.HTTP_201_CREATED, headers=headers)
-    
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         data = request.data
         serializer = self.get_serializer(data=data)
         update_user(serializer, instance)
         return Response(status=status.HTTP_200_OK)
-    
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         delete_worker(instance)
         return Response(status=status.HTTP_200_OK)
-    
+
 
 @method_decorator(response_to_api_format, name='create')
 @method_decorator(response_to_api_format, name='update')
 class GoodsViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        mixins.UpdateModelMixin,
-        mixins.ListModelMixin,
-        GenericViewSet):
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet):
     renderer_classes = (JSONRenderer,)
     queryset = None
     serializer_class = GoodSerializer
-    permission_classes = (ApothecaryPermission, )
-    
+    permission_classes = (ApothecaryPermission,)
+
     def list(self, request, *args, **kwargs):
         pharmacy = request.user.apothecary_set.all()[0].pharmacy
         self.queryset = pharmacy.medicinespharmacies_set.all()
         if 'name_id' in request.GET:
             self.queryset = self.queryset.filter(medicine__medicine_name__id=request.GET['name_id'])
         return super().list(request, *args, **kwargs)
-    
+
     def create(self, request, *args, **kwargs):
         data = request.data
         good = services.add_medicine(data, request.user)
         return Response(data={'id': good.id}, status=status.HTTP_201_CREATED)
-    
+
     def retrieve(self, request, *args, **kwargs):
         pharmacy = request.user.apothecary_set.all()[0].pharmacy
         self.queryset = pharmacy.medicinespharmacies_set.all()
         return super().retrieve(request, *args, **kwargs)
-    
+
     def update(self, request, *args, **kwargs):
         pharmacy = request.user.apothecary_set.all()[0].pharmacy
         self.queryset = pharmacy.medicinespharmacies_set.all()
@@ -426,5 +408,3 @@ class GoodsViewSet(
         data = request.data
         services.update_medicine(instance, data)
         return Response(status=status.HTTP_200_OK)
-
-
