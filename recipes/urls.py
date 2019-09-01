@@ -1,5 +1,7 @@
 from django.conf.urls import url
+from django.urls import path
 from rest_framework import routers
+from rest_framework_swagger.views import get_swagger_view
 
 from recipes import views
 from recipes.views import *
@@ -9,6 +11,7 @@ router.register('api/login', views.LoginViewSet)
 router.register('api/users', views.UserViewSet)
 
 old_urls = [
+    path('', get_swagger_view()),
     url('^logout/', do_logout, name='logout'),
     url('^api/user/', UserInfoView.as_view(), name='user_info'),
     url('^api/test_user_info/', test_user_info, name='test_user_info'),
