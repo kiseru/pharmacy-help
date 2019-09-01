@@ -15,7 +15,7 @@ from django.views.generic import TemplateView
 from rest_framework import status, permissions, mixins, viewsets, authentication
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes
+from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes, action
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -96,10 +96,10 @@ class LoginViewSet(viewsets.GenericViewSet):
 class UserViewSet(viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
-    permission_classes = (permissions.IsAuthenticated,)
     authentication_classes = (authentication.TokenAuthentication,)
 
-    def list(self, request, *args, **kwargs):
+    @action(detail=False, permission_classes=(permissions.IsAuthenticated,))
+    def me(self, request, *args, **kwargs):
         return Response(self.serializer_class(request.user).data)
 
 
