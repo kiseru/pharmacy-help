@@ -90,7 +90,7 @@ class LoginViewSet(viewsets.GenericViewSet):
         if user is None or not user.check_password(serializer.validated_data['password']):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         token, _ = Token.objects.get_or_create(user_id=user.id)
-        return Response({'token': token.key})
+        return Response({'token': token.key, 'role': user.role})
 
 
 class UserViewSet(viewsets.GenericViewSet):
@@ -166,8 +166,6 @@ class TemplateViewForApothecary(TemplateView):
     pass
 
 
-@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
-@method_decorator(has_role_for_template_view('doctor'), name='dispatch')
 class TemplateViewForDoctor(TemplateView):
     pass
 
