@@ -1,7 +1,6 @@
 from django.conf.urls import url
-from django.urls import path
+from django.urls import path, include
 from rest_framework import routers
-from rest_framework_swagger.views import get_swagger_view
 
 from recipes import views
 from recipes.views import *
@@ -11,8 +10,8 @@ router.register('login', views.LoginViewSet)
 router.register('recipes', views.RecipesViewSet)
 router.register('users', views.UserViewSet)
 
-old_urls = [
-    path('', get_swagger_view()),
+urlpatterns = [
+    path('', include(router.urls)),
     url('^medicines/edit/(?P<id>\d+)$', edit_medicine, name='edit_medicine'),
     url('^search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
     url('^search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
@@ -26,5 +25,3 @@ old_urls = [
     url('^medicines/new', GoodsViewSet.as_view({'post': 'create'})),
     url('^medicines/(?P<pk>\d+)', GoodsViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
 ]
-
-urlpatterns = old_urls + router.urls
