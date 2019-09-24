@@ -1,18 +1,13 @@
-import json
 import traceback
-from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import rest_framework
 from django import http
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.http import *
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.utils.decorators import method_decorator
-from django.views.generic import TemplateView
 from rest_framework import status, permissions, mixins, viewsets, authentication
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
@@ -22,10 +17,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from recipes import services, serializers, models
-from recipes.auth import has_role_for_template_view, \
-    AdminPermission, ApothecaryPermission, is_admin_for_template_view
+from recipes.auth import \
+    AdminPermission, ApothecaryPermission
 from recipes.exceptions import AlreadyExistsException
-from recipes.forms import MedicineNamesForm, MedicineTypeForm, MedicineForm, MedicinePharmacyForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import UserSerializer, MedicineNameSerializer, MedicineTypeSerializer, \
     MedicineWithPharmaciesSerializer, GoodSerializer
@@ -103,77 +97,6 @@ def get_recipe_for_apothecary(request, token):
     instance = Recipe.objects.get(token=token)
     serializer = serializers.RecipeSerializer(instance=instance)
     return Response(get_recipe_with_goods(serializer.data, request), status=status.HTTP_200_OK)
-
-
-@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
-class TemplateViewForAuthenticated(TemplateView):
-    pass
-
-
-@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
-@method_decorator(is_admin_for_template_view, name='dispatch')
-class TemplateViewForAdmins(TemplateView):
-    pass
-
-
-@method_decorator(login_required(login_url=reverse_lazy('home')), name='dispatch')
-@method_decorator(has_role_for_template_view('apothecary'), name='dispatch')
-class TemplateViewForApothecary(TemplateView):
-    pass
-
-
-class TemplateViewForDoctor(TemplateView):
-    pass
-
-
-def index(request):
-    medicines = MedicinesPharmacies.objects.all()
-    return render(request, 'recipes/medicines.html', {"medicines": medicines})
-
-
-def add_medicine(request):
-    ctx = {
-        'medicine_name_form': MedicineNamesForm(),
-        'medicine_type_form': MedicineTypeForm(),
-        'medicine_form': MedicineForm(),
-        'medicine_pharmacy_form': MedicinePharmacyForm()}
-    if request.method == 'POST':
-        ctx['medicine_name_form'] = MedicineNamesForm(request.POST)
-        ctx['medicine_type_form'] = MedicineTypeForm(request.POST)
-        ctx['medicine_form'] = MedicineForm(request.POST)
-        ctx['medicine_pharmacy_form'] = MedicinePharmacyForm(request.POST)
-        if (ctx['medicine_name_form'].is_valid()) and (ctx['medicine_type_form'].is_valid()) and \
-            (ctx['medicine_form'].is_valid()) and (ctx['medicine_pharmacy_form'].is_valid()):
-            instance_medicine_name = ctx['medicine_name_form'].save()
-            instance_medicine_type = ctx['medicine_type_form'].save()
-            instance_medicine_pharmacy = ctx['medicine_pharmacy_form']
-            instance = ctx['medicine_form'].save(request, m1=instance_medicine_type,
-                                                 m2=instance_medicine_name, m3=instance_medicine_pharmacy)
-            instance.save()
-            return redirect('/api/medicines/')
-    return render(request, 'recipes/add_medicine.html', ctx)
-
-
-def get_medicine(request):
-    pharmacy = request.user.apothecary_set.all()[0].pharmacy
-    medicinepharmacies = pharmacy.medicinespharmacies_set.all()
-    if 'name_id' in request.GET:
-        medicinepharmacies = medicinepharmacies.filter(medicine__medicine_name__id=request.GET['name_id'])
-    return HttpResponse(
-        json.dumps([get_medicine_json(i) for i in medicinepharmacies], ensure_ascii=False),
-        content_type='application/json'
-    )
-
-
-def get_medicine_json(medicinepharmacy):
-    return {
-        'price': medicinepharmacy.price,
-        'count': medicinepharmacy.count,
-        'id': medicinepharmacy.id,
-        'description': medicinepharmacy.medicine.medicine_name.medicine_description,
-        'name': medicinepharmacy.medicine.medicine_name.medicine_name,
-        'type': medicinepharmacy.medicine.medicine_type.type_name,
-    }
 
 
 def edit_medicine(request, id):
