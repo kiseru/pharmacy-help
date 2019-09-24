@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from recipes.auth import get_role
 from recipes.managers import CustomUserManager
 from recipes.validators import validate_pos_value
 
@@ -59,6 +58,7 @@ class User(AbstractUser):
             return 'apothecary'
 
         raise Exception('No such role')
+
 
 class Hospital(models.Model):
     city = models.ForeignKey(City, null=False, on_delete=models.CASCADE, verbose_name='Город')
