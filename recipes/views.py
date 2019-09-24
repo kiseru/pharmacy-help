@@ -96,22 +96,6 @@ class UserViewSet(viewsets.GenericViewSet):
         return Response(self.serializer_class(request.user).data)
 
 
-class RecipeCreationViewSet(mixins.RetrieveModelMixin,
-                            mixins.UpdateModelMixin,
-                            GenericViewSet):
-    queryset = Recipe.objects.all()
-    serializer_class = serializers.RecipeSerializer
-
-    lookup_field = 'token'
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        requests = MedicineRequestSerializerForUpdate(data=request.data['requests'], many=True)
-        print(requests.initial_data)
-        serve_recipe(requests.initial_data, instance, request.user.apothecary_set.first())
-        return Response(status=status.HTTP_200_OK)
-
-
 @api_view(['GET'])
 @permission_classes((ApothecaryPermission,))
 @renderer_classes((JSONRenderer,))
