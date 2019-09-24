@@ -9,6 +9,7 @@ from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary, Pha
     MedicineRequest, MedicineRequestStatus, MedicineDosage, MedicinesPharmacies, City, Hospital
 
 
+@admin.register(User)
 class MyUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'phone_number', 'password', 'is_admin')}),
@@ -32,7 +33,8 @@ class MyUserAdmin(UserAdmin):
     filter_horizontal = []
 
 
-class PharmacyAdminForm(ModelAdmin):
+@admin.register(Pharmacy)
+class PharmacyAdmin(ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         if request.user.is_superuser:
             kwargs['form'] = PharmacyForm
@@ -44,12 +46,10 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ('token',)
 
 
-admin.site.register(User, MyUserAdmin)
 admin.site.register(Medicine)
 admin.site.register(MedicineName)
 admin.site.register(Doctor)
 admin.site.register(Apothecary)
-admin.site.register(Pharmacy, PharmacyAdminForm)
 admin.site.register(MedicineType)
 admin.site.register(MedicineRequest)
 admin.site.register(MedicineRequestStatus)
