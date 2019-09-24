@@ -1,14 +1,12 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from django.contrib.auth.admin import UserAdmin
-from django.forms import ModelForm
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-# Register your models here.
+from recipes import models
 from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm, PharmacyForm
 from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary, Pharmacy, Recipe, MedicineType, \
-  MedicineRequest, MedicineRequestStatus, MedicineDosage, MedicinesPharmacies, City, Hospital
-from recipes.services import get_coordinates
+    MedicineRequest, MedicineRequestStatus, MedicineDosage, MedicinesPharmacies, City, Hospital
 
 
 class MyUserAdmin(UserAdmin):
@@ -16,7 +14,7 @@ class MyUserAdmin(UserAdmin):
         (None, {'fields': ('email', 'phone_number', 'password', 'is_admin')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name',)}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
-                                        )}),
+                                       )}),
 
     )
     add_fieldsets = (
@@ -27,9 +25,9 @@ class MyUserAdmin(UserAdmin):
     )
     form = MyUserChangeForm
     add_form = MyUserCreationForm
-    list_display = ( 'email', 'phone_number', 'first_name', 'last_name', 'is_staff')
+    list_display = ('email', 'phone_number', 'first_name', 'last_name', 'is_staff')
     list_filter = ('is_staff', 'is_superuser', 'is_active')
-    search_fields = ( 'first_name', 'phone_number', 'last_name', 'email')
+    search_fields = ('first_name', 'phone_number', 'last_name', 'email')
     ordering = ('last_name',)
     filter_horizontal = []
 
@@ -41,13 +39,17 @@ class PharmacyAdminForm(ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
 
+@admin.register(models.Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    readonly_fields = ('token',)
+
+
 admin.site.register(User, MyUserAdmin)
 admin.site.register(Medicine)
 admin.site.register(MedicineName)
 admin.site.register(Doctor)
 admin.site.register(Apothecary)
 admin.site.register(Pharmacy, PharmacyAdminForm)
-admin.site.register(Recipe)
 admin.site.register(MedicineType)
 admin.site.register(MedicineRequest)
 admin.site.register(MedicineRequestStatus)

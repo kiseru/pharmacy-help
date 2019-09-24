@@ -1,5 +1,7 @@
 import json
 import traceback
+from datetime import datetime
+from uuid import UUID, uuid4
 
 import rest_framework
 from django import http
@@ -26,10 +28,8 @@ from recipes.exceptions import AlreadyExistsException
 from recipes.forms import MedicineNamesForm, MedicineTypeForm, MedicineForm, MedicinePharmacyForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
 from recipes.serializers import UserSerializer, MedicineNameSerializer, MedicineTypeSerializer, \
-    MedicineWithPharmaciesSerializer, GoodSerializer, \
-    MedicineRequestSerializerForUpdate
-from recipes.services import create_recipe
-from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
+    MedicineWithPharmaciesSerializer, GoodSerializer
+from recipes.services import get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
     delete_worker, get_recipe_with_goods
 
 
@@ -216,7 +216,7 @@ class RecipesViewSet(viewsets.GenericViewSet,
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        serializer.save(doctor=self.request.user.doctor)
+        serializer.save(doctor=self.request.user.doctor, token=uuid4())
 
     def get_queryset(self):
         return Recipe.objects.filter(doctor__user=self.request.user)
