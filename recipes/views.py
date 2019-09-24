@@ -234,24 +234,6 @@ def edit_medicine(request, id):
         return HttpResponseNotFound("<h2>Medicine not found</h2>")
 
 
-@method_decorator(response_to_api_format, name='post')
-class UserInfoView(APIView):
-    renderer_classes = (JSONRenderer,)
-
-    def get(self, request):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
-
-    def post(self, request):
-        data = request.data
-        serializer = UserSerializer(instance=request.user, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.data.update({"error": serializer.errors}), status=status.HTTP_400_BAD_REQUEST)
-
-
 class RecipesViewSet(ReadOnlyModelViewSet):
     renderer_classes = (JSONRenderer,)
 
