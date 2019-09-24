@@ -48,12 +48,17 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи'
 
     def __str__(self):
-        return '{0} {1}'.format(self.first_name, self.last_name)
+        return f'{self.first_name} {self.last_name}'
 
     @property
     def role(self):
-        return get_role(self)
+        if self.doctor is not None:
+            return 'doctor'
 
+        if self.apothecary_set.count():
+            return 'apothecary'
+
+        raise Exception('No such role')
 
 class Hospital(models.Model):
     city = models.ForeignKey(City, null=False, on_delete=models.CASCADE, verbose_name='Город')
@@ -68,7 +73,7 @@ class Hospital(models.Model):
 
 
 class Doctor(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь')
     hospital = models.ForeignKey(Hospital, null=True, on_delete=models.CASCADE, verbose_name='Больница')
 
     class Meta:

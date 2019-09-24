@@ -3,34 +3,32 @@ import traceback
 
 import rest_framework
 from django import http
-from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.http import *
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
-from rest_framework import status, permissions, mixins, viewsets, authentication, response
+from rest_framework import status, permissions, mixins, viewsets, authentication
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes, action
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from recipes import services, serializers, models
-from recipes.auth import has_role, has_role_for_template_view, \
+from recipes.auth import has_role_for_template_view, \
     AdminPermission, ApothecaryPermission, is_admin_for_template_view
 from recipes.exceptions import AlreadyExistsException
-from recipes.forms import UserForm, MedicineNamesForm, MedicineTypeForm, MedicineForm, MedicinePharmacyForm
+from recipes.forms import MedicineNamesForm, MedicineTypeForm, MedicineForm, MedicinePharmacyForm
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
-from recipes.serializers import RecipeShortSerializer, UserSerializer, RecipeFullSerializer, \
-    MedicineNameSerializer, MedicineTypeSerializer, MedicineWithPharmaciesSerializer, GoodSerializer, \
+from recipes.serializers import UserSerializer, MedicineNameSerializer, MedicineTypeSerializer, \
+    MedicineWithPharmaciesSerializer, GoodSerializer, \
     MedicineRequestSerializerForUpdate
-from recipes.services import get_recipes, get_recipes_of_doctor, create_recipe
+from recipes.services import create_recipe
 from recipes.services import serve_recipe, get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
     delete_worker, get_recipe_with_goods
 
@@ -98,29 +96,13 @@ class UserViewSet(viewsets.GenericViewSet):
         return Response(self.serializer_class(request.user).data)
 
 
-@method_decorator(has_role('doctor'), name='create')
-@method_decorator(has_role('apothecary'), name='update')
-@method_decorator(response_to_api_format, name='create')
-@method_decorator(response_to_api_format, name='update')
-class RecipeCreationViewSet(mixins.CreateModelMixin,
-                            mixins.RetrieveModelMixin,
+class RecipeCreationViewSet(mixins.RetrieveModelMixin,
                             mixins.UpdateModelMixin,
                             GenericViewSet):
-    renderer_classes = (JSONRenderer,)
-
     queryset = Recipe.objects.all()
-    serializer_class = RecipeFullSerializer
+    serializer_class = serializers.RecipeSerializer
 
     lookup_field = 'token'
-
-    def create(self, request, *args, **kwargs):
-        data = request.data
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        recipe = Recipe(**serializer.data, doctor=request.user.doctor_set.all()[0])
-        create_recipe(recipe, data, request)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -135,7 +117,7 @@ class RecipeCreationViewSet(mixins.CreateModelMixin,
 @renderer_classes((JSONRenderer,))
 def get_recipe_for_apothecary(request, token):
     instance = Recipe.objects.get(token=token)
-    serializer = RecipeFullSerializer(instance=instance)
+    serializer = serializers.RecipeSerializer(instance=instance)
     return Response(get_recipe_with_goods(serializer.data, request), status=status.HTTP_200_OK)
 
 
@@ -230,8 +212,11 @@ def edit_medicine(request, id):
 
 
 class RecipesViewSet(viewsets.GenericViewSet,
-                     mixins.ListModelMixin):
-    serializer_class = RecipeShortSerializer
+                     mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.CreateModelMixin,
+                     mixins.UpdateModelMixin):
+    serializer_class = serializers.RecipeSerializer
     queryset = Recipe.objects.none()
 
     def list(self, request, *args, **kwargs):
@@ -239,6 +224,15 @@ class RecipesViewSet(viewsets.GenericViewSet,
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         return super().list(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        if request.user.role is not 'doctor':
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(doctor=self.request.user.doctor)
 
     def get_queryset(self):
         return Recipe.objects.filter(doctor__user=self.request.user)

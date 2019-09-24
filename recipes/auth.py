@@ -6,12 +6,12 @@ from rest_framework.response import Response
 
 
 def get_role(user):
-    if user.doctor_set.count():
+    if user.doctor:
         role = 'doctor'
     elif user.apothecary_set.count():
         role = 'apothecary'
     else:
-        role = ''
+        raise Exception('No such role')
     return role
 
 
@@ -74,7 +74,7 @@ def is_admin_for_template_view(func):
         else:
             return func(request, *args, **kwargs)
     return new_func
-    
+
 
 class ApothecaryPermission(IsAuthenticated):
     def has_permission(self, request, view):

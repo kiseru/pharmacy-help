@@ -1,16 +1,12 @@
+import re
+
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import CharField, IntegerField
 
+from recipes import models
 from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType, MedicineName, Pharmacy, \
     MedicinesPharmacies
-from rest_framework import serializers
-import re
-
-
-# class JsonSerializer:
-#     @staticmethod
-#     def get_json(object):
-#         return object.__str__()
 
 
 def serialize_user(user, errors: list):
@@ -18,17 +14,6 @@ def serialize_user(user, errors: list):
     result.data['error'] = None if not errors else ''.join(
         [''.join([j[1][0]['message'] for j in i.items()]) for i in errors])
     return result.data
-
-
-class RecipeShortSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = ('id', 'doctorName', 'patientName', 'patient_email', 'date')
-
-    id = CharField(source='token')
-    doctorName = CharField(source='get_doctor_initials')
-    patientName = CharField(source='patient_initials')
-    date = CharField(source='get_date_str')
 
 
 class MedicineRequestSerializer(serializers.ModelSerializer):
@@ -48,20 +33,6 @@ class MedicineRequestSerializerForUpdate(serializers.ModelSerializer):
         'given_medicine': {'write_only': True},
         'medicine_count': {'write_only': True},
     }
-
-
-class RecipeFullSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = ('id', 'doctor_initials', 'doctor_email', 'patient_initials', 'patient_email',
-                  'date', 'day_duration', 'patient_age', 'medicine_card_number', 'medicine_policy_number', 'requests',
-                  'comment')
-
-    id = CharField(source='token', required=False)
-    doctor_initials = CharField(source='get_doctor_initials', required=False)
-    doctor_email = CharField(source='get_doctor_email', required=False)
-    date = CharField(source='get_date_str', required=False)
-    requests = MedicineRequestSerializer(many=True, required=False)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -89,6 +60,40 @@ class UserSerializer(serializers.ModelSerializer):
                 if raise_exception:
                     raise ValidationError()
         return not len(self.errors)
+
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.City
+        fields = '__all__'
+
+
+class HospitalSerializer(serializers.ModelSerializer):
+    city = CitySerializer()
+
+    class Meta:
+        model = models.Hospital
+        fields = '__all__'
+
+
+class DoctorSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    hospital = HospitalSerializer()
+
+    class Meta:
+        model = models.Doctor
+        fields = '__all__'
+
+
+class RecipeSerializer(serializers.ModelSerializer):
+    requests = MedicineRequestSerializer(required=False, many=True,
+                                         read_only=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'patient_initials', 'patient_email', 'date',
+                  'day_duration', 'patient_age', 'medicine_card_number',
+                  'medicine_policy_number', 'requests', 'comment')
 
 
 class MedicineTypeSerializer(serializers.ModelSerializer):
@@ -119,14 +124,6 @@ class MedicineWithPharmaciesSerializer(serializers.ModelSerializer):
     medicine_name = CharField(source='name')
     medicine_type = CharField(source='type')
     pharmacies = PharmacySerializer(many=True)
-
-
-# class MedicinePharmacySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = MedicinesPharmacies
-#         exclude = ('count',)
-#     medicine = MedicineSerializer()
-#     pharmacy = PharmacySerializer()
 
 
 class MedicineSerializer(serializers.ModelSerializer):
