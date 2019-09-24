@@ -14,7 +14,6 @@ router.register('api/users', views.UserViewSet)
 old_urls = [
     path('', get_swagger_view()),
     url('^api/medicines/edit/(?P<id>\d+)$', edit_medicine, name='edit_medicine'),
-    url('^api/recipes/(?P<token>[0-9a-zA-Z]+)/confirm$', get_recipe_for_apothecary),
     url('^api/search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
     url('^api/search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
     url('^api/medicine_pharmacy/', MedicineWithPharmaciesViewSet.as_view({'get': 'list'})),

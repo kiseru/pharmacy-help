@@ -25,7 +25,7 @@ from recipes.permissions import IsDoctor
 from recipes.serializers import UserSerializer, MedicineNameSerializer, MedicineTypeSerializer, \
     MedicineWithPharmaciesSerializer, GoodSerializer
 from recipes.services import get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
-    delete_worker, get_recipe_with_goods
+    delete_worker
 
 
 def response_to_api_format(func):
@@ -89,15 +89,6 @@ class UserViewSet(viewsets.GenericViewSet):
     @action(detail=False, permission_classes=(permissions.IsAuthenticated,))
     def me(self, request, *args, **kwargs):
         return Response(self.serializer_class(request.user).data)
-
-
-@api_view(['GET'])
-@permission_classes((ApothecaryPermission,))
-@renderer_classes((JSONRenderer,))
-def get_recipe_for_apothecary(request, token):
-    instance = Recipe.objects.get(token=token)
-    serializer = serializers.RecipeSerializer(instance=instance)
-    return Response(get_recipe_with_goods(serializer.data, request), status=status.HTTP_200_OK)
 
 
 def edit_medicine(request, id):
