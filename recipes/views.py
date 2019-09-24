@@ -21,6 +21,7 @@ from recipes.auth import \
     AdminPermission, ApothecaryPermission
 from recipes.exceptions import AlreadyExistsException
 from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
+from recipes.permissions import IsDoctor
 from recipes.serializers import UserSerializer, MedicineNameSerializer, MedicineTypeSerializer, \
     MedicineWithPharmaciesSerializer, GoodSerializer
 from recipes.services import get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
@@ -118,25 +119,13 @@ def edit_medicine(request, id):
         return HttpResponseNotFound("<h2>Medicine not found</h2>")
 
 
-class RecipesViewSet(viewsets.GenericViewSet,
-                     mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
-                     mixins.CreateModelMixin,
-                     mixins.UpdateModelMixin):
+class RecipesViewSet(mixins.CreateModelMixin,
+                     mixins.UpdateModelMixin,
+                     viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.RecipeSerializer
     queryset = Recipe.objects.none()
-
-    def list(self, request, *args, **kwargs):
-        if request.user.role is not 'doctor':
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        return super().list(request, *args, **kwargs)
-
-    def create(self, request, *args, **kwargs):
-        if request.user.role is not 'doctor':
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        return super().create(request, *args, **kwargs)
+    permission_classes = (permissions.IsAuthenticated,
+                          IsDoctor)
 
     def perform_create(self, serializer):
         serializer.save(doctor=self.request.user.doctor, token=uuid4())
