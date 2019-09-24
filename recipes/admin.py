@@ -4,9 +4,11 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from recipes import models
-from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm, PharmacyForm
-from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary, Pharmacy, Recipe, MedicineType, \
-    MedicineRequest, MedicineRequestStatus, MedicineDosage, MedicinesPharmacies, City, Hospital
+from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm,\
+    PharmacyForm
+from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary,\
+    Pharmacy, MedicineType, MedicineRequest, MedicineRequestStatus,\
+    MedicineDosage, MedicinesPharmacies, City, Hospital
 
 
 @admin.register(User)
@@ -21,12 +23,14 @@ class MyUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'phone_number', 'password1', 'password2'),
+            'fields': ('email', 'phone_number', 'password1', 'password2',
+                       'first_name', 'last_name'),
         }),
     )
     form = MyUserChangeForm
     add_form = MyUserCreationForm
-    list_display = ('email', 'phone_number', 'first_name', 'last_name', 'is_staff')
+    list_display = ('email', 'phone_number', 'first_name', 'last_name',
+                    'is_staff')
     list_filter = ('is_staff', 'is_superuser', 'is_active')
     search_fields = ('first_name', 'phone_number', 'last_name', 'email')
     ordering = ('last_name',)
