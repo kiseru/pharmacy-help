@@ -7,24 +7,24 @@ from recipes import views
 from recipes.views import *
 
 router = routers.DefaultRouter()
-router.register('api/login', views.LoginViewSet)
-router.register('api/recipes', views.RecipesViewSet)
-router.register('api/users', views.UserViewSet)
+router.register('login', views.LoginViewSet)
+router.register('recipes', views.RecipesViewSet)
+router.register('users', views.UserViewSet)
 
 old_urls = [
     path('', get_swagger_view()),
-    url('^api/medicines/edit/(?P<id>\d+)$', edit_medicine, name='edit_medicine'),
-    url('^api/search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
-    url('^api/search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
-    url('^api/medicine_pharmacy/', MedicineWithPharmaciesViewSet.as_view({'get': 'list'})),
-    url('^api/pharmacies', find_pharmacies),
-    url('^api/workers/(?P<pk>\d+)/delete', WorkerViewSet.as_view({'post': 'destroy'})),
-    url('^api/workers/(?P<pk>\d+)$', WorkerViewSet.as_view({'post': 'update', 'get': 'retrieve'})),
-    url('^api/workers/new$', WorkerViewSet.as_view({'post': 'create'})),
-    url('^api/workers/$', WorkerViewSet.as_view({'get': 'list'})),
-    url('^api/medicines/$', GoodsViewSet.as_view({'get': 'list'})),
-    url('^api/medicines/new', GoodsViewSet.as_view({'post': 'create'})),
-    url('^api/medicines/(?P<pk>\d+)', GoodsViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
+    url('^medicines/edit/(?P<id>\d+)$', edit_medicine, name='edit_medicine'),
+    url('^search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
+    url('^search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
+    url('^medicine_pharmacy/', MedicineWithPharmaciesViewSet.as_view({'get': 'list'})),
+    url('^pharmacies', find_pharmacies),
+    url('^workers/(?P<pk>\d+)/delete', WorkerViewSet.as_view({'post': 'destroy'})),
+    url('^workers/(?P<pk>\d+)$', WorkerViewSet.as_view({'post': 'update', 'get': 'retrieve'})),
+    url('^workers/new$', WorkerViewSet.as_view({'post': 'create'})),
+    url('^workers/$', WorkerViewSet.as_view({'get': 'list'})),
+    url('^medicines/$', GoodsViewSet.as_view({'get': 'list'})),
+    url('^medicines/new', GoodsViewSet.as_view({'post': 'create'})),
+    url('^medicines/(?P<pk>\d+)', GoodsViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
 ]
 
 urlpatterns = old_urls + router.urls
