@@ -6,6 +6,7 @@ from recipes import views
 from recipes.views import *
 
 router = routers.DefaultRouter()
+router.register('goods', views.GoodsViewSet)
 router.register('login', views.LoginViewSet)
 router.register('medicines', views.MedicineViewSet)
 router.register('recipes', views.RecipesViewSet)

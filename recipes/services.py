@@ -2,17 +2,14 @@ import json
 import math
 
 import requests
-from django.core.mail import send_mail
 from django.db import transaction
-from django.urls import reverse
 from rest_framework.exceptions import ValidationError
 
-from pharmacyhelp import settings
 from recipes.auth import get_role
 from recipes.exceptions import AlreadyExistsException
-from recipes.models import MedicineName, MedicinesPharmacies, Pharmacy, \
-    Medicine, User, Apothecary, Doctor, MedicineType
-from recipes.serializers import PharmacySerializer, MedicineSerializer, GoodSerializer
+from recipes.models import Good, Pharmacy, \
+    Medicine, User, Apothecary, Doctor
+from recipes.serializers import PharmacySerializer, MedicineSerializer
 
 
 def get_coordinates(address: str):
@@ -46,7 +43,7 @@ def find_pharmacies(city_name, medicine_ids, coordinates=None):
     for p in pharmacies:
         pharmacies_goods[p] = [[], 0]
         for m in medicines:
-            if MedicinesPharmacies.objects.filter(pharmacy=p, medicine=m).count():
+            if Good.objects.filter(pharmacy=p, medicine=m).count():
                 pharmacies_goods[p][0].append(m)
                 pharmacies_goods[p][1] = get_distance(*coordinates, p.latitude, p.longitude)
     found_medicines = 0
@@ -102,15 +99,6 @@ def add_worker(user_serializer, admin):
     return user
 
 
-def get_recipe_with_goods(data, request):
-    for i in data['requests']:
-        medicine_id = i['medicine_name_id']
-        pharmacy = request.user.apothecary_set.first().pharmacy
-        medicine_pharmacies = MedicinesPharmacies.objects.filter(medicine__medicine_name__id=medicine_id, pharmacy=pharmacy)
-        i['goods'] = [GoodSerializer(instance=m).data for m in medicine_pharmacies]
-    return data
-
-
 def delete_worker(user):
     User.delete(user)
 
@@ -148,68 +136,3 @@ def get_workers(user, query=None):
         q4 = result.filter(last_name__icontains=query)
         result = q1 | q2 | q3 | q4
     return result
-
-
-def get_or_create_medicine_name(name, level):
-    medicines = MedicineName.objects.filter(
-        medicine_name__iexact=name,
-        medicine_level=level,
-    )
-    if medicines.count():
-        return medicines.all()[0]
-    else:
-        medicine_name = MedicineName(medicine_name=name,  medicine_level=level)
-        MedicineName.save(medicine_name)
-        return medicine_name
-
-
-def get_or_create_medicine_type(type):
-    medicines = MedicineType.objects.filter(type_name__iexact=type)
-    if medicines.count():
-        return medicines.all()[0]
-    else:
-        medicine_type = MedicineType(type_name=type)
-        MedicineType.save(medicine_type)
-        return medicine_type
-
-
-def get_or_create_medicine(medicine_name, medicine_type):
-    medicines = Medicine.objects.filter(medicine_name=medicine_name, medicine_type=medicine_type)
-    if medicines.count():
-        return medicines.all()[0]
-    else:
-        medicine = Medicine(medicine_type=medicine_type, medicine_name=medicine_name)
-        Medicine.save(medicine)
-        return medicine
-
-
-@transaction.atomic()
-def add_medicine(data, user):
-    try:
-        medicine_name = get_or_create_medicine_name(data['name'], data['level'])
-        medicine_type = get_or_create_medicine_type(data['type'])
-        medicine = get_or_create_medicine(medicine_name=medicine_name, medicine_type=medicine_type)
-        pharmacy = user.apothecary_set.all()[0].pharmacy
-        goods = MedicinesPharmacies.objects.filter(medicine=medicine, pharmacy=pharmacy)
-        if goods.count():
-            raise AlreadyExistsException(MedicinesPharmacies)
-        good = MedicinesPharmacies(
-            medicine=medicine,
-            pharmacy=pharmacy,
-            count=data['count'],
-            price=data['price'],
-        )
-        MedicinesPharmacies.save(good)
-        return good
-    except KeyError:
-        raise ValidationError()
-
-
-@transaction.atomic()
-def update_medicine(good, data):
-    try:
-        good.count = data['count']
-        good.price = data['price']
-        MedicinesPharmacies.save(good)
-    except KeyError:
-        raise ValidationError()

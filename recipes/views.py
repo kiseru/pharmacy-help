@@ -13,12 +13,12 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
-from recipes import services, serializers, models
+from recipes import serializers, models
 from recipes.auth import \
-    AdminPermission, ApothecaryPermission
+    AdminPermission
 from recipes.exceptions import AlreadyExistsException
 from recipes.models import Recipe, MedicineName, MedicineType, Medicine, User
-from recipes.permissions import IsDoctor
+from recipes.permissions import IsDoctor, IsApothecary
 from recipes.serializers import UserSerializer, MedicineNameSerializer, MedicineTypeSerializer, \
     MedicineWithPharmaciesSerializer, GoodSerializer
 from recipes.services import get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
@@ -200,43 +200,17 @@ class WorkerViewSet(mixins.CreateModelMixin,
         return Response(status=status.HTTP_200_OK)
 
 
-@method_decorator(response_to_api_format, name='create')
-@method_decorator(response_to_api_format, name='update')
-class GoodsViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet):
-    renderer_classes = (JSONRenderer,)
-    queryset = None
+class GoodsViewSet(viewsets.ModelViewSet):
+    queryset = models.Good.objects.all()
     serializer_class = GoodSerializer
-    permission_classes = (ApothecaryPermission,)
+    permission_classes = (permissions.IsAuthenticated,
+                          IsApothecary)
 
-    def list(self, request, *args, **kwargs):
-        pharmacy = request.user.apothecary_set.all()[0].pharmacy
-        self.queryset = pharmacy.medicinespharmacies_set.all()
-        if 'name_id' in request.GET:
-            self.queryset = self.queryset.filter(medicine__medicine_name__id=request.GET['name_id'])
-        return super().list(request, *args, **kwargs)
+    def get_queryset(self):
+        return self.queryset.filter(pharmacy=self.request.user.apothecary.pharmacy)
 
-    def create(self, request, *args, **kwargs):
-        data = request.data
-        good = services.add_medicine(data, request.user)
-        return Response(data={'id': good.id}, status=status.HTTP_201_CREATED)
-
-    def retrieve(self, request, *args, **kwargs):
-        pharmacy = request.user.apothecary_set.all()[0].pharmacy
-        self.queryset = pharmacy.medicinespharmacies_set.all()
-        return super().retrieve(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        pharmacy = request.user.apothecary_set.all()[0].pharmacy
-        self.queryset = pharmacy.medicinespharmacies_set.all()
-        instance = self.get_object()
-        data = request.data
-        services.update_medicine(instance, data)
-        return Response(status=status.HTTP_200_OK)
+    def perform_create(self, serializer):
+        serializer.save(pharmacy=self.request.user.apothecary.pharmacy)
 
 
 class MedicineViewSet(viewsets.ReadOnlyModelViewSet):

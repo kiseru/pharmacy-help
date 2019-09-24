@@ -4,11 +4,16 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from recipes import models
-from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm,\
+from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm, \
     PharmacyForm
-from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary,\
-    Pharmacy, MedicineType, MedicineRequest, MedicineRequestStatus,\
-    MedicineDosage, MedicinesPharmacies, City, Hospital
+from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary, \
+    Pharmacy, MedicineType, MedicineRequest, MedicineRequestStatus, \
+    MedicineDosage, City, Hospital
+
+
+@admin.register(models.Good)
+class GoodAdmin(admin.ModelAdmin):
+    list_display = ('medicine', 'pharmacy', 'count', 'price')
 
 
 @admin.register(User)
@@ -58,6 +63,5 @@ admin.site.register(MedicineType)
 admin.site.register(MedicineRequest)
 admin.site.register(MedicineRequestStatus)
 admin.site.register(MedicineDosage)
-admin.site.register(MedicinesPharmacies)
 admin.site.register(City)
 admin.site.register(Hospital)

@@ -5,8 +5,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import CharField, IntegerField
 
 from recipes import models
-from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType, MedicineName, Pharmacy, \
-    MedicinesPharmacies
+from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType, MedicineName, Pharmacy
 
 
 def serialize_user(user, errors: list):
@@ -136,9 +135,11 @@ class MedicineSerializer(serializers.ModelSerializer):
 
 
 class GoodSerializer(serializers.ModelSerializer):
+    medicine = serializers.PrimaryKeyRelatedField(queryset=models.Medicine.objects.all())
+
     class Meta:
-        model = MedicinesPharmacies
-        fields = ('count', 'price', 'name', 'type', 'id', 'level')
+        model = models.Good
+        fields = ('count', 'price', 'name', 'type', 'id', 'level', 'medicine')
 
 
 class LoginSerializer(serializers.Serializer):

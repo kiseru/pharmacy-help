@@ -51,10 +51,10 @@ class User(AbstractUser):
 
     @property
     def role(self):
-        if self.doctor is not None:
+        if hasattr(self, 'doctor'):
             return 'doctor'
 
-        if self.apothecary_set.count():
+        if hasattr(self, 'apothecary'):
             return 'apothecary'
 
         raise Exception('No such role')
@@ -138,7 +138,7 @@ class Pharmacy(models.Model):
 
 class Apothecary(models.Model):
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, verbose_name='Аптека')
-    user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE, verbose_name='Пользователь')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь')
 
     class Meta:
         verbose_name = 'Аптекарь'
@@ -175,14 +175,14 @@ class MedicineName(models.Model):
 class Medicine(models.Model):
     medicine_name = models.ForeignKey(MedicineName, on_delete=models.CASCADE, verbose_name='Название')
     medicine_type = models.ForeignKey(MedicineType, on_delete=models.CASCADE, verbose_name='Тип')
-    pharmacies = models.ManyToManyField(Pharmacy, through='MedicinesPharmacies')
+    pharmacies = models.ManyToManyField(Pharmacy, through='Good')
 
     class Meta:
         verbose_name = 'Препорат'
         verbose_name_plural = 'Препораты'
 
     def __str__(self):
-        return f'{self.medicine_name.medicine_name} {self.medicine_type.type_name}'
+        return self.medicine_name.medicine_name
 
     @property
     def name(self):
@@ -240,11 +240,16 @@ class MedicineRequest(models.Model):
         return self.medicine_dosage.medicine.id
 
 
-class MedicinesPharmacies(models.Model):
-    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
-    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
-    count = models.PositiveIntegerField(default=0, validators=[validate_pos_value])
-    price = models.FloatField(default=0.0, validators=[validate_pos_value])
+class Good(models.Model):
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, verbose_name='Лекарство')
+    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, verbose_name='Аптека')
+    count = models.PositiveIntegerField(default=0, verbose_name='Количество')
+    price = models.FloatField(default=0.0, validators=[validate_pos_value], verbose_name='Цена')
+
+    class Meta:
+        unique_together = ('medicine', 'pharmacy')
+        verbose_name = 'Товар'
+        verbose_name_plural = 'Товары'
 
     @property
     def name(self):
@@ -257,3 +262,6 @@ class MedicinesPharmacies(models.Model):
     @property
     def level(self):
         return self.medicine.medicine_name.medicine_level
+
+    def __str__(self):
+        return f'{self.medicine} - {self.pharmacy}'
