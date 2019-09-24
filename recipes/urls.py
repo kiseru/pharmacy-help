@@ -12,7 +12,6 @@ router.register('api/users', views.UserViewSet)
 
 old_urls = [
     path('', get_swagger_view()),
-    url('^logout/', do_logout, name='logout'),
     url('^api/recipes/$', RecipesViewSet.as_view({'get': 'list'}), name='recipes'),
     url('^api/medicines/edit/(?P<id>\d+)$', edit_medicine, name='edit_medicine'),
     url('^api/recipes/new$', RecipeCreationViewSet.as_view({'post': 'create'}), name='add_recipe'),

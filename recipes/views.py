@@ -98,11 +98,6 @@ class UserViewSet(viewsets.GenericViewSet):
         return Response(self.serializer_class(request.user).data)
 
 
-def do_logout(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('home'))
-
-
 @method_decorator(has_role('doctor'), name='create')
 @method_decorator(has_role('apothecary'), name='update')
 @method_decorator(response_to_api_format, name='create')
