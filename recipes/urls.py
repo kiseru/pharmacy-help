@@ -8,11 +8,11 @@ from recipes.views import *
 
 router = routers.DefaultRouter()
 router.register('api/login', views.LoginViewSet)
+router.register('api/recipes', views.RecipesViewSet)
 router.register('api/users', views.UserViewSet)
 
 old_urls = [
     path('', get_swagger_view()),
-    url('^api/recipes/$', RecipesViewSet.as_view({'get': 'list'}), name='recipes'),
     url('^api/medicines/edit/(?P<id>\d+)$', edit_medicine, name='edit_medicine'),
     url('^api/recipes/new$', RecipeCreationViewSet.as_view({'post': 'create'}), name='add_recipe'),
     url('^api/recipes/create$', TemplateViewForAuthenticated.as_view(template_name='recipe.html')),

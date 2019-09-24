@@ -12,7 +12,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
-from rest_framework import status, permissions, mixins, viewsets, authentication
+from rest_framework import status, permissions, mixins, viewsets, authentication, response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes, action
@@ -229,19 +229,19 @@ def edit_medicine(request, id):
         return HttpResponseNotFound("<h2>Medicine not found</h2>")
 
 
-class RecipesViewSet(ReadOnlyModelViewSet):
-    renderer_classes = (JSONRenderer,)
-
-    queryset = None
+class RecipesViewSet(viewsets.GenericViewSet,
+                     mixins.ListModelMixin):
     serializer_class = RecipeShortSerializer
+    queryset = Recipe.objects.none()
 
     def list(self, request, *args, **kwargs):
-        token = request.GET['id'] if 'id' in request.GET else ''
-        if request.user.role is 'doctor':
-            self.queryset = get_recipes_of_doctor(request.user.doctor_set.first(), token).order_by('-date')[:10]
-        else:
-            self.queryset = get_recipes(token).order_by('-date')[:10]
+        if request.user.role is not 'doctor':
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return Recipe.objects.filter(doctor__user=self.request.user)
 
 
 class SearchMedicineViewSet(ReadOnlyModelViewSet):
