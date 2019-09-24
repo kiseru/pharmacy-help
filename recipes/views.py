@@ -406,3 +406,11 @@ class GoodsViewSet(
         data = request.data
         services.update_medicine(instance, data)
         return Response(status=status.HTTP_200_OK)
+
+
+class MedicineViewSet(mixins.ListModelMixin,
+                      viewsets.GenericViewSet):
+
+    def get_queryset(self):
+        pharmacy = self.request.user.apothecary_set.first()
+        return pharmacy.medicinespharmacies_set.all()

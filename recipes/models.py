@@ -1,147 +1,188 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from recipes.auth import get_role
 from recipes.managers import CustomUserManager
 from recipes.validators import validate_pos_value
-from recipes.auth import  *
 
 
 class MedicineType(models.Model):
-    type_name = models.CharField(max_length=50)
+    type_name = models.CharField(max_length=50, verbose_name='Название')
+
+    class Meta:
+        verbose_name = 'Тип препората'
+        verbose_name_plural = 'Типы препаратов'
 
     def __str__(self):
         return self.type_name
 
 
 class City(models.Model):
-    name = models.CharField(max_length=50)
-    
+    name = models.CharField(max_length=50, verbose_name='Название')
+
+    class Meta:
+        verbose_name = 'Город'
+        verbose_name_plural = 'Города'
+
     def __str__(self):
         return self.name
-    
+
 
 class User(AbstractUser):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    email = models.EmailField(max_length=150, unique=True)
-    password = models.CharField(max_length=128)
-    phone_number = models.CharField(max_length=12, unique=True)
-    is_admin = models.BooleanField(default=False)
+    first_name = models.CharField(max_length=50, verbose_name='Имя')
+    last_name = models.CharField(max_length=50, verbose_name='Фамилия')
+    email = models.EmailField(max_length=150, unique=True, verbose_name='E-mail')
+    password = models.CharField(max_length=128, verbose_name='Пароль')
+    phone_number = models.CharField(max_length=12, unique=True, verbose_name='Номер телефона')
+    is_admin = models.BooleanField(default=False, verbose_name='Админ?')
 
     username = None
 
     REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'password']
     USERNAME_FIELD = 'email'
 
-    # def save(self, *args, **kwargs):
-    #     self.set_password(self.password)
-    #     super().save(*args, **kwargs)
-
     objects = CustomUserManager()
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self):
         return '{0} {1}'.format(self.first_name, self.last_name)
-    
+
     @property
     def role(self):
         return get_role(self)
-   
-   
+
+
 class Hospital(models.Model):
-    city = models.ForeignKey(City, null=False, on_delete=models.CASCADE)
-    hospital_name = models.CharField(max_length=20)
-    
+    city = models.ForeignKey(City, null=False, on_delete=models.CASCADE, verbose_name='Город')
+    hospital_name = models.CharField(max_length=20, verbose_name='Название')
+
+    class Meta:
+        verbose_name = 'Больница'
+        verbose_name_plural = 'Больницы'
+
     def __str__(self):
         return self.hospital_name
 
 
 class Doctor(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    hospital = models.ForeignKey(Hospital, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    hospital = models.ForeignKey(Hospital, null=True, on_delete=models.CASCADE, verbose_name='Больница')
+
+    class Meta:
+        verbose_name = 'Врач'
+        verbose_name_plural = 'Врачи'
 
     def __str__(self):
         return self.user.email
-    
+
     def get_initials(self):
         return str(self.user)
 
 
 class Recipe(models.Model):
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
-    patient_email = models.CharField(max_length=50)
-    patient_initials = models.CharField(max_length=100)
-    date = models.DateTimeField(auto_now=True)
-    token = models.TextField()
-    day_duration = models.PositiveIntegerField(default=15)
-    patient_age = models.PositiveSmallIntegerField()
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, verbose_name='Врач')
+    patient_email = models.CharField(max_length=50, verbose_name='E-mail пациента')
+    patient_initials = models.CharField(max_length=100, verbose_name='ФИО пациента')
+    date = models.DateTimeField(auto_now=True, verbose_name='Выписан')
+    token = models.TextField(verbose_name='Идентификатор')
+    day_duration = models.PositiveIntegerField(default=15,
+                                               verbose_name='Действительность рецепта (в днях)')
+    patient_age = models.PositiveSmallIntegerField(verbose_name='Возраст пациента')
     medicine_card_number = models.CharField(max_length=10, null=True, blank=True)
     medicine_policy_number = models.CharField(max_length=16, null=True, blank=True)
-    comment = models.TextField(blank=True, null=True)
-    
+    comment = models.TextField(blank=True, null=True, verbose_name='Комментарий')
+
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
     def get_date_str(self):
         return self.date.strftime('%d.%m.%Y')
-    
+
     def __str__(self):
-        return '{} - {} - {}'.format(self.date, self.patient_email, self.doctor.user.email)
-    
+        return f'{self.date} - {self.patient_email} - {self.doctor.user.email}'
+
     def get_doctor_initials(self):
         return self.doctor.get_initials()
-    
+
     def get_doctor_email(self):
         return self.doctor.user.email
 
     @property
     def requests(self):
         return MedicineRequest.objects.filter(recipe=self)
-    
+
 
 class Pharmacy(models.Model):
-    pharmacy_name = models.CharField(max_length=20)
-    city = models.ForeignKey(City, on_delete=models.CASCADE, null=True)
-    pharmacy_address = models.TextField()
+    pharmacy_name = models.CharField(max_length=20, verbose_name='Название')
+    city = models.ForeignKey(City, on_delete=models.CASCADE, null=True, verbose_name='Город')
+    pharmacy_address = models.TextField(verbose_name='Адрес')
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Аптека'
+        verbose_name_plural = 'Аптеки'
 
     def __str__(self):
         return self.pharmacy_name
 
 
 class Apothecary(models.Model):
-    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE)
+    pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, verbose_name='Аптека')
+    user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE, verbose_name='Пользователь')
+
+    class Meta:
+        verbose_name = 'Аптекарь'
+        verbose_name_plural = 'Аптекари'
 
     def __str__(self):
-        return '{} - {}'.format(self.user.email, self.pharmacy.pharmacy_name)
+        return f'{self.user.email} - {self.pharmacy.pharmacy_name}'
 
 
 class MedicineRequestStatus(models.Model):
-    status_name = models.CharField(max_length=20)
+    status_name = models.CharField(max_length=20, verbose_name='Название')
+
+    class Meta:
+        verbose_name = 'Статус заявки препората'
+        verbose_name_plural = 'Статусы заявки препаратов'
 
 
 class MedicineName(models.Model):
-    medicine_name = models.CharField(max_length=50, unique=True)
+    medicine_name = models.CharField(max_length=50, unique=True, verbose_name='Название')
     medicine_level = models.PositiveSmallIntegerField(default=0)
-    
+
+    class Meta:
+        verbose_name = 'Название препората'
+        verbose_name_plural = 'Названия препаратов'
+
     @property
     def medicine_types(self):
         return MedicineType.objects.filter(medicine__medicine_name_id=self.id)
-    
+
     def __str__(self):
         return self.medicine_name
 
 
 class Medicine(models.Model):
-    medicine_name = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
-    medicine_type = models.ForeignKey(MedicineType, on_delete=models.CASCADE)
+    medicine_name = models.ForeignKey(MedicineName, on_delete=models.CASCADE, verbose_name='Название')
+    medicine_type = models.ForeignKey(MedicineType, on_delete=models.CASCADE, verbose_name='Тип')
     pharmacies = models.ManyToManyField(Pharmacy, through='MedicinesPharmacies')
 
+    class Meta:
+        verbose_name = 'Препорат'
+        verbose_name_plural = 'Препораты'
+
     def __str__(self):
-        return '{} {}'.format(self.medicine_name.medicine_name, self.medicine_type.type_name)
-    
+        return f'{self.medicine_name.medicine_name} {self.medicine_type.type_name}'
+
     @property
     def name(self):
         return self.medicine_name.medicine_name
-    
+
     @property
     def type(self):
         return self.medicine_type.type_name
@@ -154,18 +195,21 @@ class MedicineDosage(models.Model):
     medicine = models.ForeignKey(MedicineName, on_delete=models.CASCADE)
 
     def __str__(self):
-        return '{} {} {}'.format(self.medicine.medicine_name, self.dosage, self.frequency)
+        return f'{self.medicine.medicine_name} {self.dosage} {self.frequency}'
 
 
 class MedicineRequest(models.Model):
-    # medicine_request_status = models.ForeignKey(MedicineRequestStatus, on_delete=models.CASCADE)
     medicine_dosage = models.ForeignKey(MedicineDosage, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     medicine_count = models.SmallIntegerField(default=0)
     given_medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, null=True, blank=True)
     request_confirmation_time = models.DateTimeField(null=True, blank=True)
     apothecary = models.ForeignKey(Apothecary, on_delete=models.CASCADE, null=True, blank=True)
-    
+
+    class Meta:
+        verbose_name = 'Запрос на лекарство'
+        verbose_name_plural = 'Запросы на лекарства'
+
     @property
     def is_accepted(self):
         return self.medicine_count > 0
@@ -173,15 +217,15 @@ class MedicineRequest(models.Model):
     @property
     def medicine_frequency(self):
         return self.medicine_dosage.frequency
-    
+
     @property
     def dosage(self):
         return self.medicine_dosage.dosage
-    
+
     @property
     def medicine_period(self):
         return self.medicine_dosage.period
-    
+
     @property
     def medicine_name(self):
         return self.medicine_dosage.medicine.medicine_name
@@ -189,23 +233,22 @@ class MedicineRequest(models.Model):
     @property
     def medicine_name_id(self):
         return self.medicine_dosage.medicine.id
-    
+
 
 class MedicinesPharmacies(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE)
     count = models.PositiveIntegerField(default=0, validators=[validate_pos_value])
     price = models.FloatField(default=0.0, validators=[validate_pos_value])
-    
+
     @property
     def name(self):
         return self.medicine.name
-    
+
     @property
     def type(self):
         return self.medicine.type
-        
+
     @property
     def level(self):
         return self.medicine.medicine_name.medicine_level
-
