@@ -73,11 +73,6 @@ def get_response(is_success, error=None, data=None):
     }
 
 
-@login_required(login_url=reverse_lazy('home'))
-def test_user_info(request):
-    return render(request, 'recipes/test_user_info.html', {'form': UserForm(instance=request.user)})
-
-
 class LoginViewSet(viewsets.GenericViewSet):
     queryset = models.User.objects.none()
     serializer_class = serializers.LoginSerializer
