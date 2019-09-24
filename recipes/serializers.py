@@ -127,12 +127,12 @@ class MedicineWithPharmaciesSerializer(serializers.ModelSerializer):
 
 
 class MedicineSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Medicine
-        fields = ('medicine_name', 'medicine_type')
-
     medicine_name = CharField(source='name')
     medicine_type = CharField(source='type')
+
+    class Meta:
+        model = Medicine
+        fields = ('id', 'medicine_name', 'medicine_type')
 
 
 class GoodSerializer(serializers.ModelSerializer):

@@ -7,12 +7,12 @@ from recipes.views import *
 
 router = routers.DefaultRouter()
 router.register('login', views.LoginViewSet)
+router.register('medicines', views.MedicineViewSet)
 router.register('recipes', views.RecipesViewSet)
 router.register('users', views.UserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    url('^medicines/edit/(?P<id>\d+)$', edit_medicine, name='edit_medicine'),
     url('^search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
     url('^search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
     url('^medicine_pharmacy/', MedicineWithPharmaciesViewSet.as_view({'get': 'list'})),
@@ -21,7 +21,4 @@ urlpatterns = [
     url('^workers/(?P<pk>\d+)$', WorkerViewSet.as_view({'post': 'update', 'get': 'retrieve'})),
     url('^workers/new$', WorkerViewSet.as_view({'post': 'create'})),
     url('^workers/$', WorkerViewSet.as_view({'get': 'list'})),
-    url('^medicines/$', GoodsViewSet.as_view({'get': 'list'})),
-    url('^medicines/new', GoodsViewSet.as_view({'post': 'create'})),
-    url('^medicines/(?P<pk>\d+)', GoodsViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
 ]

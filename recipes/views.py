@@ -4,9 +4,6 @@ from uuid import uuid4
 import rest_framework
 from django import http
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.http import *
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from rest_framework import status, permissions, mixins, viewsets, authentication
 from rest_framework.authentication import SessionAuthentication
@@ -20,7 +17,7 @@ from recipes import services, serializers, models
 from recipes.auth import \
     AdminPermission, ApothecaryPermission
 from recipes.exceptions import AlreadyExistsException
-from recipes.models import Recipe, MedicineName, MedicineType, MedicinesPharmacies, Medicine, User
+from recipes.models import Recipe, MedicineName, MedicineType, Medicine, User
 from recipes.permissions import IsDoctor
 from recipes.serializers import UserSerializer, MedicineNameSerializer, MedicineTypeSerializer, \
     MedicineWithPharmaciesSerializer, GoodSerializer
@@ -89,25 +86,6 @@ class UserViewSet(viewsets.GenericViewSet):
     @action(detail=False, permission_classes=(permissions.IsAuthenticated,))
     def me(self, request, *args, **kwargs):
         return Response(self.serializer_class(request.user).data)
-
-
-def edit_medicine(request, id):
-    try:
-        medicine = MedicinesPharmacies.objects.get(id=id)
-        if request.method == "POST":
-            medicine.medicine.medicine_name.medicine_name = request.POST.get("name")
-            medicine.medicine.medicine_type.type_name = request.POST.get("type_name")
-            medicine.medicine.medicine_name.medicine_description = request.POST.get("description")
-            medicine.count = request.POST.get("count")
-            medicine.price = request.POST.get("price")
-            medicine.medicine.medicine_name.save()
-            medicine.medicine.medicine_type.save()
-            medicine.save()
-            return HttpResponseRedirect("/api/medicines/")
-        else:
-            return render(request, "recipes/edit_medicine.html", {"medicine": medicine})
-    except MedicinesPharmacies.DoesNotExist:
-        return HttpResponseNotFound("<h2>Medicine not found</h2>")
 
 
 class RecipesViewSet(mixins.CreateModelMixin,
@@ -261,9 +239,8 @@ class GoodsViewSet(
         return Response(status=status.HTTP_200_OK)
 
 
-class MedicineViewSet(mixins.ListModelMixin,
-                      viewsets.GenericViewSet):
-
-    def get_queryset(self):
-        pharmacy = self.request.user.apothecary_set.first()
-        return pharmacy.medicinespharmacies_set.all()
+class MedicineViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = models.Medicine.objects.all()
+    serializer_class = serializers.MedicineSerializer
+    permission_classes = (permissions.IsAuthenticated,
+                          IsDoctor)
