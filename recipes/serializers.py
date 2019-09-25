@@ -92,7 +92,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'patient_initials', 'patient_email', 'date',
                   'day_duration', 'patient_age', 'medicine_card_number',
-                  'medicine_policy_number', 'requests', 'comment')
+                  'medicine_policy_number', 'requests', 'comment', 'token')
+        read_only_fields = ('token',)
 
 
 class MedicineTypeSerializer(serializers.ModelSerializer):
