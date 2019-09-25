@@ -1,14 +1,31 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from django.contrib.auth.admin import UserAdmin
-from django.utils.translation import gettext_lazy as _
 
 from recipes import models
-from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm, \
-    PharmacyForm
-from recipes.models import User, Medicine, MedicineName, Doctor, Apothecary, \
-    Pharmacy, MedicineType, MedicineRequest, MedicineRequestStatus, \
-    MedicineDosage, City, Hospital
+from recipes.admin_forms import MyUserChangeForm, MyUserCreationForm
+
+
+@admin.register(models.Apothecary)
+class ApothecaryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'pharmacy')
+    search_fields = ('pharmacy__pharmacy_name',
+                     'user__first_name',
+                     'user__last_name')
+
+
+@admin.register(models.City)
+class CityAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
+
+
+@admin.register(models.Doctor)
+class DoctorAdmin(admin.ModelAdmin):
+    list_display = ('user', 'hospital')
+    search_fields = ('hospital__hospital_name',
+                     'user__first_name',
+                     'user__last_name',
+                     'user__email')
 
 
 @admin.register(models.Good)
@@ -16,52 +33,53 @@ class GoodAdmin(admin.ModelAdmin):
     list_display = ('medicine', 'pharmacy', 'count', 'price')
 
 
-@admin.register(User)
+@admin.register(models.Hospital)
+class HospitalAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('city',)
+    list_display = ('hospital_name', 'city')
+    search_fields = ('hospital_name', 'city__name')
+
+
+@admin.register(models.MedicineName)
+class MedicineNameAdmin(admin.ModelAdmin):
+    search_fields = ('medicine_name',)
+
+
+@admin.register(models.User)
 class MyUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {'fields': ('email', 'phone_number', 'password', 'is_admin')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name',)}),
-        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
-                                       )}),
+        ('Персональная информация',
+         {'fields': ('last_name', 'first_name', 'email', 'phone_number', 'password', 'is_admin')}),
+        ('Статусы', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
 
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'phone_number', 'password1', 'password2',
-                       'first_name', 'last_name'),
-        }),
     )
     form = MyUserChangeForm
     add_form = MyUserCreationForm
-    list_display = ('email', 'phone_number', 'first_name', 'last_name',
-                    'is_staff')
-    list_filter = ('is_staff', 'is_superuser', 'is_active')
+    list_display = ('first_name', 'last_name', 'email', 'phone_number',
+                    'is_admin')
+    list_filter = ('is_admin',)
     search_fields = ('first_name', 'phone_number', 'last_name', 'email')
     ordering = ('last_name',)
     filter_horizontal = []
 
 
-@admin.register(Pharmacy)
+@admin.register(models.Pharmacy)
 class PharmacyAdmin(ModelAdmin):
-    def get_form(self, request, obj=None, **kwargs):
-        if request.user.is_superuser:
-            kwargs['form'] = PharmacyForm
-        return super().get_form(request, obj, **kwargs)
+    list_display = ('pharmacy_name', 'city', 'pharmacy_address')
+    search_fields = ('pharmacy_name', 'city__name', 'pharmacy_address')
 
 
 @admin.register(models.Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('doctor',)
+    list_display = ('patient_email', 'patient_initials', 'token', 'date')
+    ordering = ('-date',)
     readonly_fields = ('token',)
+    search_fields = ('patient_email', 'patient_initials', 'token', 'date')
 
 
-admin.site.register(Medicine)
-admin.site.register(MedicineName)
-admin.site.register(Doctor)
-admin.site.register(Apothecary)
-admin.site.register(MedicineType)
-admin.site.register(MedicineRequest)
-admin.site.register(MedicineRequestStatus)
-admin.site.register(MedicineDosage)
-admin.site.register(City)
-admin.site.register(Hospital)
+admin.site.register(models.Medicine)
+admin.site.register(models.MedicineType)
+admin.site.register(models.MedicineRequest)
+admin.site.register(models.MedicineRequestStatus)
+admin.site.register(models.MedicineDosage)

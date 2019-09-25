@@ -44,7 +44,7 @@ class RecipesViewSet(mixins.CreateModelMixin,
                      mixins.UpdateModelMixin,
                      viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.RecipeSerializer
-    queryset = Recipe.objects.none()
+    queryset = Recipe.objects.all()
     permission_classes = (permissions.IsAuthenticated,
                           IsDoctor)
 
@@ -52,7 +52,7 @@ class RecipesViewSet(mixins.CreateModelMixin,
         serializer.save(doctor=self.request.user.doctor, token=uuid4())
 
     def get_queryset(self):
-        return Recipe.objects.filter(doctor__user=self.request.user)
+        return self.queryset.filter(doctor__user=self.request.user)
 
 
 class MedicineWithPharmaciesViewSet(mixins.ListModelMixin,
