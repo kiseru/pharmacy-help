@@ -1,58 +1,16 @@
 import traceback
 from uuid import uuid4
 
-import rest_framework
-from django import http
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from rest_framework import status, permissions, mixins, viewsets, filters
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from recipes import serializers, models
-from recipes.exceptions import AlreadyExistsException
 from recipes.models import Recipe, User
 from recipes.permissions import IsDoctor, IsApothecary, IsAdmin
 from recipes.serializers import MedicineWithPharmaciesSerializer, GoodSerializer
 from recipes.services import get_pharmacies_and_medicines
-
-
-def response_to_api_format(func):
-    def new_func(request, *args, **kwargs):
-        try:
-            response = func(request, *args, **kwargs)
-            if response.__class__ != Response:
-                return response
-            if status.is_success(response.status_code) or status.is_redirect(response.status_code):
-                response.data = get_response(is_success=True, data=response.data)
-            elif status.is_client_error(response.status_code):
-                response.data = get_response(is_success=False, data=response.data, error='invalid_data')
-            return response
-        except (rest_framework.exceptions.ValidationError, ValidationError, ObjectDoesNotExist, ValueError):
-            traceback.print_exc()
-            new_response = get_response(is_success=False, error='invalid_data')
-            return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
-        except http.response.Http404:
-            traceback.print_exc()
-            new_response = get_response(is_success=False, error='not_found')
-            return Response(data=new_response, status=status.HTTP_404_NOT_FOUND)
-        except AlreadyExistsException:
-            new_response = get_response(is_success=False, error='already_exists')
-            return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            traceback.print_exc()
-            new_response = get_response(is_success=False, error=str(e))
-            return Response(data=new_response, status=status.HTTP_400_BAD_REQUEST)
-
-    return new_func
-
-
-def get_response(is_success, error=None, data=None):
-    return {
-        'status': 'success' if is_success else 'fail',
-        'error': error,
-        'data': data,
-    }
 
 
 class LoginViewSet(viewsets.GenericViewSet):
