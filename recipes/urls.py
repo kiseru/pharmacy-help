@@ -6,6 +6,7 @@ from recipes import views
 from recipes.views import *
 
 router = routers.DefaultRouter()
+router.register('apothecaries', views.ApothecaryViewSet)
 router.register('goods', views.GoodsViewSet)
 router.register('login', views.LoginViewSet)
 router.register('medicines', views.MedicineViewSet)
@@ -18,8 +19,4 @@ urlpatterns = [
     url('^search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
     url('^medicine_pharmacy/', MedicineWithPharmaciesViewSet.as_view({'get': 'list'})),
     url('^pharmacies', find_pharmacies),
-    url('^workers/(?P<pk>\d+)/delete', WorkerViewSet.as_view({'post': 'destroy'})),
-    url('^workers/(?P<pk>\d+)$', WorkerViewSet.as_view({'post': 'update', 'get': 'retrieve'})),
-    url('^workers/new$', WorkerViewSet.as_view({'post': 'create'})),
-    url('^workers/$', WorkerViewSet.as_view({'get': 'list'})),
 ]

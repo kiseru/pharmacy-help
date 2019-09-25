@@ -4,21 +4,18 @@ from uuid import uuid4
 import rest_framework
 from django import http
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.utils.decorators import method_decorator
 from rest_framework import status, permissions, mixins, viewsets, authentication
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes, action
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from recipes import serializers, models
-from recipes.auth import \
-    AdminPermission
 from recipes.exceptions import AlreadyExistsException
 from recipes.models import Recipe, MedicineName, MedicineType, Medicine, User
-from recipes.permissions import IsDoctor, IsApothecary
+from recipes.permissions import IsDoctor, IsApothecary, IsAdmin
 from recipes.serializers import UserSerializer, MedicineNameSerializer, MedicineTypeSerializer, \
     MedicineWithPharmaciesSerializer, GoodSerializer
 from recipes.services import get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
@@ -161,43 +158,18 @@ def find_pharmacies(request):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-@method_decorator(response_to_api_format, name='create')
-@method_decorator(response_to_api_format, name='update')
-class WorkerViewSet(mixins.CreateModelMixin,
-                    mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.ListModelMixin,
-                    mixins.DestroyModelMixin,
-                    GenericViewSet):
-    renderer_classes = (JSONRenderer,)
+class ApothecaryViewSet(viewsets.ModelViewSet):
+    queryset = models.Apothecary.objects.all()
+    serializer_class = serializers.ApothecarySerializer
+    permission_classes = (permissions.IsAuthenticated,
+                          IsApothecary,
+                          IsAdmin)
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    def get_queryset(self):
+        return self.queryset.filter(pharmacy=self.request.user.apothecary.pharmacy)
 
-    permission_classes = (AdminPermission,)
-
-    def list(self, request, *args, **kwargs):
-        self.queryset = get_workers(request.user, request.GET['query'] if 'query' in request.GET else None)
-        return super().list(request, *args, **kwargs)
-
-    def create(self, request, *args, **kwargs):
-        data = request.data
-        serializer = self.get_serializer(data=data)
-        user = add_worker(user_serializer=serializer, admin=request.user)
-        headers = self.get_success_headers(serializer.data)
-        return Response(data={'id': user.id}, status=status.HTTP_201_CREATED, headers=headers)
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        data = request.data
-        serializer = self.get_serializer(data=data)
-        update_user(serializer, instance)
-        return Response(status=status.HTTP_200_OK)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        delete_worker(instance)
-        return Response(status=status.HTTP_200_OK)
+    def perform_create(self, serializer):
+        serializer.save(pharmacy=self.request.user.apothecary.pharmacy)
 
 
 class GoodsViewSet(viewsets.ModelViewSet):

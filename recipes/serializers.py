@@ -152,3 +152,15 @@ class LoginSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         pass
+
+
+class ApothecarySerializer(serializers.ModelSerializer):
+    pharmacy = PharmacySerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(apothecary=None, doctor=None),
+                                                 source='user')
+
+    class Meta:
+        model = models.Apothecary
+        fields = ('pharmacy', 'user', 'user_id')
+        read_only_fields = ('pharmacy', 'user')
