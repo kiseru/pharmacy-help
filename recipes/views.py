@@ -5,16 +5,13 @@ import rest_framework
 from django import http
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from rest_framework import status, permissions, mixins, viewsets, filters
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes, action
-from rest_framework.renderers import JSONRenderer
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from recipes import serializers, models
 from recipes.exceptions import AlreadyExistsException
-from recipes.models import Recipe, Medicine, User
+from recipes.models import Recipe, User
 from recipes.permissions import IsDoctor, IsApothecary, IsAdmin
 from recipes.serializers import MedicineWithPharmaciesSerializer, GoodSerializer
 from recipes.services import get_pharmacies_and_medicines
@@ -100,24 +97,16 @@ class RecipesViewSet(mixins.CreateModelMixin,
         return Recipe.objects.filter(doctor__user=self.request.user)
 
 
-class MedicineWithPharmaciesViewSet(ReadOnlyModelViewSet):
-    renderer_classes = (JSONRenderer,)
-
-    queryset = None
+class MedicineWithPharmaciesViewSet(mixins.ListModelMixin,
+                                    viewsets.GenericViewSet):
+    queryset = models.Medicine.objects.filter(good__count__gt=0)
     serializer_class = MedicineWithPharmaciesSerializer
-
-    def list(self, request, *args, **kwargs):
-        if 'id' in request.GET:
-            self.queryset = Medicine.objects.filter(medicine_name__pk=request.GET['id'])
-        else:
-            self.queryset = Medicine.objects.all()
-        return super().list(request, *args, **kwargs)
+    permission_classes = (permissions.AllowAny,)
+    filter_backends = [filters.SearchFilter]
+    search_field = ('medicine_name__medicine_name',
+                    'medicine_type__type_name')
 
 
-@api_view(['GET'])
-@permission_classes((permissions.AllowAny,))
-@authentication_classes((SessionAuthentication,))
-@renderer_classes((JSONRenderer,))
 def find_pharmacies(request):
     try:
         data = {
