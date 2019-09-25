@@ -4,7 +4,7 @@ from uuid import uuid4
 import rest_framework
 from django import http
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from rest_framework import status, permissions, mixins, viewsets
+from rest_framework import status, permissions, mixins, viewsets, filters
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes, action
@@ -14,10 +14,9 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from recipes import serializers, models
 from recipes.exceptions import AlreadyExistsException
-from recipes.models import Recipe, MedicineName, MedicineType, Medicine, User
+from recipes.models import Recipe, Medicine, User
 from recipes.permissions import IsDoctor, IsApothecary, IsAdmin
-from recipes.serializers import MedicineNameSerializer, MedicineTypeSerializer, \
-    MedicineWithPharmaciesSerializer, GoodSerializer
+from recipes.serializers import MedicineWithPharmaciesSerializer, GoodSerializer
 from recipes.services import get_pharmacies_and_medicines
 
 
@@ -101,30 +100,6 @@ class RecipesViewSet(mixins.CreateModelMixin,
         return Recipe.objects.filter(doctor__user=self.request.user)
 
 
-class SearchMedicineViewSet(ReadOnlyModelViewSet):
-    renderer_classes = (JSONRenderer,)
-
-    queryset = MedicineName.objects.all()
-    serializer_class = MedicineNameSerializer
-
-    def list(self, request, *args, **kwargs):
-        if 'medicine_name' in request.GET:
-            self.queryset = self.queryset.filter(medicine_name__icontains=request.GET['medicine_name'])
-        return super().list(request, *args, *kwargs)
-
-
-class SearchMedicineTypesViewSet(ReadOnlyModelViewSet):
-    renderer_classes = (JSONRenderer,)
-
-    queryset = MedicineType.objects.all()
-    serializer_class = MedicineTypeSerializer
-
-    def list(self, request, *args, **kwargs):
-        if 'type_name' in request.GET:
-            self.queryset = self.queryset.filter(type_name__icontains=request.GET['type_name'])
-        return super().list(request, *args, *kwargs)
-
-
 class MedicineWithPharmaciesViewSet(ReadOnlyModelViewSet):
     renderer_classes = (JSONRenderer,)
 
@@ -191,3 +166,6 @@ class MedicineViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.MedicineSerializer
     permission_classes = (permissions.IsAuthenticated,
                           IsDoctor)
+    filter_backends = [filters.SearchFilter]
+    search_fields = ('medicine_name__medicine_name',
+                     'medicine_type__type_name')

@@ -15,8 +15,6 @@ router.register('users', views.UserViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    url('^search/medicine/', SearchMedicineViewSet.as_view({'get': 'list'})),
-    url('^search/medicine_type/', SearchMedicineTypesViewSet.as_view({'get': 'list'})),
     url('^medicine_pharmacy/', MedicineWithPharmaciesViewSet.as_view({'get': 'list'})),
     url('^pharmacies', find_pharmacies),
 ]

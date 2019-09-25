@@ -5,14 +5,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import CharField, IntegerField
 
 from recipes import models
-from recipes.models import Recipe, MedicineRequest, User, Medicine, MedicineType, MedicineName, Pharmacy
-
-
-def serialize_user(user, errors: list):
-    result = UserSerializer(instance=user)
-    result.data['error'] = None if not errors else ''.join(
-        [''.join([j[1][0]['message'] for j in i.items()]) for i in errors])
-    return result.data
+from recipes.models import Recipe, MedicineRequest, User, Medicine, Pharmacy
 
 
 class MedicineRequestSerializer(serializers.ModelSerializer):
@@ -94,20 +87,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'day_duration', 'patient_age', 'medicine_card_number',
                   'medicine_policy_number', 'requests', 'comment', 'token')
         read_only_fields = ('token',)
-
-
-class MedicineTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MedicineType
-        fields = ('id', 'type_name')
-
-
-class MedicineNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MedicineName
-        fields = ('id', 'medicine_name', 'medicine_types')
-
-    medicine_types = MedicineTypeSerializer(many=True)
 
 
 class PharmacySerializer(serializers.ModelSerializer):
