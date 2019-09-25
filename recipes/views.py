@@ -4,7 +4,7 @@ from uuid import uuid4
 import rest_framework
 from django import http
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from rest_framework import status, permissions, mixins, viewsets, authentication
+from rest_framework import status, permissions, mixins, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, renderer_classes, authentication_classes, permission_classes, action
@@ -16,10 +16,9 @@ from recipes import serializers, models
 from recipes.exceptions import AlreadyExistsException
 from recipes.models import Recipe, MedicineName, MedicineType, Medicine, User
 from recipes.permissions import IsDoctor, IsApothecary, IsAdmin
-from recipes.serializers import UserSerializer, MedicineNameSerializer, MedicineTypeSerializer, \
+from recipes.serializers import MedicineNameSerializer, MedicineTypeSerializer, \
     MedicineWithPharmaciesSerializer, GoodSerializer
-from recipes.services import get_pharmacies_and_medicines, add_worker, update_user, get_workers, \
-    delete_worker
+from recipes.services import get_pharmacies_and_medicines
 
 
 def response_to_api_format(func):
@@ -75,10 +74,12 @@ class LoginViewSet(viewsets.GenericViewSet):
         return Response({'token': token.key, 'role': user.role})
 
 
-class UserViewSet(viewsets.GenericViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
-    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,
+                          IsApothecary | IsDoctor,
+                          IsAdmin)
 
     @action(detail=False, permission_classes=(permissions.IsAuthenticated,))
     def me(self, request, *args, **kwargs):

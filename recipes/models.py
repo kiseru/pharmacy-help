@@ -57,7 +57,7 @@ class User(AbstractUser):
         if hasattr(self, 'apothecary'):
             return 'apothecary'
 
-        raise Exception('No such role')
+        return ''
 
 
 class Hospital(models.Model):

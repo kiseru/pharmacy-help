@@ -13,4 +13,10 @@ class IsApothecary(permissions.BasePermission):
 
 class IsDoctor(permissions.BasePermission):
     def has_permission(self, request, view):
+        print(request.user.role)
         return request.user.role == 'doctor'
+
+
+class IsApothecaryOrIsDoctor(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return
