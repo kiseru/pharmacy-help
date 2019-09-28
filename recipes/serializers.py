@@ -35,24 +35,6 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
-    def is_valid(self, raise_exception=False):
-        if super().is_valid(raise_exception=raise_exception):
-            if len(self.initial_data['password']) < 5:
-                self._errors['password'] = 'Password can not be less than 5 symbols'
-                if raise_exception:
-                    raise ValidationError()
-            else:
-                self.validated_data['password'] = self.initial_data['password']
-            if not re.fullmatch('([^\W\d_]| )+', self.initial_data['first_name']):
-                self._errors['first_name'] = 'First name should contain only letters or "-"'
-                if raise_exception:
-                    raise ValidationError()
-            if not re.fullmatch('([^\W\d_]| )+', self.initial_data['last_name']):
-                self._errors['first_name'] = 'Last name should contain only letters or "-"'
-                if raise_exception:
-                    raise ValidationError()
-        return not len(self.errors)
-
 
 class CitySerializer(serializers.ModelSerializer):
     class Meta:

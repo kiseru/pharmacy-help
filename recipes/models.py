@@ -1,8 +1,8 @@
 from django.contrib.auth.models import AbstractUser
+from django.core import validators
 from django.db import models
 
 from recipes.managers import CustomUserManager
-from recipes.validators import validate_pos_value
 
 
 class MedicineType(models.Model):
@@ -28,11 +28,25 @@ class City(models.Model):
 
 
 class User(AbstractUser):
-    first_name = models.CharField(max_length=50, verbose_name='Имя')
-    last_name = models.CharField(max_length=50, verbose_name='Фамилия')
+    first_name = models.CharField(
+        max_length=50,
+        verbose_name='Имя',
+        validators=(validators.RegexValidator(r'([^\W\d_]| )+', message='Имя должно содержать только буквы'),)
+    )
+    last_name = models.CharField(
+        max_length=50,
+        verbose_name='Фамилия',
+        validators=(validators.RegexValidator(r'([^\W\d_]| )+', message='Фамилия должна содержать только буквы'),)
+    )
     email = models.EmailField(max_length=150, unique=True, verbose_name='E-mail')
-    password = models.CharField(max_length=128, verbose_name='Пароль')
-    phone_number = models.CharField(max_length=12, unique=True, verbose_name='Номер телефона')
+    password = models.CharField(max_length=128, verbose_name='Пароль', validators=(validators.MinLengthValidator(5),))
+    phone_number = models.CharField(
+        max_length=12,
+        unique=True,
+        verbose_name='Номер телефона',
+        validators=(validators.RegexValidator(r'^\+7\d{10}', message='Должно начинаться с +7 и содержать 11 цифр'),
+                    validators.MinLengthValidator(12),
+                    validators.MaxLengthValidator(12)))
     is_admin = models.BooleanField(default=False, verbose_name='Админ?')
 
     username = None
@@ -244,7 +258,7 @@ class Good(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, verbose_name='Лекарство')
     pharmacy = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, verbose_name='Аптека')
     count = models.PositiveIntegerField(default=0, verbose_name='Количество')
-    price = models.FloatField(default=0.0, validators=[validate_pos_value], verbose_name='Цена')
+    price = models.FloatField(default=0.0, validators=(validators.MinValueValidator(0),), verbose_name='Цена')
 
     class Meta:
         unique_together = ('medicine', 'pharmacy')
